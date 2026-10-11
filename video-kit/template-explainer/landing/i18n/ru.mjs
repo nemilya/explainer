@@ -1,4 +1,4 @@
-/* Landing page "{{TITLE}}", Russian. Keys are the same in every language (checked by the build: make landing). Values are HTML. */
+/* Landing page "{{TITLE}}", Russian. Keys are the same in every language (checked by the build: make dist). Values are HTML. */
 export default {
   langName: 'Русский',
   ogLocale: 'ru_RU',

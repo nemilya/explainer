@@ -23,7 +23,7 @@ anatomy/            скилл и кит изометрических фигур
 video-kit/          движок роликов (из nemilya/infographics) + слой фигуры: lib/figure.js (камера, булавки),
                     film.layers и film.speakers в stage/stage.js; шаблон темы — template-explainer/
 explainers/
-  build.mjs         сборка страниц: шаблон + i18n/<язык>.mjs → статические HTML на каждый язык (make landing)
+  build.mjs         сборка сайта: шаблон + i18n/<язык>.mjs → статические HTML на каждый язык + файлы → dist/ (make dist)
   lang.js           автовыбор языка до отрисовки; suggest.js, video.js, landing.css — общее
   catalog/          шаблон и словари каталога
   <тема>/
@@ -31,9 +31,8 @@ explainers/
     model.js        модель — единственный источник чисел, чистые функции времени
     figure.js       фигура anatomy: buildFigure() → SVG и якоря, mountFigure() → apply(состояние)
     landing/        шаблон страницы index.html + i18n/en.mjs, ru.mjs; landing.js — живая фигура
-    index.html      собранная страница (en), ru/index.html — собранная (ru)
     video/          film.js, text/<язык>.js, scenes.css, voice.config.json, SCENARIO.md, voice/, out/, out/web/
-index.html, ru/     собранный каталог (en, ru); sitemap.xml, robots.txt
+dist/               собранный сайт — его копируют на хостинг (make dist; не в git)
 site.mjs            адрес сайта и языки (первый — основной)
 Makefile            make help · serve · landing · test · new
 .claude/skills/     explain — порядок работы над темой; anatomy — ссылка на скилл фигур
@@ -48,7 +47,7 @@ Makefile            make help · serve · landing · test · new
 
 Основной язык — английский, остальные — в подпапке со своим адресом (как в nemilya/scantunnel): `/` и `/ru/`,
 `/explainers/token-bucket/` и `/explainers/token-bucket/ru/`. Страницы собираются из одного шаблона и словарей
-по языкам (`make landing`): у каждой `<html lang>`, свои title/description, `canonical`, `hreflang` на все
+по языкам (`make dist`): у каждой `<html lang>`, свои title/description, `canonical`, `hreflang` на все
 языки и `x-default` → английский, общий `sitemap.xml`. Ключи словарей обязаны совпадать — иначе сборка падает.
 
 **Какой язык увидит читатель** (`explainers/lang.js`, блокирующий скрипт в `<head>`, до первой отрисовки):
@@ -67,15 +66,17 @@ Makefile            make help · serve · landing · test · new
 ориентации, если есть вертикальный ролик, сразу 9:16.
 
 Новый язык: строка в `site.mjs`, `i18n/<код>.mjs` у каталога и каждой темы, `text/<код>.js` и `langs.<код>`
-в `voice.config.json` ролика, страны в `TZ` в `explainers/lang.js` → `make landing test`.
+в `voice.config.json` ролика, страны в `TZ` в `explainers/lang.js` → `make dist test`.
 
 ## Команды
 
 ```bash
 make help        # все команды
-make serve       # сайт локально: http://127.0.0.1:8790/ (/ru/ — русский)
-make landing     # собрать страницы из шаблонов и i18n/
-make test        # автовыбор языка, словари, собранные страницы актуальны
+make dist        # собрать сайт в dist/ — эту папку копируют на хостинг
+make preview     # собрать и открыть dist/: http://127.0.0.1:8791/ (/ru/ — русский)
+make deploy DEPLOY=user@host:/var/www/explainer/   # собрать и залить dist/ на сервер через rsync
+make test        # автовыбор языка, словари, в собранном сайте нет битых ссылок
+make serve       # сервер разработки поверх репозитория (плееры роликов): http://127.0.0.1:8790/
 make new SLUG=my-topic TITLE="How … works"
 ```
 
@@ -101,11 +102,20 @@ make video video-cc                # MP4 16:9 и 9:16 с субтитрами �
 make video video-cc LNG=ru
 make web                           # лёгкие версии для сайта → out/web/
 make cover && make cover LNG=ru    # обложки Reels
-cd ../../.. && make landing test   # пересобрать страницы
+cd ../../.. && make preview        # пересобрать сайт и посмотреть
 ```
 
-Сайт статический: `make serve` локально или корень репозитория на GitHub Pages / любом статическом хостинге;
-перед выкладкой — настоящий адрес в `site.mjs`.
+## Выкладка
+
+Сайт статический и после `make dist` целиком лежит в `dist/`: содержимое папки копируется на любой статический
+хостинг как есть (или `make deploy` с `DEPLOY=user@host:/path/` — rsync; адрес можно записать и в `local.mk`).
+Перед выкладкой — настоящий адрес в `site.mjs`: от него строятся canonical, hreflang и sitemap.xml.
+
+`dist/` повторяет структуру репозитория и содержит только то, что нужно браузеру: страницы (`index.html`, `ru/`,
+`explainers/<тема>/`, `…/ru/`, `sitemap.xml`, `robots.txt`), общие скрипты и стили, шрифты, кит anatomy, фигуру,
+модель и скрипт лендинга каждой темы, лёгкие ролики (`video/out/web/`), субтитры и живой плеер ролика с озвучкой.
+У token-bucket это около 29 МБ, в основном четыре ролика. Папка не коммитится: `make dist` пересоздаёт её с нуля,
+а `make test` проверяет, что в ней нет ссылок на отсутствующие файлы.
 
 ## anatomy: сопровождение
 

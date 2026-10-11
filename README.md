@@ -17,7 +17,7 @@ as a machine (a coin magazine is the bucket, a hopper clock is the refill, a req
 a ~2.5-minute dialogue between Vera and Max (English and Russian, horizontal and vertical), and a landing page
 with the live model.
 
-![A frame from the token bucket video](explainers/token-bucket/video/out/poster-en.jpg)
+![A frame from the token bucket video](explainers/token-bucket/video/out/poster.jpg)
 
 ## Layout
 
@@ -26,7 +26,7 @@ anatomy/            isometric figure skill and kit — a copy of wheresryan22/an
 video-kit/          video engine (from nemilya/infographics) + the figure layer: lib/figure.js (camera, pins),
                     film.layers and film.speakers in stage/stage.js; topic template — template-explainer/
 explainers/
-  build.mjs         page builder: template + i18n/<lang>.mjs → static HTML per language (make landing)
+  build.mjs         site builder: template + i18n/<lang>.mjs → static HTML per language + assets → dist/ (make dist)
   lang.js           language auto-pick before first paint; suggest.js, video.js, landing.css — shared
   catalog/          catalog template and i18n
   <topic>/
@@ -34,9 +34,8 @@ explainers/
     model.js        the model — the single source of every number, pure functions of time
     figure.js       anatomy figure: buildFigure() → SVG and anchors, mountFigure() → apply(state)
     landing/        page template index.html + i18n/en.mjs, ru.mjs; landing.js — the live figure
-    index.html      built page (en), ru/index.html — built page (ru)
     video/          film.js, text/<lang>.js, scenes.css, voice.config.json, SCENARIO.md, voice/, out/, out/web/
-index.html, ru/     built catalog (en, ru); sitemap.xml, robots.txt
+dist/               the built site — copy it to the hosting (make dist; not in git)
 site.mjs            site address and languages (first one is the main language)
 Makefile            make help · serve · landing · test · new
 .claude/skills/     explain — how to build a topic; anatomy — link to the figure skill
@@ -51,7 +50,7 @@ happens exactly on the word that names it, and after a new voice-over everything
 
 English is the main language; every other language lives in a subfolder with its own URL (as in
 nemilya/scantunnel): `/` and `/ru/`, `/explainers/token-bucket/` and `/explainers/token-bucket/ru/`. Pages are
-built from one template and per-language dictionaries (`make landing`): each has `<html lang>`, its own
+built from one template and per-language dictionaries (`make dist`): each has `<html lang>`, its own
 title/description, `canonical`, `hreflang` for every language plus `x-default` → English, and a shared
 `sitemap.xml`. Dictionaries must have identical keys — the build fails otherwise.
 
@@ -73,15 +72,17 @@ on a phone in portrait, if a vertical cut exists, it opens 9:16 first.
 
 A new language: a line in `site.mjs`, `i18n/<code>.mjs` for the catalog and each topic, `text/<code>.js` and
 `langs.<code>` in `voice.config.json` for the video, countries in `TZ` in `explainers/lang.js`, then
-`make landing test`.
+`make dist test`.
 
 ## Commands
 
 ```bash
 make help        # all commands
-make serve       # the site locally: http://127.0.0.1:8790/ (/ru/ — Russian)
-make landing     # build pages from templates and i18n/
-make test        # language auto-pick, dictionaries, built pages are up to date
+make dist        # build the site into dist/ — the folder to copy to the hosting
+make preview     # build and open dist/: http://127.0.0.1:8791/ (/ru/ — Russian)
+make deploy DEPLOY=user@host:/var/www/explainer/   # build and rsync dist/ to the server
+make test        # language auto-pick, dictionaries, no broken links in the built site
+make serve       # dev server over the repository (video players): http://127.0.0.1:8790/
 make new SLUG=my-topic TITLE="How … works"
 ```
 
@@ -107,11 +108,20 @@ make video video-cc                # MP4 16:9 and 9:16 with captions → out/
 make video video-cc LNG=ru
 make web                           # light versions for the site → out/web/
 make cover && make cover LNG=ru    # Reels covers
-cd ../../.. && make landing test   # rebuild the pages
+cd ../../.. && make preview        # rebuild the site and look at it
 ```
 
-The site is static: `make serve` locally, or publish the repository root (GitHub Pages or any static host);
-set the real address in `site.mjs` first.
+## Publishing
+
+The site is static and lives entirely in `dist/` after `make dist`: copy the folder's contents to any static
+hosting as is (or `make deploy` with `DEPLOY=user@host:/path/` — rsync; the address can also go into `local.mk`).
+Set the real address in `site.mjs` first: canonical, hreflang and sitemap.xml are built from it.
+
+`dist/` keeps the repository layout and holds only what the browser needs: the pages (`index.html`, `ru/`,
+`explainers/<topic>/`, `…/ru/`, `sitemap.xml`, `robots.txt`), shared scripts and styles, fonts, the anatomy kit,
+every topic's figure/model/landing script, light videos (`video/out/web/`), subtitles and the live video player
+with its voice-over. For token-bucket that is about 29 MB, mostly the four videos. The folder is not committed;
+`make dist` recreates it from scratch, and `make test` checks that nothing in it links to a missing file.
 
 ## anatomy: keeping the copy up to date
 

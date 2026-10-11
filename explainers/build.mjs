@@ -1,29 +1,32 @@
 #!/usr/bin/env node
-/* Builds the site's pages: template + dictionaries → static HTML for every language (as in nemilya/scantunnel).
+/* Builds the site into dist/ — the folder you copy to the hosting (as in nemilya/scantunnel and prism-rail).
  *
- *   node explainers/build.mjs              build (make landing)
- *   node explainers/build.mjs --check      only check that the built pages are up to date (test)
+ *   node explainers/build.mjs              build into dist/ (make dist)
+ *   node explainers/build.mjs --out DIR    build into another folder (tests)
  *
- * Pages:
- *   catalog  explainers/catalog/index.html + i18n/<code>.mjs            → /index.html, /ru/index.html
- *   topic    explainers/<slug>/landing/index.html + i18n/<code>.mjs     → explainers/<slug>/index.html,
- *                                                                          explainers/<slug>/ru/index.html
+ * Pages (template + dictionaries → static HTML for every language):
+ *   catalog  explainers/catalog/index.html + i18n/<code>.mjs            → dist/index.html, dist/ru/index.html
+ *   topic    explainers/<slug>/landing/index.html + i18n/<code>.mjs     → dist/explainers/<slug>/index.html,
+ *                                                                          dist/explainers/<slug>/ru/index.html
  * Languages and the site address — site.mjs in the root (the first locale is the main one, at the root of the page's folder).
+ * Next to the pages go only the files the browser needs (assets()): shared scripts and styles, fonts, the anatomy kit,
+ * each topic's figure, model and landing script, light videos (out/web/), subtitles and the live video player.
+ * dist/ keeps the repository layout, so relative links work the same; it is not committed (make dist recreates it).
  *
  * Template:  {{key}} — a dictionary string (HTML allowed) or a service value (see vars);
  *          <!--if flag-->…<!--else-->…<!--end-->;
  *          <!--each key-->…{{.}} or {{.0}} {{.1}}…<!--/each--> — over a dictionary array.
  * The dictionary's `js` object goes into the page as JSON (<script type="application/json" id="i18n">) —
  * strings for scripts. Every language must have the same set of keys — otherwise the build fails.
- * A topic's video (video/): MP4s from video/out/ for every language and format, chapters — from the video's timeline
- * with the voice-over durations; no MP4 — the live player video/index.html. */
+ * A topic's video (video/): MP4s from video/out/web/ (or out/) for every language and format, chapters — from the
+ * video's timeline with the voice-over durations; no MP4 — the live player video/index.html. */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
-const GENERATED = '<!-- Built by explainers/build.mjs from the template and i18n/ — do not edit by hand: make landing -->';
+const GENERATED = '<!-- Built by explainers/build.mjs from the template and i18n/ — do not edit by hand: make dist -->';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const imp = (p) => import(`${pathToFileURL(p).href}?v=${fs.statSync(p).mtimeMs}`);
@@ -169,27 +172,73 @@ export async function pages() {
         vars.ogImage = '';
       }
       vars.flags.og = !!vars.ogImage;
-      out.push({ file: path.join(ROOT, dir, 'index.html'), html: render(template, vars, t, `${p.id}/${locale.code}`) });
+      out.push({ file: `${dir}index.html`, html: render(template, vars, t, `${p.id}/${locale.code}`) });
     }
   }
   // sitemap: every page in every language
   const urls = list.map((p) => site.locales.map((l) => `${site.url}${p.base}${l.dir ? `${l.dir}/` : ''}`));
   const sm = urls.map((group) => group.map((u) => `  <url>\n    <loc>${esc(u)}</loc>\n${group.map((a, i) => `    <xhtml:link rel="alternate" hreflang="${site.locales[i].code}" href="${esc(a)}"/>`).join('\n')}\n    <xhtml:link rel="alternate" hreflang="x-default" href="${esc(group[0])}"/>\n  </url>`).join('\n')).join('\n');
-  out.push({ file: path.join(ROOT, 'sitemap.xml'), html: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${sm}\n</urlset>\n` });
-  out.push({ file: path.join(ROOT, 'robots.txt'), html: `User-agent: *\nAllow: /\n\nSitemap: ${site.url}sitemap.xml\n` });
+  out.push({ file: 'sitemap.xml', html: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${sm}\n</urlset>\n` });
+  out.push({ file: 'robots.txt', html: `User-agent: *\nAllow: /\n\nSitemap: ${site.url}sitemap.xml\n` });
+  return { files: out, topics: list.filter((x) => x.topic).map((x) => x.base) };
+}
+
+// ---------------------------------------------------------------- files next to the pages
+/** files (relative to the repo root) the browser needs: shared assets + every topic's scripts, media and live player */
+export function assets(topics) {
+  const out = [];
+  const add = (f) => { if (fs.existsSync(path.join(ROOT, f)) && fs.statSync(path.join(ROOT, f)).isFile()) out.push(f); };
+  const walk = (dir, keep = () => true) => {
+    if (!fs.existsSync(path.join(ROOT, dir))) return;
+    for (const f of fs.readdirSync(path.join(ROOT, dir))) {
+      const rel = `${dir}/${f}`;
+      if (fs.statSync(path.join(ROOT, rel)).isDirectory()) walk(rel, keep);
+      else if (keep(rel)) add(rel);
+    }
+  };
+  // shared: styles and scripts of the pages, fonts, the anatomy kit (+ its license)
+  for (const f of ['landing.css', 'lang.js', 'suggest.js', 'video.js', 'catalog/catalog.js']) add(`explainers/${f}`);
+  walk('video-kit/fonts');
+  for (const f of ['kit/iso-kit.mjs', 'kit/iso.css', 'LICENSE']) add(`anatomy/${f}`);
+  // the live video player: the engine's browser files
+  for (const f of ['stage/stage.js', 'stage/base.css', 'lib/motion.js', 'lib/timeline.js', 'lib/figure.js', 'lib/art.js']) add(`video-kit/${f}`);
+  for (const base of topics) {
+    const t = base.replace(/\/$/, '');
+    for (const f of fs.readdirSync(path.join(ROOT, t))) if (/\.(m?js|css)$/.test(f)) add(`${t}/${f}`);
+    // the live player of the topic: page, film, texts, styles, voice-over
+    for (const f of fs.existsSync(path.join(ROOT, t, 'video')) ? fs.readdirSync(path.join(ROOT, t, 'video')) : []) if (/\.(m?js|css)$|^index\.html$/.test(f)) add(`${t}/video/${f}`);
+    walk(`${t}/video/text`);
+    walk(`${t}/video/voice`, (f) => /\/[a-z]{2}\.(m4a|json|vtt)$/.test(f));
+    walk(`${t}/video/art`, (f) => /\.(jpg|png|webp)$/.test(f) && !f.includes('/takes/'));
+    // videos: light versions (make web), otherwise the full ones
+    if (fs.existsSync(path.join(ROOT, t, 'video/out/web'))) walk(`${t}/video/out/web`, (f) => /\.(mp4|jpg)$/.test(f));
+    else walk(`${t}/video/out`, (f) => /\/(?!still-|part-)[^/]+\.(mp4|jpg)$/.test(f) && !f.includes('/web/'));
+  }
   return out;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const list = await pages();
-  const check = process.argv.includes('--check');
-  const stale = [];
-  for (const { file, html } of list) {
-    const now = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
-    if (now === html) continue;
-    stale.push(path.relative(ROOT, file));
-    if (!check) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, html); }
+/** build the site into outDir (it is recreated) → { pages, files } */
+export async function build(outDir = path.join(ROOT, 'dist')) {
+  const { files, topics } = await pages();
+  fs.rmSync(outDir, { recursive: true, force: true });
+  for (const { file, html } of files) {
+    fs.mkdirSync(path.dirname(path.join(outDir, file)), { recursive: true });
+    fs.writeFileSync(path.join(outDir, file), html);
   }
-  if (check && stale.length) { console.error(`out of date (make landing): ${stale.join(', ')}`); process.exit(1); }
-  console.log(`${list.length} files${stale.length ? `, ${check ? 'out of date' : 'updated'}: ${stale.join(', ')}` : ', all up to date'}`);
+  const copied = assets(topics);
+  for (const f of copied) {
+    fs.mkdirSync(path.dirname(path.join(outDir, f)), { recursive: true });
+    fs.copyFileSync(path.join(ROOT, f), path.join(outDir, f));
+  }
+  return { pages: files.length, files: copied.length };
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const i = process.argv.indexOf('--out');
+  const out = i > 0 ? path.resolve(process.argv[i + 1]) : path.join(ROOT, 'dist');
+  const r = await build(out);
+  let bytes = 0;
+  const size = (d) => { for (const f of fs.readdirSync(d)) { const p = path.join(d, f); fs.statSync(p).isDirectory() ? size(p) : (bytes += fs.statSync(p).size); } };
+  size(out);
+  console.log(`site → ${path.relative(process.cwd(), out) || '.'}: ${r.pages} pages + ${r.files} files, ${(bytes / 2 ** 20).toFixed(1)} MB`);
 }

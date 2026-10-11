@@ -27,5 +27,5 @@ make voice                      # озвучка en — основной язы�
 make video video-cc             # MP4 16:9 и вертикальный с субтитрами в кадре → out/
 make video video-cc LNG=ru
 make cover; make cover LNG=ru   # обложки для Reels
-make web                        # лёгкие 720p-версии для лендинга → out/web/; потом make landing в корне
+make web                        # лёгкие 720p-версии для лендинга → out/web/; потом make dist в корне
 ```

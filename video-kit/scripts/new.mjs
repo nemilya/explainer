@@ -3,7 +3,7 @@
  *   node video-kit/scripts/new.mjs explainers/<slug> --title "How … works"
  *       a whole topic from template-explainer/: QUESTIONS.md (brief), model.js, figure.js (anatomy),
  *       landing/ + landing.js (landing page), video/ (film.js, text/, scenes.css, voice.config.json, …).
- *       Next: cd explainers/<slug>/video && make preview; make landing in the repo root.
+ *       Next: cd explainers/<slug>/video && make preview; make preview in the repo root (the site).
  *
  *   node video-kit/scripts/new.mjs <folder> --plain [--name name] [--art]
  *       only a video <folder>/video from template/ (as in infographics: title, points, finale);
@@ -56,4 +56,4 @@ fill(dir);
 const rel = relative(process.cwd(), dir) || '.';
 console.log(plain
   ? `→ ${rel}  (engine: ${relative(dir, KIT)})\n  next: cd ${rel} && make preview`
-  : `→ ${rel}: QUESTIONS.md, model.js, figure.js, landing/, video/\n  1) fill in QUESTIONS.md  2) model.js and figure.js (anatomy/SKILL.md)  3) video/: the script\n  look: cd ${rel}/video && make preview; make landing in the repo root → ${rel}/index.html`);
+  : `→ ${rel}: QUESTIONS.md, model.js, figure.js, landing/, video/\n  1) fill in QUESTIONS.md  2) model.js and figure.js (anatomy/SKILL.md)  3) video/: the script\n  look: cd ${rel}/video && make preview; make preview in the repo root (the site in dist/)`);

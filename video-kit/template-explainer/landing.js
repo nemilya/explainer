@@ -1,5 +1,5 @@
 /* Landing page "{{TITLE}}": the live figure (figure.js + model.js), the video and the language. The page is built by
- * explainers/build.mjs (make landing) from landing/index.html and landing/i18n/<code>.mjs; strings for the script —
+ * explainers/build.mjs (make dist) from landing/index.html and landing/i18n/<code>.mjs; strings for the script —
  * in <script type="application/json" id="i18n">. A full example with buttons and counters — explainers/token-bucket. */
 import { buildFigure, mountFigure } from './figure.js';
 import { state } from './model.js';

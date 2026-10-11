@@ -1,6 +1,6 @@
 /* Local static server for make preview (the video player) and make serve. Run from the project folder:
- *   node <video-kit>/scripts/serve.mjs [port=8790]
- * Serves the repo root (a project needs video-kit too) and prints the project's player URL.
+ *   node <video-kit>/scripts/serve.mjs [port=8790] [root]
+ * Serves the repo root (a project needs video-kit too) or another folder (make preview: dist/) and prints the URL.
  * Unlike python3 -m http.server it supports Range (206 Partial Content): without it
  * Chrome can't seek an MP4 (the video player).
  * For local viewing only: listens on 127.0.0.1. */
@@ -9,7 +9,7 @@ import { stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import path from 'node:path';
 
-const ROOT = path.resolve(import.meta.dirname, '..', '..');
+const ROOT = process.argv[3] ? path.resolve(process.argv[3]) : path.resolve(import.meta.dirname, '..', '..');
 const PORT = Number(process.argv[2] || 8790);
 const HERE = path.relative(ROOT, process.cwd());
 const TYPES = {

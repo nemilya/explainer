@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://explainer.nemilya.me/sitemap.xml
