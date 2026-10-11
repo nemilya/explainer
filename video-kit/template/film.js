@@ -13,7 +13,7 @@ import { E, css, pop, rise, seg, words } from '{{KIT}}/lib/motion.js';
 import en from './text/en.js';
 import ru from './text/ru.js';
 
-export const TEXTS = { ru, en }; // the first language is the main one
+export const TEXTS = { en, ru }; // the first language is the main one (English)
 export const LANGS = Object.keys(TEXTS);
 
 const wordsOf = (list) => list.map((w) => (w === '<br>' ? '<br>' : `<span class="w">${w}</span>`)).join(' ').replace(/ <br> /g, '<br>');

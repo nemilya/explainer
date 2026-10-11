@@ -32,11 +32,11 @@ explainers/
   lang.js           language auto-pick before first paint; suggest.js, video.js, landing.css — shared
   catalog/          catalog template and i18n
   <topic>/
-    QUESTIONS.md    brief: questions, the truth (numbers), the object, parts, scenes
+    QUESTIONS.md    brief: questions, the truth (numbers), the object, parts, scenes (+ QUESTIONS.ru.md, a translation)
     model.js        the model — the single source of every number, pure functions of time
     figure.js       anatomy figure: buildFigure() → SVG and anchors, mountFigure() → apply(state)
     landing/        page template index.html + i18n/en.mjs, ru.mjs; landing.js — the live figure
-    video/          film.js, text/<lang>.js, scenes.css, voice.config.json, SCENARIO.md, voice/, out/, out/web/
+    video/          film.js, text/<lang>.js, scenes.css, voice.config.json, SCENARIO.md (+ .ru.md), voice/, out/, out/web/
 dist/               the built site — copy it to the hosting (make dist; not in git)
 site.mjs            site address and languages (first one is the main language)
 Makefile            make help · serve · landing · test · new

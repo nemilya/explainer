@@ -1,37 +1,39 @@
-# Почему API отвечает 429? — бриф
+# Why does an API answer 429? — brief
 
-## Вопросы, на которые отвечаем
-1. Что значит 429 Too Many Requests и кто «считает» запросы?
-2. Сколько запросов можно отправить разом?
-3. Почему при долгой нагрузке проходит ровно r запросов в секунду?
-4. Что делать клиенту, получившему 429?
+**English** · [Русский](QUESTIONS.ru.md)
 
-## Зритель и главная мысль
-- Разработчик, который упёрся в лимит API.
-- Запомнить: **всплеск — не больше b, в среднем — не больше r; за T секунд — не больше b + r·T.**
+## Questions we answer
+1. What does 429 Too Many Requests mean, and who is "counting" the requests?
+2. How many requests can I send at once?
+3. Why does exactly r requests per second get through under a long load?
+4. What should a client do after a 429?
 
-## Правда
-- Token bucket: ведро на b жетонов, пополнение r жетонов/с, запрос забирает 1 жетон, нет жетона — отказ.
-- Лишние жетоны сверх b пропадают (нельзя накопить больше b).
-- В машине: b = 5, r = 0,5/с (монета раз в 2 с) — игрушечные числа, чтобы было видно глазом; у настоящих API
-  обычно десятки и сотни, механика та же.
-- В коде жетоны пересчитывают при запросе: `tokens = min(b, tokens + Δt·r)`; дискретная монета раз в 1/r с
-  даёт ту же границу b + r·T.
+## The viewer and the main idea
+- A developer who has hit an API rate limit.
+- Remember: **a burst is at most b, the average is at most r; in T seconds — at most b + r·T.**
 
-## Объект
-Монетный автомат: магазин монет (ведро) + бункер с часами (пополнение) + лента с карточками-запросами.
-Движется: монеты падают в магазин; запрос, проезжая магазин, получает нижнюю монету; запрос без монеты
-толкатель сбрасывает в лоток 429. Полный магазин закрывает заслонку — лишняя монета катится в стакан.
+## The truth
+- Token bucket: a bucket of b tokens, a refill of r tokens/s, a request takes 1 token, no token — a rejection.
+- Tokens above b are lost (you can't save more than b).
+- In the machine: b = 5, r = 0.5/s (a coin every 2 s) — toy numbers so it can be seen by eye; real APIs usually have
+  tens and hundreds, the mechanics are the same.
+- In code tokens are recomputed on a request: `tokens = min(b, tokens + Δt·r)`; a discrete coin every 1/r s gives
+  the same bound b + r·T.
 
-## Детали (≈70)
-| Группа | Детали |
+## The object
+A coin machine: a coin magazine (the bucket) + a hopper with a clock (the refill) + a belt with request cards.
+What moves: coins drop into the magazine; a request passing the magazine gets the bottom coin; a request without a
+coin is pushed into the 429 tray by the kicker. A full magazine closes the flap — an extra coin rolls into the cup.
+
+## Parts (≈70)
+| Group | Parts |
 |---|---|
-| Основание | плита, 4 ножки (фланец + опора), канавка, 4 винта с кольцами, линейка с рисками, табличка TOKEN BUCKET |
-| Бункер | фланец, колонна с кольцами, воротник, короб со швом, устье жёлоба, табличка «r = 1/2 s», ручка темпа, часы: ободок, циферблат, накатка, кольцо, 20 рисок, стрелка |
-| Магазин | основание со швом и кольцом, направляющая и толкатель, 4 стойки с колпачками, верхнее кольцо, риски уровня 1–5 и «b», язычок к ленте, **монеты** (lit) |
-| Жёлоб | дно, два борта с заклёпками, заслонка с риской |
-| Переполнение | стакан с тенью внутри |
-| Отказы | корпус толкателя со швом, лампа (линза светится 200 / 429), лопатка со штоком |
-| Лента | 4 поперечины, задний и передний борта, полотно с бегущими планками, ролики с осями |
-| Лотки | лоток 429 и лоток 200: дно, четыре стенки, гравировка |
-| Запросы | карточки: строки «текста», гнездо под монету, красный крест у отказа |
+| Base | plate, 4 feet (flange + foot), groove, 4 screws with rings, a ruler with ticks, a TOKEN BUCKET label plate |
+| Hopper | flange, column with rings, collar, a box with a seam, the chute mouth, an "r = 1/2 s" plate, a tempo knob, the clock: bezel, dial, knurl, ring, 20 ticks, hand |
+| Magazine | base with a seam and a ring, guide and pusher, 4 posts with caps, a top ring, level marks 1–5 and "b", a tongue to the belt, **coins** (lit) |
+| Chute | floor, two lips with rivets, a flap with a mark |
+| Overflow | a cup with a shadow inside |
+| Rejections | kicker housing with a seam, a lamp (the lens glows for 200 / 429), a paddle with a rod |
+| Belt | 4 cross-members, back and front rails, a belt with moving cleats, rollers with axles |
+| Trays | the 429 tray and the 200 tray: floor, four walls, an engraving |
+| Requests | cards: lines of "text", a coin slot, a red cross on a rejection |

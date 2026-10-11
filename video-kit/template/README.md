@@ -1,19 +1,19 @@
-# Видео: {{NAME}}
+# Video: {{NAME}}
 
-Ролик с озвучкой по инфографике `../index.html`. Движок — `{{KIT}}` (описание там же в README.md).
+A narrated video. Engine — `{{KIT}}` (see its README.md).
 
 ```bash
-make voice video-cc          # озвучка (основной язык) + вертикальный ролик с субтитрами → out/
-make voice video-cc LNG=en   # то же по-английски
-make cover LNG=en            # обложка для Reels → out/cover-en.jpg
-make preview                 # интерактивный плеер в браузере
-make help                    # все цели
+make voice video-cc          # voice-over (the main language) + a vertical video with captions → out/
+make voice video-cc LNG=ru   # the same in Russian
+make cover LNG=ru            # Reels cover → out/cover-ru.jpg
+make preview                 # the interactive player in the browser
+make help                    # all targets
 ```
 
-| Что | Где |
+| What | Where |
 |---|---|
-| реплики, слова-якоря, надписи | `text/<язык>.js` |
-| сцены: время, вёрстка, анимация | `film.js` |
-| палитра и стили сцен (и вертикальная раскладка) | `scenes.css` |
-| голос, манера, темп, музыка | `voice.config.json` |
-| обложка | `cover.html` + `cover` в `text/<язык>.js` |
+| lines, cue words, captions | `text/<lang>.js` |
+| scenes: time, markup, animation | `film.js` |
+| palette and scene styles (and the vertical layout) | `scenes.css` |
+| voice, manner, pace, music | `voice.config.json` |
+| cover | `cover.html` + `cover` in `text/<lang>.js` |

@@ -1,16 +1,18 @@
-# Почему API отвечает 429? — token bucket
+# Why does an API answer 429? — token bucket
 
-Explainer: алгоритм ограничения запросов token bucket, собранный как настоящая машина.
+**English** · [Русский](README.ru.md) · **Live:** [English](https://explainer.nemilya.me/explainers/token-bucket/) · [Русский](https://explainer.nemilya.me/explainers/token-bucket/ru/)
 
-| Что | Где |
+An explainer: the token bucket rate-limiting algorithm built as a real machine.
+
+| What | Where |
 |---|---|
-| бриф: вопросы, правда, объект, детали | [`QUESTIONS.md`](QUESTIONS.md) |
-| модель (единственный источник чисел) | [`model.js`](model.js) — `simulate()` проигрывает события, `view(sim, t)` — положение каждой детали |
-| фигура anatomy | [`figure.js`](figure.js) — `buildFigure()` → SVG и якоря, `mountFigure()` → `apply(view)` |
-| лендинг | [`index.html`](index.html) + [`landing.js`](landing.js) — живая машина с кнопками, ролик, факты, код |
-| ролик | [`video/`](video) — сценарий [`SCENARIO.md`](video/SCENARIO.md), `film.js`, тексты ru/en, озвучка, MP4 в `video/out/` |
+| brief: questions, the truth, the object, the parts | [`QUESTIONS.md`](QUESTIONS.md) |
+| the model (the single source of every number) | [`model.js`](model.js) — `simulate()` plays the events, `view(sim, t)` — the position of every part |
+| the anatomy figure | [`figure.js`](figure.js) — `buildFigure()` → SVG and anchors, `mountFigure()` → `apply(view)` |
+| the landing page | [`landing/`](landing) (template + `i18n/en.mjs`, `ru.mjs`) + [`landing.js`](landing.js) — the live machine with buttons, the video, facts, code; built by `make dist` in the root |
+| the video | [`video/`](video) — the script [`SCENARIO.md`](video/SCENARIO.md), `film.js`, en/ru texts, voice-over, MP4s in `video/out/` |
 
-Машина: магазин на 5 монет — ведро (ёмкость **b**); бункер с часами роняет монету раз в 2 с — пополнение
-(**r** = 0,5/с); когда магазин полон, заслонка закрыта и лишняя монета уходит в стакан переполнения;
-запрос на ленте получает нижнюю монету (лоток 200) или, без монеты, толкатель сбрасывает его в лоток 429.
-За любые T секунд проходит не больше b + r·T запросов.
+The machine: a magazine of 5 coins is the bucket (capacity **b**); a hopper with a clock drops a coin every 2 s — the
+refill (**r** = 0.5/s); when the magazine is full, the flap is closed and an extra coin rolls into the overflow cup;
+a request on the belt gets the bottom coin (the 200 tray) or, with no coin left, the kicker pushes it into the 429 tray.
+In any T seconds at most b + r·T requests get through.

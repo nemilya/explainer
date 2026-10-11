@@ -1,155 +1,159 @@
-# video-kit — ролики с озвучкой
+# video-kit — narrated videos
 
-Общий движок для видео (пришёл из nemilya/infographics): сцены, которые «оживают» синхронно с голосом,
-плюс слой **фигуры anatomy** — машина работает весь ролик, камера наезжает на детали, подписи-булавки
-цепляются к ним, а ведущие объясняют (один голос или диалог). Озвучка —
-Gemini TTS через OpenRouter, музыка и звуки синтезируются кодом (без сэмплов). Результаты:
+**English** · [Русский](README.ru.md)
 
-- MP4 1920×1080 и вертикальный 1080×1920 (Reels, Shorts, Telegram), субтитры отдельной дорожкой;
-- вертикальный MP4 **с субтитрами прямо в кадре** — короткие фразы, звучащее слово подсвечено;
-- **интерактивный плеер** (`index.html` проекта): ролик рисуется в браузере со звуком, главами,
-  субтитрами, переключением формата 16:9 / 9:16 и языка;
-- обложка для Reels 1080×1920 (всё важное — в зоне 4:5 сетки профиля).
+A shared video engine (it came from nemilya/infographics): scenes that come alive in sync with the voice,
+plus an **anatomy figure layer** — the machine runs through the whole video, the camera moves onto its parts,
+pin labels attach to them, and the hosts explain (one voice or a dialogue). The voice-over is
+Gemini TTS through OpenRouter; music and sound effects are synthesized in code (no samples). Output:
 
-Пример готового проекта — [`../explainers/token-bucket/video`](../explainers/token-bucket/video) (фигура, диалог, два
-формата, два языка).
+- MP4 1920×1080 and vertical 1080×1920 (Reels, Shorts, Telegram), subtitles as a separate track;
+- a vertical MP4 **with captions burned into the frame** — short phrases, the spoken word highlighted;
+- an **interactive player** (the project's `index.html`): the video is drawn in the browser with sound, chapters,
+  subtitles, a 16:9 / 9:16 switch and a language switch;
+- a Reels cover 1080×1920 (everything important inside the 4:5 zone of the profile grid).
 
-## Фигура anatomy в ролике и диалог
+A finished example — [`../explainers/token-bucket/video`](../explainers/token-bucket/video) (a figure, a dialogue,
+two formats, two languages).
 
-- **`film.layers`** — постоянные слои под сценами: `[{ id, html({ v }), draw(t, tl, ctx) }]`, `t` — время от
-  начала ролика, `tl.scenes` — начало, длительность и `q` каждой сцены (из них строится расписание машины).
-  Слой рисуется раньше сцен, поэтому сцены могут читать то, что он вычислил (камеру, положение деталей).
-- **`lib/figure.js`** — `camera(shots, anchors)` → камера по шотам `{ t, d, at, zoom, pos }` (плавные наезды по
-  логарифму масштаба); `place(el, fig, box, cam)` ставит фигуру в кадр и возвращает `pin(якорь)` → пиксели
-  кадра; `pinLabel(el, line, [x, y], k, { side, frame })` — булавка-подпись (точка, линия, ярлык, который не
-  выходит за кадр); `shown(t, a, b)` — видимость подписи.
-- **`film.speakers`** — `[{ voice: '' | 'he', name, role }]`: плашки «кто говорит» с волной голоса (в вертикали —
-  сверху), субтитры реплик второго голоса отмечены цветом (`#cc[data-voice]`).
-- Новая тема целиком (бриф, модель, фигура, ролик, лендинг): `node video-kit/scripts/new.mjs explainers/<slug> --title "…"`
-  (шаблон `template-explainer/`); только ролик в старом стиле — `--plain`.
-- **`make web`** — лёгкие версии для сайта (`scripts/web.mjs`): 720p (вертикальные 720×1280), CRF 28,
-  AAC 96 кбит/с, `+faststart` → `out/web/` с теми же именами (≈5 МБ вместо 17); `CRF=31 HEIGHT=540` — легче.
-- **Не перегревать ноутбук при рендере:** на macOS по умолчанию аппаратный кодек VideoToolbox (`ENC=sw` — x264),
-  `ENC=hw` — NVENC на Linux/Windows, `THREADS=2`, `PAUSE=40` (мс между кадрами), `NICE=10` — приоритет ffmpeg и
-  Chromium ниже (по умолчанию).
-- Проверка озвучки понимает числа: распознавание пишет «429» цифрами — числительные в реплике тогда не сверяются.
+## An anatomy figure in a video, and dialogue
 
-**Ролики на ИИ-картинках** со сквозными героями (листы-референсы персонажей → кадры с ними,
-Seedream через OpenRouter) — [`AI-ART.md`](AI-ART.md); пример — [`../karkas-house/video`](../karkas-house/video).
+- **`film.layers`** — persistent layers under the scenes: `[{ id, html({ v }), draw(t, tl, ctx) }]`, `t` — time from
+  the start of the video, `tl.scenes` — the start, duration and `q` of every scene (the machine's schedule is built
+  from them). A layer is drawn before the scenes, so the scenes can read what it computed (the camera, part positions).
+- **`lib/figure.js`** — `camera(shots, anchors)` → a camera from shots `{ t, d, at, zoom, pos }` (smooth zooms along
+  the log of the scale); `place(el, fig, box, cam)` puts the figure into the frame and returns `pin(anchor)` → frame
+  pixels; `pinLabel(el, line, [x, y], k, { side, frame })` — a pin label (a dot, a line and a tag that never leaves
+  the frame); `shown(t, a, b)` — label visibility.
+- **`film.speakers`** — `[{ voice: '' | 'he', name, role }]`: "who is speaking" badges with a voice wave (at the top
+  in the vertical frame); captions of the second voice's lines are marked with a color (`#cc[data-voice]`).
+- A whole new topic (brief, model, figure, video, landing page): `node video-kit/scripts/new.mjs explainers/<slug> --title "…"`
+  (the `template-explainer/` template); only a video in the old style — `--plain`.
+- **`make web`** — light versions for the site (`scripts/web.mjs`): 720p (vertical 720×1280), CRF 28,
+  AAC 96 kbit/s, `+faststart` → `out/web/` with the same names (≈5 MB instead of 17); `CRF=31 HEIGHT=540` — lighter.
+- **Rendering without overheating a laptop:** on macOS the hardware VideoToolbox encoder by default (`ENC=sw` — x264),
+  `ENC=hw` — NVENC on Linux/Windows, `THREADS=2`, `PAUSE=40` (ms between frames), `NICE=10` — lower priority for
+  ffmpeg and Chromium (the default).
+- The voice-over check understands numbers: transcription writes "429" as digits, so number words in the line are
+  not compared then.
 
-## Новый ролик
+**Videos made of AI images** with recurring characters (character reference sheets → shots with them,
+Seedream through OpenRouter) — [`AI-ART.md`](AI-ART.md); the first such project is karkas-house in nemilya/infographics.
+
+## A new video
 
 ```bash
-node video-kit/scripts/new.mjs explainers/my-topic --title "…"   # тема explainer целиком (template-explainer/)
-node video-kit/scripts/new.mjs my-infographic --plain              # только ролик → my-infographic/video (--art — ИИ-картинки)
+node video-kit/scripts/new.mjs explainers/my-topic --title "…"   # a whole explainer topic (template-explainer/)
+node video-kit/scripts/new.mjs my-infographic --plain              # only a video → my-infographic/video (--art — AI images)
 cd explainers/my-topic/video
-make preview      # плеер в браузере (без озвучки длительности оцениваются по тексту)
-# пишем сцены (film.js), тексты (text/ru.js, text/en.js), стили (scenes.css) — смотрим в плеере
-make voice video-cc            # озвучка основного языка + ролик для Reels → out/
-make voice video-cc LNG=en     # то же по-английски
-make cover LNG=en              # обложка → out/cover-en.jpg
+make preview      # the player in the browser (without a voice-over durations are estimated from the text)
+# write the scenes (film.js), the texts (text/en.js, text/ru.js), the styles (scenes.css) — watch in the player
+make voice video-cc            # voice-over in the main language + the Reels video → out/
+make voice video-cc LNG=ru     # the same in Russian
+make cover LNG=ru              # cover → out/cover-ru.jpg
 ```
 
-Нужны Node 22 и `ffmpeg`; один раз — `make install` (Playwright для рендера; браузер —
-`npx playwright install chromium`, если его нет). Сеть и ключ нужны только для `make voice`:
-`export OPENROUTER_API_KEY=…` или строка `OPENROUTER_API_KEY = …` в `local.mk` проекта (в git не
-попадает); прокси — `OPENROUTER_PROXY = socks5h://…`. Синтезируются только новые или изменённые
-реплики (кеш — `voice/clips/` проекта); пересвести звук без сети — `make mix`.
+Needs Node 22 and `ffmpeg`; once — `make install` (Playwright for rendering; the browser —
+`npx playwright install chromium` if it is missing). Network and a key are needed only for `make voice`:
+`export OPENROUTER_API_KEY=…` or a line `OPENROUTER_API_KEY = …` in the project's `local.mk` (not in git);
+proxy — `OPENROUTER_PROXY = socks5h://…`. Only new or changed lines are synthesized (cache — the project's
+`voice/clips/`); remix the audio without the network — `make mix`.
 
-Все цели — `make help` в папке проекта. Язык — `LNG=en` (по умолчанию первый из `LANGS` в film.js).
-Качество видео — `CRF` (по умолчанию 19; для ИИ-картинок с наездом хватает 23, файл втрое меньше):
-`make video-cc CRF=23` или `CRF ?= 23` в Makefile проекта.
+All targets — `make help` in the project folder. Language — `LNG=ru` (default — the first in `LANGS` in film.js).
+Video quality — `CRF` (19 by default; AI images with a slow zoom are fine at 23, a third of the size):
+`make video-cc CRF=23` or `CRF ?= 23` in the project's Makefile.
 
-## Проект ролика
+## A video project
 
 ```
-<инфографика>/video/
-  film.js            сцены: время (build), вёрстка (html), анимация кадра (draw); export makeFilm(lang), LANGS
-  text/<язык>.js     реплики (say), слова-якоря анимации (cue), надписи, обложка (cover), подписи плеера (ui)
-  scenes.css         палитра (токены :root) и стили сцен; вертикальная раскладка — #stage.v, под субтитры — #stage.cc
-  index.html         плеер (подключает video-kit/stage/base.css, scenes.css, video-kit/stage/stage.js)
-  cover.html         макет обложки
-  voice.config.json  голос, манера, темп, громкость музыки; name — имя роликов в out/; voices — другие голоса
-  art.js             (необязательно) ИИ-картинки: стиль, листы героев, кадры — AI-ART.md
-  art/               refs/, shots/ (картинки, в git), art.json (отпечатки, seed, цена), index.html (галерея), takes/ (черновики)
+<topic>/video/
+  film.js            scenes: time (build), markup (html), frame animation (draw); export makeFilm(lang), LANGS
+  text/<lang>.js     lines (say), animation cue words (cue), captions, the cover (cover), player labels (ui, ui.player)
+  scenes.css         palette (:root tokens) and scene styles; vertical layout — #stage.v, room for captions — #stage.cc
+  index.html         the player (loads video-kit/stage/base.css, scenes.css, video-kit/stage/stage.js)
+  cover.html         the cover layout
+  voice.config.json  voice, manner, tempo, music volume; name — video file name in out/; voices — other voices
+  art.js             (optional) AI images: style, character sheets, shots — AI-ART.md
+  art/               refs/, shots/ (images, in git), art.json (fingerprints, seed, price), index.html (gallery), takes/ (drafts)
   Makefile           KIT := ../../video-kit; include $(KIT)/video.mk
-  voice/             <язык>.m4a (дорожка), .json (длительности реплик), .vtt (субтитры), clips/ (кеш, не в git)
-  out/               <имя>[-en][-vertical][-captions].mp4, cover[-en].jpg, poster*.jpg
+  voice/             <lang>.m4a (the track), .json (line durations), .vtt (subtitles), clips/ (cache, not in git)
+  out/               <name>[-<lang>][-vertical][-captions].mp4, cover[-<lang>].jpg, poster*.jpg, web/ (make web)
 ```
 
-### Сцена
+### A scene
 
 ```js
 {
-  id: 'chain', kicker: 'Механизм', num: '02', mood: 'drive',   // mood — музыка: calm | drive | dark | end
-  theme: 'dark',                                                // фон сцены: dark | accent (необязательно)
-  build(s) {                                                    // время сцены
-    const a = s.say('Реплика голоса…');                         // → { t0, t1, dur, at('слово') }
-    s.sfx(a.at('слово'), 'pop', 1);                             // звук на слове
-    s.hold(a.t1 + s.p(1.5));                                    // сцена длится до…; s.p — пауза с темпом языка
-    return { show: a.at('слово') };                             // q — моменты для draw
+  id: 'chain', kicker: 'Mechanism', num: '02', mood: 'drive',   // mood — music: calm | drive | dark | end
+  theme: 'dark',                                                // scene background: dark | accent (optional)
+  build(s) {                                                    // the scene's time
+    const a = s.say('A voice line…');                           // → { t0, t1, dur, at('word') }
+    s.sfx(a.at('line'), 'pop', 1);                              // a sound on a word
+    s.hold(a.t1 + s.p(1.5));                                    // the scene lasts until…; s.p — a pause with the language's pace
+    return { show: a.at('line') };                              // q — moments for draw
   },
-  html: ({ v }) => `<h2 class="h2">…</h2>`,                     // вёрстка (v — вертикальный кадр)
-  draw(t, q, { $, $$, v }) { rise($('.h2'), t, q.show); },      // кадр в момент t — чистая функция времени
+  html: ({ v }) => `<h2 class="h2">…</h2>`,                     // markup (v — the vertical frame)
+  draw(t, q, { $, $$, v }) { rise($('.h2'), t, q.show); },      // the frame at moment t — a pure function of time
 }
 ```
 
-Помощники анимации (`lib/motion.js`): `rise`, `pop`, `fade`, `stroke` (прорисовка SVG-линий с
-`pathLength="1"`), `words` (пословное появление), `setK` (зачёркивания/подчёркивания через `--k`),
-`css`, `seg`, `E` (сглаживания), `rng` (детерминированный ГПСЧ); для картинок — `ken` (наезд,
-отъезд, панорама) и `shake` (тряска); `shot('id')` из `lib/art.js` — `<img>` кадра `art/shots/id.jpg`.
-Картинки в вёрстке сцен декодируются до первого кадра. Звуки (`lib/sound.mjs`): `whoosh`,
+Animation helpers (`lib/motion.js`): `rise`, `pop`, `fade`, `stroke` (drawing SVG lines with
+`pathLength="1"`), `words` (word-by-word appearance), `setK` (strike-throughs/underlines through `--k`),
+`css`, `seg`, `E` (easings), `rng` (a deterministic PRNG); for images — `ken` (zoom in, zoom out, pan)
+and `shake`; `shot('id')` from `lib/art.js` — the `<img>` of the shot `art/shots/id.jpg`.
+Images in scene markup are decoded before the first frame. Sounds (`lib/sound.mjs`): `whoosh`,
 `swish`, `pop`, `tick`, `strike`, `impact`, `riser`, `bell`, `chime`.
 
-Реплики задают темп: анимация привязана к началу и концу реплик и к словам-якорям
-(`a.at('капитал')` — оценка по доле текста с паузами на знаках препинания), поэтому после новой
-озвучки всё само встаёт на место. Каждая новая реплика распознаётся обратно и сверяется с текстом
-(при пропусках слов — синтез заново, до 3 попыток).
+The lines set the pace: animation is tied to the start and end of lines and to cue words
+(`a.at('capital')` — estimated by the share of the text with pauses on punctuation), so after a new
+voice-over everything falls into place by itself. Every new line is transcribed back and compared with the text
+(missing words → synthesized again, up to 3 attempts).
 
-Второй голос (персонаж): `s.say('«Да его ж ветром сдует!»', { voice: 'wolf' })` и в
-`voice.config.json` — `"voices": { "wolf": { "voice": "Algenib", "instructions": "…" } }` (поправки к
-основному голосу: `voice`, `instructions`, `tempo`, `speed`, `model`). У субтитров такой реплики —
+A second voice (a character): `s.say('"It will blow away in the wind!"', { voice: 'wolf' })` and in
+`voice.config.json` — `"voices": { "wolf": { "voice": "Algenib", "instructions": "…" } }` (overrides of the
+main voice: `voice`, `instructions`, `tempo`, `speed`, `model`). The captions of such a line get
 `#cc[data-voice="wolf"]`.
 
-### Языки и темп
+### Languages and pace
 
-Тексты — `text/<язык>.js`, подключаются в `TEXTS` в film.js (первый — основной). Голос каждого
-языка — в `voice.config.json`: сверху основной, в `langs.<язык>` — поправки: `voice`,
-`instructions`, `tempo` (ускорение готовой речи без смены высоты), `gap` (пауза между репликами, с),
-`pace` (множитель пауз сцен — `s.p()`), `language`, `verify.skip`. Для динамичных роликов
-подходит `tempo: 1.1, gap: 0.18, pace: 0.6`.
+Texts — `text/<lang>.js`, listed in `TEXTS` in film.js (the first is the main one). Each language's voice is in
+`voice.config.json`: the main one on top, `langs.<lang>` — overrides: `voice`, `instructions`, `tempo` (speeding up
+the finished speech without changing pitch), `gap` (pause between lines, s), `pace` (multiplier for scene pauses —
+`s.p()`), `language`, `verify.skip`. For fast-paced videos `tempo: 1.1, gap: 0.18, pace: 0.6` works well.
 
-### Плеер
+### The player
 
-Пробел / K — пауза, ← / → — 5 с, N / P — глава, C — субтитры, M — звук, F — весь экран; кнопки
-формата (9:16 / 16:9) и языка. Адрес с `#v`, `#en`, `#en-v` открывает нужную версию, `?t=95` — с
-95-й секунды. Плеер — статическая страница: для публикации нужны папка проекта и `video-kit`
-рядом (в explainer это делает `make dist` в корне: сайт со всеми плеерами — в `dist/`).
+Space / K — pause, ← / → — 5 s, N / P — chapter, C — subtitles, M — sound, F — full screen; format (9:16 / 16:9)
+and language buttons. A URL with `#v`, `#ru`, `#ru-v` opens that version, `?t=95` — from second 95. Button tooltips
+are English by default and translated through `ui.player` in `text/<lang>.js`. The player is a static page: to
+publish it, the project folder and `video-kit` must sit next to each other (in explainer `make dist` in the root does
+this: the site with every player goes into `dist/`).
 
-## Как устроено
+## How it works
 
 ```
-video.mk            цели make для проектов
-stage/base.css      шрифты, токены по умолчанию, кадр, подписи глав, прогресс, субтитры, плеер
-stage/stage.js      сцены и наплывы, подписи глав, субтитры фразами, плеер; window.__video.seek(t)
-lib/timeline.js     сборка таймлайна: сцены → абсолютное время реплик и звуков
-lib/motion.js       анимационные помощники — чистые функции времени
-lib/sound.mjs       синтез музыки и эффектов
-scripts/voice.mjs   TTS → проверка распознаванием → сведение голоса, музыки и звуков → voice/
-scripts/art.mjs     ИИ-картинки: art.js → листы-референсы → кадры с ними → art/ (AI-ART.md)
-lib/openrouter.mjs  запросы к OpenRouter (ключ, прокси, повторы) — для озвучки и картинок
-lib/art.js          промпты листов героев и мест (character, place), shot('id') для сцен
-lib/figure.js       фигура anatomy в ролике: камера, place(), булавки-подписи
-scripts/render.mjs  Chromium снимает кадры (index.html?render) → ffmpeg → MP4; --cover — обложка
-scripts/serve.mjs   локальный сервер для make preview (с Range — для перемотки)
-scripts/project.mjs папка проекта, имя роликов, языки — для скриптов
-scripts/new.mjs     новая тема из template-explainer/ (или ролик из template/ с --plain)
-template-explainer/ заготовка темы: бриф, модель, фигура anatomy, ролик-диалог, лендинг
-template/           заготовка ролика без фигуры: титул, три тезиса, вывод, финал
-template-art/       art.js для роликов на ИИ-картинках (new.mjs --art)
+video.mk            make targets for projects
+stage/base.css      fonts, default tokens, frame, chapter labels, progress, subtitles, player
+stage/stage.js      scenes and crossfades, chapter labels, phrase subtitles, layers, speakers, player; window.__video.seek(t)
+lib/timeline.js     building the timeline: scenes → absolute times of lines and sounds
+lib/motion.js       animation helpers — pure functions of time
+lib/sound.mjs       synthesis of music and sound effects
+lib/figure.js       an anatomy figure in a video: camera, place(), pin labels
+scripts/voice.mjs   TTS → check by transcription → mixing voice, music and sounds → voice/
+scripts/art.mjs     AI images: art.js → reference sheets → shots with them → art/ (AI-ART.md)
+lib/openrouter.mjs  OpenRouter requests (key, proxy, retries) — for voice-over and images
+lib/art.js          prompts for character and place sheets (character, place), shot('id') for scenes
+scripts/render.mjs  Chromium captures frames (index.html?render) → ffmpeg → MP4; --cover — the cover
+scripts/web.mjs     light 720p versions for the site → out/web/
+scripts/serve.mjs   a local server for make preview (with Range — for seeking)
+scripts/project.mjs the project folder, video name, languages — for the scripts
+scripts/new.mjs     a new topic from template-explainer/ (or a video from template/ with --plain)
+template-explainer/ topic stub: brief, model, anatomy figure, dialogue video, landing page
+template/           a video stub without a figure: title, three points, verdict, finale
+template-art/       art.js for videos made of AI images (new.mjs --art)
 fonts/              Source Serif 4, Golos Text, JetBrains Mono (OFL)
 ```
 
-Каждый кадр — функция времени: `seek(t)` перерисовывает сцены к моменту `t`. Поэтому рендер
-покадровый и одинаковый при каждом запуске, а плеер перематывается мгновенно. Сервер рендера
-отдаёт корень репозитория (проекту нужен и сам video-kit); сеть при рендере не нужна.
+Every frame is a function of time: `seek(t)` redraws the scenes at moment `t`. So rendering is frame by frame and
+identical on every run, and the player seeks instantly. The render server serves the repo root (a project needs
+video-kit too); no network is needed while rendering.

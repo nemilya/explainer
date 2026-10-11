@@ -29,11 +29,11 @@ explainers/
   lang.js           автовыбор языка до отрисовки; suggest.js, video.js, landing.css — общее
   catalog/          шаблон и словари каталога
   <тема>/
-    QUESTIONS.md    бриф: вопросы, правда (числа), объект, детали, сцены
+    QUESTIONS.md    бриф: вопросы, правда (числа), объект, детали, сцены (QUESTIONS.ru.md — перевод)
     model.js        модель — единственный источник чисел, чистые функции времени
     figure.js       фигура anatomy: buildFigure() → SVG и якоря, mountFigure() → apply(состояние)
     landing/        шаблон страницы index.html + i18n/en.mjs, ru.mjs; landing.js — живая фигура
-    video/          film.js, text/<язык>.js, scenes.css, voice.config.json, SCENARIO.md, voice/, out/, out/web/
+    video/          film.js, text/<язык>.js, scenes.css, voice.config.json, SCENARIO.md (+ .ru.md), voice/, out/, out/web/
 dist/               собранный сайт — его копируют на хостинг (make dist; не в git)
 site.mjs            адрес сайта и языки (первый — основной)
 Makefile            make help · serve · landing · test · new

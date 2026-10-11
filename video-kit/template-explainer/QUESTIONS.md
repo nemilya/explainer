@@ -1,35 +1,35 @@
 # {{TITLE}}
 
-Бриф объяснения. Заполняется до любой геометрии — по нему строятся модель, фигура, сценарий и лендинг
-(порядок — в `.claude/skills/explain/SKILL.md`).
+The explainer brief. Fill it in before any geometry — the model, the figure, the script and the landing page are
+built from it (the order — in `.claude/skills/explain/SKILL.md`).
 
-## Вопросы, на которые отвечаем
+## Questions we answer
 1. …
 2. …
 3. …
 
-## Кто зритель и что он должен унести
-- Зритель: …
-- Одна фраза, которую он запомнит: …
+## Who the viewer is and what they should take away
+- Viewer: …
+- The one sentence they will remember: …
 
-## Правда: числа и поведение
-Реальные величины, пороги, формулы — всё, что покажут счётчики, подписи и реплики.
+## The truth: numbers and behavior
+Real quantities, thresholds, formulas — everything the counters, labels and lines will show.
 - …
 
-## Объект (anatomy)
-Какая настоящая машина/прибор своим устройством *и есть* идея. Одна фраза: что движется и что это значит.
+## The object (anatomy)
+Which real machine or instrument *is* the idea by the way it works. One sentence: what moves and what that means.
 - …
 
-## Детали (40–80 для Figure)
-| Группа | Детали |
+## Parts (40–80 for a Figure)
+| Group | Parts |
 |---|---|
-| Основание | плита, ножки, винты, табличка, линейка |
-| Конструкция | … |
-| Механизм | … |
-| Предмет (lit) | … |
+| Base | plate, feet, screws, label plate, ruler |
+| Structure | … |
+| Mechanism | … |
+| Subject (lit) | … |
 
-## Сценарий (кратко)
-Сцены ролика, кто говорит (she — объясняет, he — спрашивает), что делает машина и камера.
-| # | Сцена | Реплики (суть) | Машина | Камера |
+## Script (short)
+The video's scenes, who speaks (she — explains, he — asks), what the machine and the camera do.
+| # | Scene | Lines (gist) | Machine | Camera |
 |---|---|---|---|---|
-| 0 | Вопрос | he: … / she: … | … | общий план |
+| 0 | Question | he: … / she: … | … | wide shot |
