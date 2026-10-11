@@ -1,80 +1,86 @@
 # Explainer
 
-Объяснения «как это работает» в трёх видах из одной модели:
+**English** · [Русский](README.ru.md)
 
-- **интерактивная иллюстрация** — изометрическая машина на ките [anatomy](anatomy/), чьё устройство *и есть* идея;
-- **ролик с озвучкой** — камера наезжает на детали машины, а ведущие объясняют (один голос или диалог
-  «спрашивает — объясняет»), 16:9 и 9:16 с субтитрами в кадре, на нескольких языках — движок [video-kit](video-kit/);
-- **лендинг** — вопросы, живая машина с кнопками и счётчиками, ролик с главами, суть и код.
+"How does it work" explainers, built in three forms from one model:
 
-**Пример:** [`explainers/token-bucket`](explainers/token-bucket) — «Почему API отвечает 429?»: token bucket
-в железе (магазин монет — ведро, часы бункера — пополнение, лента запросов, лотки 200 и 429), ролик-диалог
-Веры и Макса на ~2,5 минуты (ru и en, горизонтальный и вертикальный), лендинг с живой моделью.
+- **an interactive illustration** — an isometric machine made with [anatomy](https://github.com/wheresryan22/anatomy)
+  (a copy lives in [`anatomy/`](anatomy/)), whose working *is* the idea;
+- **a narrated video** — the camera moves onto parts of the running machine while the hosts explain it (one
+  narrator or a "one asks, one explains" dialogue), in 16:9 and 9:16 with burned-in captions, in several
+  languages — the [video-kit](video-kit/) engine;
+- **a landing page** — the questions, the live machine with controls and counters, the video with chapters,
+  the gist and the code.
 
-![Кадр ролика token bucket](explainers/token-bucket/video/out/poster.jpg)
+**Example:** [`explainers/token-bucket`](explainers/token-bucket) — "Why does an API answer 429?": a token bucket
+as a machine (a coin magazine is the bucket, a hopper clock is the refill, a request belt, trays for 200 and 429),
+a ~2.5-minute dialogue between Vera and Max (English and Russian, horizontal and vertical), and a landing page
+with the live model.
 
-## Как устроено
+![A frame from the token bucket video](explainers/token-bucket/video/out/poster-en.jpg)
+
+## Layout
 
 ```
-anatomy/            скилл и кит изометрических фигур (копия wheresryan22/anatomy, MIT) — не правим
-video-kit/          движок роликов (из nemilya/infographics) + слой фигуры: lib/figure.js (камера, булавки),
-                    film.layers и film.speakers в stage/stage.js; шаблон темы — template-explainer/
+anatomy/            isometric figure skill and kit — a copy of wheresryan22/anatomy @ 240a9bf (MIT), kept unmodified
+video-kit/          video engine (from nemilya/infographics) + the figure layer: lib/figure.js (camera, pins),
+                    film.layers and film.speakers in stage/stage.js; topic template — template-explainer/
 explainers/
-  landing.css       общий стиль лендингов
-  <тема>/
-    QUESTIONS.md    бриф: вопросы, правда (числа), объект, детали, сцены
-    model.js        модель — единственный источник чисел, чистые функции времени
-    figure.js       фигура anatomy: buildFigure() → SVG и якоря, mountFigure() → apply(состояние)
-    index.html      лендинг (+ landing.js)
-    video/          film.js, text/<язык>.js, scenes.css, voice.config.json, SCENARIO.md, voice/, out/
-index.html          каталог тем
-.claude/skills/     explain — порядок работы над темой; anatomy — ссылка на скилл фигур
+  landing.css       shared landing style
+  <topic>/
+    QUESTIONS.md    brief: questions, the truth (numbers), the object, parts, scenes
+    model.js        the model — the single source of every number, pure functions of time
+    figure.js       anatomy figure: buildFigure() → SVG and anchors, mountFigure() → apply(state)
+    index.html      landing page (+ landing.js)
+    video/          film.js, text/<lang>.js, scenes.css, voice.config.json, SCENARIO.md, voice/, out/
+index.html          topic catalog
+.claude/skills/     explain — how to build a topic; anatomy — link to the figure skill
 ```
 
-Ключевая идея — **одна модель на всё**: `model.js` проигрывает события, `figure.js` ставит детали по
-состоянию, ролик рисует кадр как функцию времени (покадровый рендер, мгновенная перемотка), лендинг крутит
-ту же модель вживую. Расписание машины в ролике строится от реплик: событие случается ровно на слове, которым
-о нём говорят, и после новой озвучки всё встаёт на место само.
+The key idea is **one model for everything**: `model.js` plays the events, `figure.js` places the parts from the
+state, the video draws each frame as a function of time (frame-by-frame rendering, instant seeking), and the
+landing page runs the same model live. The machine's schedule in the video is built from the lines: an event
+happens exactly on the word that names it, and after a new voice-over everything lands in place again.
 
-## Новая тема
+## A new topic
 
-В Claude Code: `/explain как работает …` (скилл [`.claude/skills/explain`](.claude/skills/explain/SKILL.md)).
-Вручную:
+In Claude Code: `/explain how … works` (the [`.claude/skills/explain`](.claude/skills/explain/SKILL.md) skill).
+By hand:
 
 ```bash
-node video-kit/scripts/new.mjs explainers/my-topic --title "Как работает …"   # заготовка всех частей
+node video-kit/scripts/new.mjs explainers/my-topic --title "How … works"   # stubs for every part
 cd explainers/my-topic/video
-make preview                       # плеер ролика: http://127.0.0.1:8790/explainers/my-topic/video/
-make voice && make voice LNG=en    # озвучка (OPENROUTER_API_KEY)
-make video video-cc                # MP4 16:9 и 9:16 с субтитрами → out/
+make preview                       # video player: http://127.0.0.1:8790/explainers/my-topic/video/
+make voice && make voice LNG=en    # voice-over (OPENROUTER_API_KEY)
+make video video-cc                # MP4 16:9 and 9:16 with captions → out/
 make video video-cc LNG=en
-make cover && make cover LNG=en    # обложки Reels
+make cover && make cover LNG=en    # Reels covers
 ```
 
-Лендинг и каталог — статические страницы: откройте `index.html` через любой локальный сервер из корня
-(например, `node video-kit/scripts/serve.mjs` из корня → http://127.0.0.1:8790/) или выложите репозиторий на
-GitHub Pages.
+The landing pages and the catalog are static: serve the repository root with any local server (for example
+`node video-kit/scripts/serve.mjs` from the root → http://127.0.0.1:8790/) or publish it on GitHub Pages.
 
-## anatomy: сопровождение
+## anatomy: keeping the copy up to date
 
-`anatomy/` — копия [wheresryan22/anatomy](https://github.com/wheresryan22/anatomy) на коммите **`240a9bf`**, без
-изменений (наши правки — только в `video-kit/` и `explainers/`). Обновить из мастер-репозитория:
+[`anatomy/`](anatomy/) is a vendored copy of [wheresryan22/anatomy](https://github.com/wheresryan22/anatomy) at
+commit **`240a9bf`**, unmodified (our changes go only to `video-kit/` and `explainers/`). To update it from upstream:
 
 ```bash
 git clone https://github.com/wheresryan22/anatomy /tmp/anatomy
-git -C /tmp/anatomy log --oneline 240a9bf..HEAD             # что изменилось с нашей версии
+git -C /tmp/anatomy log --oneline 240a9bf..HEAD                    # what changed since our copy
 git -C /tmp/anatomy diff --stat 240a9bf..HEAD -- kit SKILL.md references
-rsync -a --delete --exclude .git /tmp/anatomy/ anatomy/       # взять новую версию
+rsync -a --delete --exclude .git /tmp/anatomy/ anatomy/              # take the new version
 ```
 
-После обновления — проверить, что фигуры собираются (`explainers/*/figure.js` импортируют
-`anatomy/kit/iso-kit.mjs`), посмотреть кадры (`make stills`), и записать новый коммит здесь и в `CLAUDE.md`.
+Afterwards check that the figures still build (`explainers/*/figure.js` import `anatomy/kit/iso-kit.mjs`), look at
+stills (`make stills`), and record the new commit here, in `README.ru.md` and in `CLAUDE.md`.
 
-## Требования
+## Requirements
 
-Node 22, `ffmpeg`; для рендера — Playwright (`make install` в папке ролика) и Chromium. Ключ OpenRouter нужен
-только для озвучки: `export OPENROUTER_API_KEY=…` или `OPENROUTER_API_KEY = …` в `local.mk` ролика (не в git).
+Node 22 and `ffmpeg`; for rendering — Playwright (`make install` in a video folder) and Chromium. An OpenRouter
+key is needed only for the voice-over: `export OPENROUTER_API_KEY=…` or `OPENROUTER_API_KEY = …` in the video's
+`local.mk` (not in git).
 
-## Лицензии
+## Licenses
 
-`anatomy/` — MIT (© wheresryan22, см. `anatomy/LICENSE`). Шрифты в `video-kit/fonts/` — OFL.
+`anatomy/` — MIT (© wheresryan22, see [`anatomy/LICENSE`](anatomy/LICENSE)). Fonts in `video-kit/fonts/` — OFL.

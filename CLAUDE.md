@@ -3,8 +3,10 @@
 - Новая тема или «объясни, как работает …» → скилл `explain` (`.claude/skills/explain/SKILL.md`); фигуры →
   скилл `anatomy` (`anatomy/SKILL.md`). Образец всех частей — `explainers/token-bucket/`.
 - `anatomy/` — копия wheresryan22/anatomy на коммите `240a9bf`, не редактируем; свои изменения — в `video-kit/` и
-  `explainers/`. Обновление из upstream — раздел «anatomy: сопровождение» в README.md (и обновить коммит здесь).
-- Тексты, комментарии, коммиты — по-русски (как в коде video-kit); английский — только `text/en.js` и тексты en.
+  `explainers/`. Обновление из upstream — раздел «anatomy: keeping the copy up to date» в README.md (и обновить коммит
+  здесь и в README.ru.md).
+- README.md — на английском (основной), README.ru.md — русская версия; держать их в согласии.
+- Комментарии в коде и коммиты — по-русски (как в коде video-kit); английский — `text/en.js`, тексты en и README.md.
 - Кадр ролика — чистая функция времени: никаких `Math.random`, `Date.now`, состояния между кадрами.
 - Одна модель на всё: числа в кадре и на лендинге — только из `model.js`.
 - Проверка — глазами: `make stills T=…` / `make stills-v T=… CC=1` в папке ролика, читать каждый PNG.
