@@ -15,7 +15,7 @@ import { E, clamp, lerp, seg } from './motion.js';
 
 /** camera from shots → (t) => { at: [x, y], zoom, pos: [fx, fy] } */
 export function camera(shots, anchors = {}) {
-  const pt = (a) => (Array.isArray(a) ? a : anchors[a] ?? (() => { throw new Error(`нет якоря «${a}»`); })());
+  const pt = (a) => (Array.isArray(a) ? a : anchors[a] ?? (() => { throw new Error(`no anchor "${a}"`); })());
   const list = [...shots].sort((a, b) => a.t - b.t).map((s) => ({ d: 1.4, zoom: 1, pos: [0.5, 0.5], ...s }));
   return (t, extra = anchors) => {
     const P = (a) => (Array.isArray(a) ? a : extra[a] ?? pt(a));
@@ -52,7 +52,7 @@ export function place(el, fig, box, cam, anchors = fig.anchors) {
   }
   const pin = (a) => {
     const p = Array.isArray(a) ? a : anchors[a];
-    if (!p) throw new Error(`нет якоря «${a}»`);
+    if (!p) throw new Error(`no anchor "${a}"`);
     return [tx + p[0] * S, ty + p[1] * S];
   };
   return { scale: S, pin };

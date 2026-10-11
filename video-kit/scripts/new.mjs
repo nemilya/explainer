@@ -19,16 +19,16 @@ const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
 const src = args.find((a, i) => !a.startsWith('--') && !['--name', '--title'].includes(args[i - 1]));
 if (!src) {
-  console.error('usage: node video-kit/scripts/new.mjs explainers/<slug> --title "…"   |   <папка> --plain [--name имя] [--art]');
+  console.error('usage: node video-kit/scripts/new.mjs explainers/<slug> --title "…"   |   <folder> --plain [--name name] [--art]');
   process.exit(1);
 }
 const target = resolve(src);
-if (!target.startsWith(ROOT + sep)) { console.error(`папка должна лежать в ${ROOT}`); process.exit(1); }
+if (!target.startsWith(ROOT + sep)) { console.error(`the folder must be inside ${ROOT}`); process.exit(1); }
 const plain = args.includes('--plain');
 const dir = plain ? join(target, 'video') : target;
 const name = opt('name') ?? basename(target);
 const title = opt('title') ?? name;
-if (existsSync(join(dir, plain ? 'film.js' : 'model.js'))) { console.error(`уже есть: ${dir}`); process.exit(1); }
+if (existsSync(join(dir, plain ? 'film.js' : 'model.js'))) { console.error(`already exists: ${dir}`); process.exit(1); }
 
 if (plain) {
   cpSync(join(KIT, 'template'), dir, { recursive: true });
@@ -55,5 +55,5 @@ fill(dir);
 
 const rel = relative(process.cwd(), dir) || '.';
 console.log(plain
-  ? `→ ${rel}  (движок: ${relative(dir, KIT)})\n  дальше: cd ${rel} && make preview`
-  : `→ ${rel}: QUESTIONS.md, model.js, figure.js, index.html, video/\n  1) заполните QUESTIONS.md  2) model.js и figure.js (anatomy/SKILL.md)  3) video/: сценарий\n  посмотреть: cd ${rel}/video && make preview  (лендинг — ${rel}/index.html)`);
+  ? `→ ${rel}  (engine: ${relative(dir, KIT)})\n  next: cd ${rel} && make preview`
+  : `→ ${rel}: QUESTIONS.md, model.js, figure.js, landing/, video/\n  1) fill in QUESTIONS.md  2) model.js and figure.js (anatomy/SKILL.md)  3) video/: the script\n  look: cd ${rel}/video && make preview; make landing in the repo root → ${rel}/index.html`);

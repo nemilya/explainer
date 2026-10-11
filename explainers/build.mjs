@@ -40,7 +40,7 @@ export function checkKeys(dicts, where) {
     const got = sig(dicts[code]);
     const missing = want.filter((k) => !got.includes(k));
     const extra = got.filter((k) => !want.includes(k));
-    if (missing.length || extra.length) throw new Error(`${where}/i18n/${code}.mjs расходится с ${base}: нет [${missing}] лишние [${extra}]`);
+    if (missing.length || extra.length) throw new Error(`${where}/i18n/${code}.mjs differs from ${base}: missing [${missing}] extra [${extra}]`);
   }
 }
 
@@ -61,16 +61,16 @@ function render(template, vars, dict, where) {
   };
   let html = template.replace(/<!--each ([\w.]+)-->([\s\S]*?)<!--\/each-->/g, (_, key, body) => {
     const list = get(key);
-    if (!Array.isArray(list)) throw new Error(`${where}: <!--each ${key}--> — не список`);
+    if (!Array.isArray(list)) throw new Error(`${where}: <!--each ${key}--> is not a list`);
     return list.map((item) => body.replace(/\{\{(\.\d*)\}\}/g, (m, k) => String(get(k, item)))).join('');
   });
   html = html.replace(/<!--if (!?)(\w+)-->\n?([\s\S]*?)(?:<!--else-->\n?([\s\S]*?))?<!--end-->\n?/g, (_, neg, name, yes, no = '') => {
-    if (!(name in vars.flags)) throw new Error(`${where}: неизвестный флаг шаблона ${name}`);
+    if (!(name in vars.flags)) throw new Error(`${where}: unknown template flag ${name}`);
     return (neg ? !vars.flags[name] : vars.flags[name]) ? yes : no;
   });
   return html.replace(/(="?)?\{\{([\w.]+)\}\}/g, (m, attr, key) => {
     const v = get(key);
-    if (typeof v !== 'string') throw new Error(`${where}: нет строки для {{${key}}}`);
+    if (typeof v !== 'string') throw new Error(`${where}: no string for {{${key}}}`);
     return (attr || '') + (attr ? v.replace(/"/g, '&quot;') : v);
   });
 }
@@ -190,6 +190,6 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     stale.push(path.relative(ROOT, file));
     if (!check) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, html); }
   }
-  if (check && stale.length) { console.error(`устарело (make landing): ${stale.join(', ')}`); process.exit(1); }
-  console.log(`${list.length} файлов${stale.length ? `, ${check ? 'устарели' : 'обновлены'}: ${stale.join(', ')}` : ', всё актуально'}`);
+  if (check && stale.length) { console.error(`out of date (make landing): ${stale.join(', ')}`); process.exit(1); }
+  console.log(`${list.length} files${stale.length ? `, ${check ? 'out of date' : 'updated'}: ${stale.join(', ')}` : ', all up to date'}`);
 }

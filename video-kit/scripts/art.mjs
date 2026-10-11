@@ -32,7 +32,7 @@ const ROOT = P.dir;
 const ART = join(ROOT, 'art');
 const TAKES = join(ART, 'takes');
 const cfgFile = join(ROOT, 'art.js');
-if (!existsSync(cfgFile)) throw new Error(`нет art.js в ${ROOT} (AI-ART.md)`);
+if (!existsSync(cfgFile)) throw new Error(`no art.js in ${ROOT} (AI-ART.md)`);
 const CFG = (await import(pathToFileURL(cfgFile).href)).default;
 const MODEL = CFG.model ?? 'bytedance-seed/seedream-5-0-flash';
 const PRICE = CFG.price ?? 0.018; // $ per image — only for the plan; the real price comes from the API response
@@ -53,18 +53,18 @@ const save = () => {
 const ITEMS = new Map();
 for (const [dir, list] of [['refs', CFG.refs ?? {}], ['shots', CFG.shots ?? {}]]) {
   for (const [id, it] of Object.entries(list)) {
-    if (ITEMS.has(id)) throw new Error(`id «${id}» встречается дважды (refs и shots — общее пространство имён)`);
+    if (ITEMS.has(id)) throw new Error(`id "${id}" appears twice (refs and shots share one namespace)`);
     ITEMS.set(id, { id, dir, refs: [], ...it, file: join(ART, dir, `${id}.jpg`) });
   }
 }
 for (const it of ITEMS.values()) {
-  for (const r of it.refs) if (!ITEMS.has(r)) throw new Error(`${it.id}: нет референса «${r}» в art.js`);
+  for (const r of it.refs) if (!ITEMS.has(r)) throw new Error(`${it.id}: no reference "${r}" in art.js`);
 }
 const order = [];
 const seen = new Map();
 const visit = (id, path = []) => {
   if (seen.get(id) === 'done') return;
-  if (seen.get(id) === 'open') throw new Error(`цикл референсов: ${[...path, id].join(' → ')}`);
+  if (seen.get(id) === 'open') throw new Error(`reference cycle: ${[...path, id].join(' → ')}`);
   seen.set(id, 'open');
   for (const r of ITEMS.get(id).refs) visit(r, [...path, id]);
   seen.set(id, 'done');
@@ -114,7 +114,7 @@ async function generate(it, seed, out) {
   const res = await post('/images', body, { timeout: 300 });
   const json = JSON.parse(res.body.toString('utf8'));
   const img = json.data?.[0];
-  if (!img?.b64_json) throw new Error(`${it.id}: в ответе нет картинки: ${res.body.toString('utf8').slice(0, 300)}`);
+  if (!img?.b64_json) throw new Error(`${it.id}: no image in the response: ${res.body.toString('utf8').slice(0, 300)}`);
   const buf = Buffer.from(img.b64_json, 'base64');
   if (/jpe?g/.test(img.media_type ?? 'image/jpeg')) writeFileSync(out, buf);
   else {
@@ -152,7 +152,7 @@ const slot = async (fn) => {
 // ---------------------------------------------------------------- modes
 const only = typeof opt('only') === 'string' ? opt('only').split(',') : null;
 const redo = typeof opt('redo') === 'string' ? opt('redo').split(',') : [];
-for (const id of [...(only ?? []), ...redo]) if (!ITEMS.has(id)) throw new Error(`нет «${id}» в art.js`);
+for (const id of [...(only ?? []), ...redo]) if (!ITEMS.has(id)) throw new Error(`no "${id}" in art.js`);
 let spent = 0;
 
 if (opt('pick')) {
@@ -161,21 +161,21 @@ if (opt('pick')) {
   const it = ITEMS.get(id);
   // the latest take with this seed
   const take = (TAKEN[id] ?? []).filter((x) => x.seed === seed && existsSync(takeFile(id, x))).at(-1);
-  if (!it || !take) throw new Error(`нет черновика ${id} с seed ${seed} в art/takes/`);
-  if (it.seed !== undefined) console.warn(`  ⚠ в art.js у «${id}» задан seed: ${it.seed} — уберите его, иначе выбор не удержится`);
+  if (!it || !take) throw new Error(`no take ${id} with seed ${seed} in art/takes/`);
+  if (it.seed !== undefined) console.warn(`  ⚠ art.js sets seed: ${it.seed} for "${id}" — remove it, otherwise the pick won't stick`);
   const hash = hashOf(it, seed);
-  if (take.hash !== hash) console.warn('  ⚠ черновик сделан по другой постановке (промпт или референсы с тех пор менялись) — беру как есть');
+  if (take.hash !== hash) console.warn('  ⚠ the take was made from a different setup (the prompt or references have changed since) — taking it as is');
   const buf = readFileSync(takeFile(id, take));
   shelve(it);
   writeFileSync(it.file, buf);
   M.items[id] = { ...M.items[id], file: rel(it.file), seed, hash, cost: take?.cost ?? null, at: new Date().toISOString() };
-  console.log(`${id}: взят вариант seed ${seed} → ${rel(it.file)}`);
+  console.log(`${id}: picked the variant with seed ${seed} → ${rel(it.file)}`);
 } else if (opt('takes')) {
   const n = Number(opt('takes'));
   if (!only) throw new Error('--takes N --only id[,id]');
   for (const id of only) {
     const it = ITEMS.get(id);
-    for (const r of it.refs) if (!existsSync(ITEMS.get(r).file)) throw new Error(`${id}: сначала сгенерируйте референс «${r}» (make art)`);
+    for (const r of it.refs) if (!existsSync(ITEMS.get(r).file)) throw new Error(`${id}: generate the reference "${r}" first (make art)`);
     await Promise.all(Array.from({ length: n }, () => slot(async () => {
       const seed = randomInt(1, 2147483647);
       const x = { seed, hash: hashOf(it, seed) };
@@ -187,7 +187,7 @@ if (opt('pick')) {
       console.log(`  → ${rel(out)} ${r.w}×${r.h}${r.cost !== null ? ` $${r.cost}` : ''}`);
     })));
   }
-  console.log(`выбрать: make art-pick ID=<id> SEED=<seed> (варианты — в art/index.html)`);
+  console.log(`to pick: make art-pick ID=<id> SEED=<seed> (variants — in art/index.html)`);
 } else if (!opt('gallery')) {
   // items needed: --only and their missing references, otherwise all
   const want = new Set(only ?? ITEMS.keys());
@@ -204,15 +204,15 @@ if (opt('pick')) {
     const m = M.items[id];
     const depChanged = it.refs.some((r) => will.has(r));
     let why = null;
-    if (redo.includes(id)) why = 'новая попытка';
-    else if (!existsSync(it.file)) why = 'новая';
-    else if (depChanged || m?.hash !== hashOf(it)) why = depChanged ? 'изменился референс' : 'изменилась постановка';
-    if (why && it.lock && why !== 'новая' && why !== 'новая попытка') { console.warn(`  🔒 ${id}: ${why}, но lock — оставляю как есть`); continue; }
+    if (redo.includes(id)) why = 'new attempt';
+    else if (!existsSync(it.file)) why = 'new';
+    else if (depChanged || m?.hash !== hashOf(it)) why = depChanged ? 'a reference changed' : 'the setup changed';
+    if (why && it.lock && why !== 'new' && why !== 'new attempt') { console.warn(`  🔒 ${id}: ${why}, but locked — leaving as is`); continue; }
     if (why) { plan.push({ id, why }); will.add(id); }
   }
-  if (!plan.length) console.log('все картинки на месте и актуальны');
+  if (!plan.length) console.log('all images are in place and up to date');
   else {
-    console.log(`план: ${plan.length} шт. ≈ $${(plan.length * PRICE).toFixed(2)} (${MODEL})`);
+    console.log(`plan: ${plan.length} images ≈ $${(plan.length * PRICE).toFixed(2)} (${MODEL})`);
     for (const p of plan) console.log(`  ${ITEMS.get(p.id).dir}/${p.id} — ${p.why}`);
   }
   if (!opt('dry') && plan.length) {
@@ -236,7 +236,7 @@ if (opt('pick')) {
               spent += r.cost ?? 0;
               M.items[id] = { file: rel(it.file), seed, hash: hashOf(it, seed), cost: r.cost, w: r.w, h: r.h, model: MODEL, refs: it.refs, at: new Date().toISOString() };
               save();
-              console.log(`  ✓ ${rel(it.file)} ${r.w}×${r.h}${r.cost !== null ? ` $${r.cost}` : ''} за ${Math.round((Date.now() - t0) / 1000)} с`);
+              console.log(`  ✓ ${rel(it.file)} ${r.w}×${r.h}${r.cost !== null ? ` $${r.cost}` : ''} in ${Math.round((Date.now() - t0) / 1000)} s`);
             } catch (e) {
               console.error(`  ✗ ${id}: ${e.message}`);
               fail.push(id);
@@ -247,10 +247,10 @@ if (opt('pick')) {
       return done.get(id);
     };
     await Promise.all(plan.map((p) => job(p.id)));
-    if (fail.length) { console.error(`не получилось: ${fail.join(', ')}`); process.exitCode = 1; }
+    if (fail.length) { console.error(`failed: ${fail.join(', ')}`); process.exitCode = 1; }
   }
 }
-if (spent) console.log(`потрачено: $${spent.toFixed(3)}`);
+if (spent) console.log(`spent: $${spent.toFixed(3)}`);
 save();
 
 // ---------------------------------------------------------------- gallery art/index.html
@@ -264,10 +264,10 @@ const card = (it) => {
   const takes = (TAKEN[it.id] ?? []).filter((x) => existsSync(takeFile(it.id, x)));
   return `<article id="${it.id}" class="${it.dir}${stale ? ' stale' : ''}">
   <a href="${it.dir}/${it.id}.jpg?v=${m?.hash ?? ''}"><img loading="lazy" src="${it.dir}/${it.id}.jpg?v=${m?.hash ?? ''}" alt="${esc(it.id)}"></a>
-  <h3>${esc(it.id)}${it.name ? ` <small>${esc(it.name)}</small>` : ''}${it.lock ? ' 🔒' : ''}${stale ? ' <b>устарел</b>' : ''}${has ? '' : ' <b>нет файла</b>'}</h3>
+  <h3>${esc(it.id)}${it.name ? ` <small>${esc(it.name)}</small>` : ''}${it.lock ? ' 🔒' : ''}${stale ? ' <b>stale</b>' : ''}${has ? '' : ' <b>no file</b>'}</h3>
   <p class="meta">${esc(it.aspect ?? '9:16')} · seed ${m?.seed ?? '—'}${m?.w ? ` · ${m.w}×${m.h}` : ''}${m?.cost ? ` · $${m.cost}` : ''}${it.refs.length ? ` · refs: ${it.refs.map((r) => `<a href="#${r}">${esc(r)}</a>`).join(', ')}` : ''}</p>
   ${it.n ? `<p class="note">${esc(it.n)}</p>` : ''}
-  <details><summary>промпт</summary><p>${esc(promptOf(it))}</p></details>
+  <details><summary>prompt</summary><p>${esc(promptOf(it))}</p></details>
   ${takes.length ? `<div class="takes">${takes.map((x) => `<a href="takes/${takeName(it.id, x)}" title="make art-pick ID=${it.id} SEED=${x.seed}"><img loading="lazy" src="takes/${takeName(it.id, x)}" alt=""><span>${x.seed}</span></a>`).join('')}</div>` : ''}
 </article>`;
 };
@@ -277,7 +277,7 @@ const section = (dir, title) => {
 };
 writeFileSync(join(ART, 'index.html'), `<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Картинки · ${esc(P.name)}</title>
+<title>Images · ${esc(P.name)}</title>
 <style>
   :root { color-scheme: light dark; --bg: #F4EDE4; --fg: #1F1F1F; --card: #fff; --muted: #7a7166; --warn: #E2583E; }
   @media (prefers-color-scheme: dark) { :root { --bg: #181614; --fg: #EEE7DE; --card: #24211E; --muted: #A39A8F; } }
@@ -299,10 +299,10 @@ writeFileSync(join(ART, 'index.html'), `<!doctype html>
   .takes img { width: 100%; border-radius: 6px; display: block; }
   a { color: inherit; }
 </style></head><body><main>
-<h1>Картинки ролика «${esc(P.name)}»</h1>
-<p class="sub">${esc(MODEL)} · ${Object.keys(M.items).length} шт. · всего потрачено $${total.toFixed(3)}. Перерисовать: <code>make art-redo ID=…</code>, варианты: <code>make art-takes ID=… N=3</code>, выбрать: <code>make art-pick ID=… SEED=…</code></p>
-${section('refs', 'Листы-референсы')}
-${section('shots', 'Кадры')}
+<h1>Images of the video "${esc(P.name)}"</h1>
+<p class="sub">${esc(MODEL)} · ${Object.keys(M.items).length} images · spent in total $${total.toFixed(3)}. Redraw: <code>make art-redo ID=…</code>, variants: <code>make art-takes ID=… N=3</code>, pick: <code>make art-pick ID=… SEED=…</code></p>
+${section('refs', 'Reference sheets')}
+${section('shots', 'Shots')}
 </main></body></html>
 `);
-console.log(`галерея → art/index.html`);
+console.log(`gallery → art/index.html`);

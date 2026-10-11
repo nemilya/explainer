@@ -14,9 +14,9 @@ export async function project(args = process.argv.slice(2)) {
   const i = args.indexOf('--project');
   const dir = resolve(i >= 0 ? args[i + 1] : process.cwd());
   if (!existsSync(join(dir, 'film.js'))) {
-    throw new Error(`нет film.js в ${dir}: запускайте из папки проекта (make …) или укажите --project <папка>`);
+    throw new Error(`no film.js in ${dir}: run from the project folder (make …) or pass --project <folder>`);
   }
-  if (!dir.startsWith(`${SERVE_ROOT}/`)) throw new Error(`проект должен лежать внутри ${SERVE_ROOT}`);
+  if (!dir.startsWith(`${SERVE_ROOT}/`)) throw new Error(`the project must be inside ${SERVE_ROOT}`);
   const cfgFile = join(dir, 'voice.config.json');
   const cfg = existsSync(cfgFile) ? JSON.parse(readFileSync(cfgFile, 'utf8')) : {};
   const name = cfg.name ?? (basename(dir) === 'video' ? basename(dirname(dir)) : basename(dir));

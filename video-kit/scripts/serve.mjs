@@ -47,4 +47,4 @@ createServer(async (req, res) => {
   } catch {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('404');
   }
-}).listen(PORT, '127.0.0.1', () => console.log(`http://127.0.0.1:${PORT}/${HERE && !HERE.startsWith('..') ? `${HERE}/` : ''}  (корень: ${ROOT})`));
+}).listen(PORT, '127.0.0.1', () => console.log(`http://127.0.0.1:${PORT}/${HERE && !HERE.startsWith('..') ? `${HERE}/` : ''}  (root: ${ROOT})`));

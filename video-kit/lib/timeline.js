@@ -38,7 +38,7 @@ function builder(durOf, { gap = GAP, pace = 1 } = {}) {
         t0, t1: t0 + dur, dur, text,
         at(part, off = 0) {
           const i = text.indexOf(part);
-          if (i < 0) throw new Error(`нет «${part}» в реплике: ${text}`);
+          if (i < 0) throw new Error(`no "${part}" in the line: ${text}`);
           return t0 + dur * (weight(text.slice(0, i)) / W) + off;
         },
       };

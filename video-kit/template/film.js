@@ -20,7 +20,7 @@ const wordsOf = (list) => list.map((w) => (w === '<br>' ? '<br>' : `<span class=
 
 export default function makeFilm(lang = LANGS[0]) {
   const T = TEXTS[lang];
-  if (!T) throw new Error(`нет текстов для языка «${lang}» (есть: ${LANGS.join(', ')})`);
+  if (!T) throw new Error(`no texts for language "${lang}" (available: ${LANGS.join(', ')})`);
   return {
     lang,
     title: T.ui.title,

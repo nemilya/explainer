@@ -156,7 +156,7 @@ export function synth(tl) {
   const fx = new Float32Array(n);
   tl.events.filter((e) => e.type === 'sfx').forEach((e, k) => {
     const f = FX[e.kind];
-    if (!f) throw new Error(`неизвестный звук: ${e.kind}`);
+    if (!f) throw new Error(`unknown sound: ${e.kind}`);
     f(fx, e.t, e.arg, 1000 + k);
   });
   return { music: mus, fx };

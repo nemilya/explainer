@@ -97,7 +97,7 @@ if (opt('cover')) {
   await page.waitForFunction(() => window.__cover?.ready, null, { timeout: 60000 });
   const file = join(OUT, `cover${LANG !== P.langs[0] ? `-${LANG}` : ''}.jpg`);
   await page.screenshot({ path: file, type: 'jpeg', quality: 92 });
-  console.log(`обложка → ${file.replace(`${ROOT}/`, '')}`);
+  console.log(`cover → ${file.replace(`${ROOT}/`, '')}`);
   await browser.close();
   server.close();
   process.exit(process.exitCode ?? 0);
@@ -117,11 +117,11 @@ if (stills) {
     await seek(t);
     await page.screenshot({ path: join(OUT, `still${SUFFIX}-${String(t).replace('.', '_')}.png`) });
   }
-  console.log(`${ts.length} кадров → ${rel(OUT)}/still${SUFFIX}-*.png (ролик ${duration.toFixed(1)} с)`);
+  console.log(`${ts.length} frames → ${rel(OUT)}/still${SUFFIX}-*.png (video ${duration.toFixed(1)} s)`);
 } else if (opt('poster')) {
   await seek(poster);
   await page.screenshot({ path: join(OUT, `poster${SUFFIX}.jpg`), type: 'jpeg', quality: 90 });
-  console.log(`обложка → ${rel(OUT)}/poster${SUFFIX}.jpg`);
+  console.log(`poster → ${rel(OUT)}/poster${SUFFIX}.jpg`);
 } else {
   const cdp = await page.context().newCDPSession(page);
   const grab = async () => Buffer.from((await cdp.send('Page.captureScreenshot', { format: 'jpeg', quality: 94, optimizeForSpeed: true })).data, 'base64');
@@ -147,7 +147,7 @@ if (stills) {
     ...inputs, ...outputs, '-t', (to - from).toFixed(3), ...videoCodec(VERT ? 1080 * 1920 : 1920 * 1080), '-pix_fmt', 'yuv420p', '-movflags', '+faststart', file],
   { stdio: ['pipe', 'inherit', 'inherit'] });
   lower(ff.pid);
-  console.log(`кодек: ${HW ? (process.platform === 'darwin' ? 'VideoToolbox (аппаратный)' : 'NVENC (аппаратный)') : `x264${process.env.THREADS ? `, потоков ${process.env.THREADS}` : ''}`}${NICE ? `, приоритет +${NICE}` : ''}${PAUSE ? `, пауза ${PAUSE} мс` : ''}`);
+  console.log(`codec: ${HW ? (process.platform === 'darwin' ? 'VideoToolbox (hardware)' : 'NVENC (hardware)') : `x264${process.env.THREADS ? `, ${process.env.THREADS} threads` : ''}`}${NICE ? `, priority +${NICE}` : ''}${PAUSE ? `, pause ${PAUSE} ms` : ''}`);
   const n = Math.ceil((to - from) * FPS);
   const t0 = Date.now();
   for (let i = 0; i <= n; i++) {
@@ -155,11 +155,11 @@ if (stills) {
     const buf = await grab();
     if (!ff.stdin.write(buf)) await new Promise((ok) => ff.stdin.once('drain', ok));
     if (PAUSE) await new Promise((ok) => setTimeout(ok, PAUSE));
-    if (i % (FPS * 5) === 0) process.stdout.write(`\r${Math.round((i / n) * 100)}%  (${Math.round((Date.now() - t0) / 1000)} с)`);
+    if (i % (FPS * 5) === 0) process.stdout.write(`\r${Math.round((i / n) * 100)}%  (${Math.round((Date.now() - t0) / 1000)} s)`);
   }
   ff.stdin.end();
   await new Promise((ok, fail) => ff.on('close', (c) => (c ? fail(new Error(`ffmpeg ${c}`)) : ok())));
-  console.log(`\r${n + 1} кадров${withAudio ? ' + звук' : ''}${withSubs ? ' + субтитры' : ''} за ${Math.round((Date.now() - t0) / 1000)} с → ${rel(file)}`);
+  console.log(`\r${n + 1} frames${withAudio ? ' + audio' : ''}${withSubs ? ' + subtitles' : ''} in ${Math.round((Date.now() - t0) / 1000)} s → ${rel(file)}`);
   if (!part) {
     await seek(poster);
     await page.screenshot({ path: join(OUT, `poster${SUFFIX}.jpg`), type: 'jpeg', quality: 90 });

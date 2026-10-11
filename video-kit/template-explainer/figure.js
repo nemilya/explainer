@@ -29,7 +29,7 @@ export function buildFigure() {
     k.lineSvg(k.planOutline(k.insetPlan(CAR, 3), 11, P, 4), { tone: 'faint' }),
   ].join('');
   const svg = k.figureSvg({
-    width: W, height: H, label: '{{TITLE}}: заготовка фигуры — каретка на направляющих.',
+    width: W, height: H, label: '{{TITLE}}: a stub figure — a carriage on rails.',
     body: [...base, `<g data-l="carriage">${carriage}</g>`],
   });
   const anchors = { machine: at([0, 0, 0]), carriage: at([0, 0, 11]), left: at([MODEL.from, 0, 3]), right: at([MODEL.to, 0, 3]) };

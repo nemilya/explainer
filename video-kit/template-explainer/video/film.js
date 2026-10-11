@@ -20,7 +20,7 @@ const G = { t: 0, pin: () => [0, 0], fig: null };
 const talk = (s, lines, first = {}) => lines.map(([who, text], i) => s.say(text, { ...(i === 0 ? first : {}), ...(who === 'he' ? { voice: 'he' } : {}) }));
 function cue(said, word) {
   for (const a of said) if (a.text.includes(word)) return a.at(word);
-  throw new Error(`нет «${word}» в репликах сцены`);
+  throw new Error(`no "${word}" in the scene's lines`);
 }
 
 /** camera: shots in the video's global time, from scene starts and their q */
@@ -37,7 +37,7 @@ function shots(tl, v) {
 
 export default function makeFilm(lang = LANGS[0]) {
   const T = TEXTS[lang];
-  if (!T) throw new Error(`нет текстов для языка «${lang}» (есть: ${LANGS.join(', ')})`);
+  if (!T) throw new Error(`no texts for language "${lang}" (available: ${LANGS.join(', ')})`);
   let fig = null;
   let cam = null;
   return {

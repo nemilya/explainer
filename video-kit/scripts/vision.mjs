@@ -18,7 +18,7 @@ const modelArg = flag('--model');
 const pos = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--local' && args[i - 1] !== '--model');
 const [image, question] = pos;
 if (!image || !question) {
-  console.error('usage: node vision.mjs <image.png|jpg> "<вопрос>" [--model M] [--local path/local.mk]');
+  console.error('usage: node vision.mjs <image.png|jpg> "<question>" [--model M] [--local path/local.mk]');
   process.exit(2);
 }
 
@@ -30,7 +30,7 @@ if ((!KEY || !PROXY) && existsSync(lmPath)) {
   KEY ||= lm.match(/OPENROUTER_API_KEY=(.+)/)?.[1]?.trim() ?? '';
   PROXY ||= lm.match(/OPENROUTER_PROXY=(.+)/)?.[1]?.trim() ?? '';
 }
-if (!KEY) { console.error('нет ключа: задай OPENROUTER_API_KEY или local.mk'); process.exit(3); }
+if (!KEY) { console.error('no key: set OPENROUTER_API_KEY or local.mk'); process.exit(3); }
 
 const MODEL = modelArg || process.env.CHECK_MODEL || 'anthropic/claude-haiku-5.5';
 const mime = /\.jpe?g$/i.test(image) ? 'image/jpeg' : 'image/png';

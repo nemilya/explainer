@@ -32,7 +32,7 @@ const NICE = Number(process.env.NICE ?? 10);
 const HW = process.env.ENC === 'hw';
 const THREADS = process.env.THREADS ? ['-threads', process.env.THREADS] : [];
 
-const mb = (f) => `${(statSync(f).size / 2 ** 20).toFixed(1)} МБ`;
+const mb = (f) => `${(statSync(f).size / 2 ** 20).toFixed(1)} MB`;
 const duration = (f) => Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString());
 const rel = (p) => p.replace(`${P.dir}/`, '');
 
@@ -50,9 +50,9 @@ function ffmpeg(argv, dur, label) {
       if (!us || !dur) return;
       const k = Math.min(1, us / 1e6 / dur);
       const left = k > 0.02 ? Math.round(((Date.now() - t0) / 1000) * (1 / k - 1)) : null;
-      process.stdout.write(`\r${label}: ${Math.round(k * 100)}%${left !== null ? `, осталось ~${left} с` : ''}   `);
+      process.stdout.write(`\r${label}: ${Math.round(k * 100)}%${left !== null ? `, ~${left} s left` : ''}   `);
     });
-    p.on('close', (code) => { process.stdout.write('\n'); code ? fail(new Error(`ffmpeg: код ${code}`)) : done(); });
+    p.on('close', (code) => { process.stdout.write('\n'); code ? fail(new Error(`ffmpeg: exit code ${code}`)) : done(); });
   });
 }
 
@@ -63,7 +63,7 @@ const sources = (existsSync(OUT) ? readdirSync(OUT) : [])
     const lang = f.slice(P.name.length).match(/^-([a-z]{2})(?=-|\.)/)?.[1] ?? P.langs[0];
     return !ONLY || lang === ONLY;
   });
-if (!sources.length) { console.error(`нет готовых MP4 в ${rel(OUT)}/ — сначала make video / video-cc`); process.exit(1); }
+if (!sources.length) { console.error(`no finished MP4s in ${rel(OUT)}/ — run make video / video-cc first`); process.exit(1); }
 mkdirSync(WEB, { recursive: true });
 
 for (const f of sources) {

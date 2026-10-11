@@ -33,7 +33,7 @@ function talk(s, lines, first = {}) {
 /** the moment of a cue word in any of the scene's lines */
 function cue(said, word, off = 0) {
   for (const a of said) if (a.text.includes(word)) return a.at(word, off);
-  throw new Error(`нет «${word}» в репликах сцены`);
+  throw new Error(`no "${word}" in the scene's lines`);
 }
 
 // ---------------------------------------------------------------- the machine's schedule from the lines
@@ -157,7 +157,7 @@ function drawChart(ctx, A) {
 // ---------------------------------------------------------------- film
 export default function makeFilm(lang = LANGS[0]) {
   const T = TEXTS[lang];
-  if (!T) throw new Error(`нет текстов для языка «${lang}» (есть: ${LANGS.join(', ')})`);
+  if (!T) throw new Error(`no texts for language "${lang}" (available: ${LANGS.join(', ')})`);
   let fig = null;
   let planned = null;
   let cam = null;
@@ -370,10 +370,10 @@ export async function debug(lang = 'ru') {
   const { compile } = await import('../../../video-kit/lib/timeline.js');
   const tl = compile(makeFilm(lang));
   const { sim, marks } = plan(tl);
-  console.log('длительность', tl.duration.toFixed(1), 'сцены', tl.scenes.map((s) => `${s.id}@${s.start.toFixed(1)}`).join(' '));
-  console.log('отметки', JSON.stringify(marks), 'карточка едет', travel().toFixed(2), 'с');
+  console.log('duration', tl.duration.toFixed(1), 'scenes', tl.scenes.map((s) => `${s.id}@${s.start.toFixed(1)}`).join(' '));
+  console.log('marks', JSON.stringify(marks), 'card travel', travel().toFixed(2), 's');
   console.log(sim.reqs.map((r) => `${r.t.toFixed(1)}${r.ok ? '✓' : '✗'}`).join(' '));
-  for (const s of tl.scenes) console.log(s.id.padEnd(8), 'жетонов в начале:', sim.tokensAt(s.start), ' q:', JSON.stringify(Object.fromEntries(Object.entries(s.q).map(([k, x]) => [k, Math.round(x * 10) / 10]))));
-  console.log('всплеск:', JSON.stringify(sim.reqs.filter((r) => r.t >= marks.burst[0] - 0.01 && r.t <= marks.burst[1] + 0.01).map((r) => r.ok)));
+  for (const s of tl.scenes) console.log(s.id.padEnd(8), 'tokens at start:', sim.tokensAt(s.start), ' q:', JSON.stringify(Object.fromEntries(Object.entries(s.q).map(([k, x]) => [k, Math.round(x * 10) / 10]))));
+  console.log('burst:', JSON.stringify(sim.reqs.filter((r) => r.t >= marks.burst[0] - 0.01 && r.t <= marks.burst[1] + 0.01).map((r) => r.ok)));
   return lerp(0, 0, 0);
 }

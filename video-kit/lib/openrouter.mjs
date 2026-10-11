@@ -44,7 +44,7 @@ async function send(url, headers, json, form = null, timeout = 180) {
 /** POST {endpoint}{path}: a JSON body or multipart (form: { field: string | { file } }) */
 export async function post(path, body, { form = null, endpoint = ENDPOINT, timeout = 180 } = {}) {
   const key = process.env.OPENROUTER_API_KEY;
-  if (!key) throw new Error('нет OPENROUTER_API_KEY в окружении (video-kit/README.md)');
+  if (!key) throw new Error('no OPENROUTER_API_KEY in the environment (video-kit/README.md)');
   const headers = { authorization: `Bearer ${key}`, 'x-title': 'Infographics video' };
   if (!form) headers['content-type'] = 'application/json';
   let res;
@@ -56,7 +56,7 @@ export async function post(path, body, { form = null, endpoint = ENDPOINT, timeo
       res = { status: 599, type: '', body: Buffer.from(String(e.message)) };
     }
     if (!(res.status === 429 || res.status >= 500) || attempt >= 4) break;
-    console.warn(`  … ${path}: HTTP ${res.status}, повтор через ${5 * attempt} с`);
+    console.warn(`  … ${path}: HTTP ${res.status}, retrying in ${5 * attempt} s`);
     await new Promise((ok) => setTimeout(ok, 5000 * attempt));
   }
   if (res.status < 200 || res.status >= 300) throw new Error(`${path}: HTTP ${res.status} ${res.body.toString('utf8').slice(0, 300)}`);

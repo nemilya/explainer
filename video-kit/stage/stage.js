@@ -132,14 +132,14 @@ let shown = new Set();
 
 function drawScene(i, t) {
   const sc = film.scenes[i];
-  try { sc.draw?.(t - SC[i].start, SC[i].q, ctxs[i]); } catch (e) { console.error(`сцена ${sc.id} @${t.toFixed(2)}: ${e.stack}`); }
+  try { sc.draw?.(t - SC[i].start, SC[i].q, ctxs[i]); } catch (e) { console.error(`scene ${sc.id} @${t.toFixed(2)}: ${e.stack}`); }
 }
 
 const TLX = { scenes: SC, events: TL.events, duration: TL.duration };
 function frame(t) {
   t = clamp(t, 0, TL.duration);
   for (const { ly, ctx } of LAYERS) {
-    try { ly.draw?.(t, TLX, ctx); } catch (e) { console.error(`слой ${ly.id} @${t.toFixed(2)}: ${e.stack}`); }
+    try { ly.draw?.(t, TLX, ctx); } catch (e) { console.error(`layer ${ly.id} @${t.toFixed(2)}: ${e.stack}`); }
   }
   if (speakersEl) {
     const on = CUES.find((c) => t >= c.t - 0.05 && t < c.t + c.dur + 0.1);
@@ -218,7 +218,7 @@ function frame(t) {
 
 // ---------------------------------------------------------------- start
 // scene images (AI shots art/…) must be decoded before the first frame: rendering is frame by frame
-await Promise.all([...document.images].map((img) => img.decode().catch(() => console.error(`нет картинки: ${img.getAttribute('src')}`))));
+await Promise.all([...document.images].map((img) => img.decode().catch(() => console.error(`missing image: ${img.getAttribute('src')}`))));
 // all fonts (@font-face of the engine and the project) — up front: the browser won't load them for hidden scenes
 await Promise.all([...document.fonts].map((f) => f.load().catch(() => {})));
 await document.fonts.ready;
@@ -244,6 +244,21 @@ function player() {
   const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/></svg>';
   const fmt = (x) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, '0')}`;
   audio.src = audio.dataset.src.replace('{lang}', LANG);
+  // player tooltips: English by default, translated through ui.player in text/<lang>.js
+  const L = {
+    play: 'Play / pause (Space)', prev: 'Previous chapter (P)', next: 'Next chapter (N)', seek: 'Seek',
+    cc: 'Subtitles (C)', mute: 'Sound (M)', fs: 'Full screen (F)', horizontal: 'Horizontal version', vertical: 'Vertical version',
+    ...film.ui.player,
+  };
+  const label = (id, text) => { const el = $(id); el.title = text; el.setAttribute('aria-label', text); };
+  label('play', L.play);
+  label('prev', L.prev);
+  label('next', L.next);
+  $('track').setAttribute('aria-label', L.seek);
+  label('cc-btn', L.cc);
+  label('mute', L.mute);
+  label('fs', L.fs);
+  $('menu-btn').title = film.ui.menu;
   $('watch').textContent = film.ui.watch;
   $('menu-btn').textContent = film.ui.menu;
   const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { /* private mode */ } return null; };
@@ -322,7 +337,7 @@ function player() {
     else { location.hash = u.hash; location.reload(); }
   };
   $('fmt').textContent = V ? '16:9' : '9:16';
-  $('fmt').title = V ? 'Horizontal / Горизонтальная версия' : 'Vertical / Вертикальная версия';
+  $('fmt').title = V ? L.horizontal : L.vertical;
   $('fmt').onclick = () => reopen({ v: !V });
   $('fmt').hidden = FORMATS.length < 2;
   const other = LANGS[(LANGS.indexOf(LANG) + 1) % LANGS.length];

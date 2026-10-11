@@ -41,7 +41,7 @@ const CFG = { ...BASE, ...OWN, verify: { ...BASE.verify, ...OWN.verify }, voices
 /** voice settings of a line: the main voice or a role from voices */
 function voiceOf(role) {
   if (!role) return CFG;
-  if (!CFG.voices[role]) throw new Error(`нет голоса «${role}» в voices (voice.config.json)`);
+  if (!CFG.voices[role]) throw new Error(`no voice "${role}" in voices (voice.config.json)`);
   return { ...CFG, ...CFG.voices[role] };
 }
 const film = P.makeFilm(LANG);
@@ -120,17 +120,17 @@ for (const [text, role] of said) {
   const file = join(CLIPS, `${hash}.wav`);
   const check = file.replace(/\.wav$/, '.check.json');
   if (REDO && text.includes(REDO)) { rmSync(file, { force: true }); rmSync(check, { force: true }); }
-  if (!existsSync(file) && MIX_ONLY) throw new Error(`нет реплики в кеше (запустите без --mix): ${text}`);
+  if (!existsSync(file) && MIX_ONLY) throw new Error(`line not in the cache (run without --mix): ${text}`);
   for (let attempt = 1; !MIX_ONLY; attempt++) {
     if (!existsSync(file)) {
-      console.log(`tts${attempt > 1 ? ` (попытка ${attempt})` : ''}${role ? ` [${role}]` : ''}: ${text}`);
+      console.log(`tts${attempt > 1 ? ` (attempt ${attempt})` : ''}${role ? ` [${role}]` : ''}: ${text}`);
       await tts(text, file, V);
     }
     if (!CFG.verify.enabled || existsSync(check)) break;
     const v = await verify(file, text);
     if (v.ok) { writeFileSync(check, `${JSON.stringify(v, null, 2)}\n`); break; }
-    console.warn(`  ⚠ распознано «${v.transcript}» (совпадение ${v.score}${v.tail ? '' : ', оборван конец'})`);
-    if (attempt >= CFG.verify.retries) { writeFileSync(check, `${JSON.stringify(v, null, 2)}\n`); console.warn('  ⚠ оставляю последнюю попытку'); break; }
+    console.warn(`  ⚠ transcribed "${v.transcript}" (match ${v.score}${v.tail ? '' : ', the ending is cut off'})`);
+    if (attempt >= CFG.verify.retries) { writeFileSync(check, `${JSON.stringify(v, null, 2)}\n`); console.warn('  ⚠ keeping the last attempt'); break; }
     rmSync(file);
   }
   lines[text] = { dur: Math.round(probe(file) * 100) / 100, clip: `clips/${hash}.wav`, ...(role ? { voice: role } : {}) };
@@ -164,4 +164,4 @@ ff(...inputs, '-i', join(CLIPS, 'music.wav'), '-i', join(CLIPS, 'fx.wav'), '-fil
 const ts = (x) => new Date(Math.round(x * 1000)).toISOString().slice(11, 23);
 writeFileSync(join(DIR, `${LANG}.vtt`), `WEBVTT\n\n${cues.map((c, i) => `${i + 1}\n${ts(c.t)} --> ${ts(c.t + c.dur)}\n${c.text}\n`).join('\n')}`);
 writeFileSync(join(DIR, `${LANG}.json`), `${JSON.stringify({ ...manifest, duration: Math.round(tl.duration * 100) / 100 }, null, 2)}\n`);
-console.log(`${n} реплик, ролик ${tl.duration.toFixed(1)} с → ${rel(track)}, ${rel(join(DIR, `${LANG}.vtt`))}`);
+console.log(`${n} lines, video ${tl.duration.toFixed(1)} s → ${rel(track)}, ${rel(join(DIR, `${LANG}.vtt`))}`);

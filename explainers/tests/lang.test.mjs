@@ -28,17 +28,17 @@ function run({ page = 'en', saved = null, langs = ['en-US'], tz = 'Europe/Berlin
 const { exLang } = run();
 const pick = (o) => exLang.pick({ available: AVAIL, ...o });
 
-test('порядок: явный выбор → язык браузера → страна по поясу → en', () => {
-  assert.equal(pick({ saved: 'en', langs: ['ru-RU'], tz: 'Europe/Moscow' }), 'en', 'явный выбор важнее всего');
-  assert.equal(pick({ saved: 'xx', langs: ['ru-RU'] }), 'ru', 'неизвестный сохранённый код игнорируется');
-  assert.equal(pick({ langs: ['ru-RU'], tz: 'Europe/Berlin' }), 'ru', 'русскоязычный за границей');
-  assert.equal(pick({ langs: ['en-US'], tz: 'Europe/Moscow' }), 'ru', 'английский браузер в России');
+test('order: explicit choice → browser language → country by time zone → en', () => {
+  assert.equal(pick({ saved: 'en', langs: ['ru-RU'], tz: 'Europe/Moscow' }), 'en', 'an explicit choice wins');
+  assert.equal(pick({ saved: 'xx', langs: ['ru-RU'] }), 'ru', 'an unknown saved code is ignored');
+  assert.equal(pick({ langs: ['ru-RU'], tz: 'Europe/Berlin' }), 'ru', 'a Russian speaker abroad');
+  assert.equal(pick({ langs: ['en-US'], tz: 'Europe/Moscow' }), 'ru', 'an English browser in Russia');
   assert.equal(pick({ langs: ['de-DE'], tz: 'Europe/Berlin' }), 'en');
   assert.equal(pick({ langs: ['uk-UA'], tz: 'Europe/Kyiv' }), 'en');
   assert.equal(pick({ langs: [], tz: '' }), 'en');
 });
 
-test('страны: Россия, Беларусь, Казахстан → ru; пояса существуют', () => {
+test('countries: Russia, Belarus, Kazakhstan → ru; the zones exist', () => {
   for (const tz of ['Europe/Moscow', 'Europe/Kaliningrad', 'Asia/Yekaterinburg', 'Asia/Vladivostok', 'Europe/Minsk', 'Asia/Almaty']) assert.equal(pick({ tz }), 'ru', tz);
   for (const tz of ['Europe/Riga', 'America/New_York', 'Asia/Tashkent']) assert.equal(pick({ tz }), 'en', tz);
   for (const [tz, lang] of Object.entries(exLang.TZ)) {
@@ -47,20 +47,20 @@ test('страны: Россия, Беларусь, Казахстан → ru; �
   }
 });
 
-test('с основной страницы уводим на свой язык, сохраняя ?query и #якорь', () => {
+test('the main page redirects to the reader\'s language, keeping ?query and #anchor', () => {
   assert.equal(run({ tz: 'Europe/Moscow' }).to, 'ru/');
   assert.equal(run({ langs: ['ru'], search: '?utm=tg', hash: '#video' }).to, 'ru/?utm=tg#video');
-  assert.equal(run({ saved: 'ru' }).to, 'ru/', 'выбирал ru раньше → основная открывает ru');
+  assert.equal(run({ saved: 'ru' }).to, 'ru/', 'chose ru before → the main page opens ru');
   assert.equal(run({ tz: 'Europe/Berlin' }).to, null);
-  assert.equal(run({ saved: 'en', tz: 'Europe/Moscow' }).to, null, 'явно выбрал en');
+  assert.equal(run({ saved: 'en', tz: 'Europe/Moscow' }).to, null, 'explicitly chose en');
 });
 
-test('не уводим: ботов, переходы внутри сайта, с /ru/', () => {
+test('no redirect: bots, navigation inside the site, from /ru/', () => {
   for (const ua of ['Mozilla/5.0 (compatible; Googlebot/2.1)', 'Mozilla/5.0 (compatible; YandexBot/3.0)', 'TelegramBot (like TwitterBot)']) {
     assert.equal(run({ tz: 'Europe/Moscow', ua }).to, null, ua);
   }
   assert.equal(run({ tz: 'Europe/Moscow', referrer: 'https://x.example/explainers/' }).to, null);
   assert.equal(run({ tz: 'Europe/Moscow', referrer: 'https://ya.ru/' }).to, 'ru/');
-  assert.equal(run({ page: 'ru', tz: 'Europe/Berlin' }).to, null, 'прямая ссылка на /ru/');
-  assert.equal(run({ page: 'ru', tz: 'Europe/Berlin' }).exLang.current, 'en', 'выбор вычислен — по нему плашка');
+  assert.equal(run({ page: 'ru', tz: 'Europe/Berlin' }).to, null, 'a direct link to /ru/');
+  assert.equal(run({ page: 'ru', tz: 'Europe/Berlin' }).exLang.current, 'en', 'the choice is computed — the banner uses it');
 });
