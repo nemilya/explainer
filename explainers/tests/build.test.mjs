@@ -1,4 +1,4 @@
-/* Сборка страниц (explainers/build.mjs): ключи словарей, ссылки между языками, собранное актуально. */
+/* Page build (explainers/build.mjs): dictionary keys, links between languages, built pages are up to date. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';

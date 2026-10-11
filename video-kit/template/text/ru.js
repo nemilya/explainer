@@ -1,5 +1,5 @@
-/* Тексты ролика по-русски: say — реплики голоса, cue — слова-якоря (должны дословно встречаться
- * в реплике: на них срабатывает анимация), остальное — надписи в кадре (инлайн-HTML можно). */
+/* Russian texts: say — voice lines, cue — cue words (must appear verbatim
+ * in a line: the animation fires on them), the rest — captions in the frame (inline HTML allowed). */
 export default {
   ui: {
     title: 'Заголовок ролика',

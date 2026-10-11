@@ -1,11 +1,11 @@
-/* {{TITLE}} — модель: единственный источник правды для фигуры, ролика и лендинга.
- * Чистые функции времени: state(t) не помнит прошлых кадров (рендер ролика — покадровый, с перемоткой).
- * Замените заготовку («каретка ездит между упорами») настоящей моделью из QUESTIONS.md. */
+/* {{TITLE}} — the model: the single source of truth for the figure, the video and the landing page.
+ * Pure functions of time: state(t) remembers no past frames (the video renders frame by frame, with seeking).
+ * Replace the stub ("a carriage moving between stops") with the real model from QUESTIONS.md. */
 export const MODEL = { from: -60, to: 60, period: 6 };
 
 const smooth = (k) => k * k * (3 - 2 * k);
 
-/** положение каретки в момент t: туда-обратно за period секунд */
+/** carriage position at moment t: there and back over `period` seconds */
 export function state(t, m = MODEL) {
   const phase = ((t % m.period) + m.period) % m.period / m.period;
   const k = phase < 0.5 ? smooth(phase * 2) : smooth(2 - phase * 2);

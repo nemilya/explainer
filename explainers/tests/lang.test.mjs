@@ -1,4 +1,4 @@
-/* Автовыбор языка (explainers/lang.js): порядок выбора и когда уводим с основной страницы. */
+/* Language auto-choice (explainers/lang.js): the choice order and when the main page redirects. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -9,7 +9,7 @@ const SRC = fs.readFileSync(path.resolve(import.meta.dirname, '..', 'lang.js'), 
 const AVAIL = ['en', 'ru'];
 const HREF = { en: './', ru: 'ru/' };
 
-/** выполнить lang.js в «браузере» из заглушек → куда увели (или null) и exLang */
+/** run lang.js in a stubbed "browser" → where it redirected (or null) and exLang */
 function run({ page = 'en', saved = null, langs = ['en-US'], tz = 'Europe/Berlin', ua = 'Mozilla/5.0',
   referrer = '', origin = 'https://x.example', search = '', hash = '' } = {}) {
   let to = null;

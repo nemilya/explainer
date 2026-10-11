@@ -1,8 +1,8 @@
-/* {{NAME}} — библия ИИ-картинок ролика ({{KIT}}/AI-ART.md). make art DRY=1 — план и цена, make art — генерация.
+/* {{NAME}} — the AI-image bible of the video ({{KIT}}/AI-ART.md). make art DRY=1 — plan and price, make art — generate.
  *
- * refs — листы-референсы (герои, места): генерируются первыми, их стоит одобрить глазами (art/index.html).
- * shots — кадры сцен: к каждому прикладываются листы из его refs, легенда «Image 1 — …» пишется сама.
- * Текста на картинках нет: надписи и цифры — HTML поверх (film.js: shot('id'), ken()). */
+ * refs — reference sheets (characters, places): generated first, worth approving by eye (art/index.html).
+ * shots — scene shots: each gets the sheets from its refs attached, the legend "Image 1 — …" is written automatically.
+ * No text on the images: captions and numbers are HTML on top (film.js: shot('id'), ken()). */
 import { character, place } from '{{KIT}}/lib/art.js';
 
 const STYLE = 'cute 3D clay / plasticine look, soft warm studio lighting, pastel palette, kind and playful. '

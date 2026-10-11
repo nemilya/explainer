@@ -1,13 +1,13 @@
-/* Проект ролика для скриптов video-kit: папка с film.js (по умолчанию — текущая, или --project <папка>).
+/* A video project for the video-kit scripts: the folder with film.js (the current one by default, or --project <folder>).
  *
- * Имя роликов (out/<имя>[-en][-vertical][-captions].mp4) — поле "name" в voice.config.json,
- * иначе по папке: <инфографика>/video → <инфографика>. Языки — LANGS из film.js, первый — основной. */
+ * Video file name (out/<name>[-<lang>][-vertical][-captions].mp4) — the "name" field in voice.config.json,
+ * otherwise from the folder: <topic>/video → <topic>. Languages — LANGS from film.js, the first is the main one. */
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export const KIT = resolve(import.meta.dirname, '..');
-/** корень, который отдаёт локальный сервер: папка над video-kit (корень репозитория) */
+/** the root served by the local server: the folder above video-kit (the repo root) */
 export const SERVE_ROOT = resolve(KIT, '..');
 
 export async function project(args = process.argv.slice(2)) {

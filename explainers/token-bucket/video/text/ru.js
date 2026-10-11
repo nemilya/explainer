@@ -1,7 +1,7 @@
-/* Тексты ролика по-русски. say — реплики: [кто, текст], кто: 'she' — Вера (объясняет, основной голос),
- * 'he' — Макс (спрашивает, голос he в voice.config.json). cue — слова-якоря: должны дословно стоять
- * в реплике, на них срабатывает анимация. Числа и буквы голосу пишем словами («бэ», «четыреста
- * двадцать девять»), на экране — цифрами. Остальное — надписи в кадре. */
+/* Russian video texts. say — lines: [who, text], who: 'she' — Vera (explains, the main voice),
+ * 'he' — Max (asks, the he voice in voice.config.json). cue — cue words: must appear verbatim
+ * in the line, the animation fires on them. Numbers and letters for the voice are spelled out in words
+ * («бэ», «четыреста двадцать девять»), on screen — in digits. The rest — captions in the frame. */
 export default {
   ui: {
     title: 'Почему API отвечает 429? — Token bucket',

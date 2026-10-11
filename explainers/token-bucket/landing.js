@@ -1,10 +1,10 @@
-/* Лендинг «Why does an API answer 429?»: живая машина (figure.js + model.js), ролик и язык.
- * Страница собрана explainers/build.mjs из landing/index.html и landing/i18n/<code>.mjs: тексты уже
- * в HTML, строки для скрипта — в <script type="application/json" id="i18n">. Один скрипт на все языки.
+/* Landing page "Why does an API answer 429?": the live machine (figure.js + model.js), the video and the language.
+ * The page is built by explainers/build.mjs from landing/index.html and landing/i18n/<code>.mjs: the texts are already
+ * in the HTML, strings for the script — in <script type="application/json" id="i18n">. One script for every language.
  *
- * Машина — та же модель, что в ролике, но с живым расписанием: «запрос» ставит карточку на ленту,
- * «всплеск» — десять подряд, переключатель — период пополнения. Пока никто не трогает, идёт тур:
- * ровный поток и иногда всплеск. */
+ * The machine is the same model as in the video, but with a live schedule: "request" puts a card on the belt,
+ * "burst" — ten in a row, the switch — the refill period. While nobody touches it, a tour runs:
+ * a steady flow and now and then a burst. */
 import { buildFigure, mountFigure } from './figure.js';
 import { MACHINE, simulate, travel, view } from './model.js';
 import { suggestLanguage } from '../suggest.js';
@@ -13,10 +13,10 @@ import { videoSection } from '../video.js';
 const T = JSON.parse(document.getElementById('i18n')?.textContent || '{}');
 const fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]);
 
-// ---------------------------------------------------------------- язык: запомнить выбор, плашка «есть на …»
+// ---------------------------------------------------------------- language: remember the choice, the "available in …" banner
 suggestLanguage();
 
-// ---------------------------------------------------------------- живая машина
+// ---------------------------------------------------------------- live machine
 const FIG = buildFigure({ label: T.figLabel });
 const stage = document.querySelector('.iso-stage');
 stage.innerHTML = FIG.svg;
@@ -45,7 +45,7 @@ function send(at = clock) {
 const burst = () => { for (let i = 0; i < 10; i++) send(); };
 function setPeriod(p) {
   period = p;
-  // монеты, уже выпущенные из бункера (до приземления < feed), оставляем; дальше — новый темп
+  // coins already released from the hopper (landing < feed away) stay; after that — the new tempo
   ticks = ticks.filter((t) => t <= clock + MACHINE.feed);
   nextTick = (ticks.length ? ticks[ticks.length - 1] : clock) + period;
   document.querySelectorAll('#rate button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.p) === p)));
@@ -66,7 +66,7 @@ stage.addEventListener('keydown', (e) => {
 });
 stage.addEventListener('click', () => { takeOver(); send(); stage.focus(); });
 
-// тур: ровный поток раз в 2,6 с, на 18-й секунде — всплеск, цикл 30 с
+// tour: a steady flow every 2.6 s, a burst at second 18, a 30 s cycle
 function tour(dt) {
   const before = tourClock;
   tourClock += dt;
@@ -86,12 +86,12 @@ function tick(now) {
   if (touring) tour(dt);
   while (nextTick <= clock + 3) { ticks.push(Math.round(nextTick * 1000) / 1000); nextTick += period; }
   let sim = simulate({ start: base.tokens, ticks: ticks.filter((t) => t > base.t), arrivals: arrivals.filter((t) => t > base.t) });
-  // счётчики — по решениям, которые уже случились
+  // counters — from decisions that have already happened
   for (const r of sim.reqs) {
     const key = `${r.t}`;
     if (r.t <= clock && !counted.has(key)) { counted.add(key); r.ok ? totals.ok++ : totals.no++; }
   }
-  // раз в 10 с забываем старое: состояние ведра на момент clock − 6 становится началом
+  // every 10 s forget the old: the bucket state at clock − 6 becomes the start
   if (clock - base.t > 16) {
     const t0 = clock - 6;
     base = { t: t0, tokens: sim.tokensAt(t0) };
@@ -114,5 +114,5 @@ new IntersectionObserver((entries) => {
 }, { rootMargin: '120px 0px' }).observe(stage);
 if (still.matches) touring = false;
 
-// ---------------------------------------------------------------- ролик: 16:9 / 9:16 и главы
+// ---------------------------------------------------------------- video: 16:9 / 9:16 and chapters
 videoSection();

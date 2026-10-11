@@ -1,6 +1,6 @@
-/* Запросы к OpenRouter для скриптов (озвучка — scripts/voice.mjs, картинки — scripts/art.mjs).
- * Ключ — только из окружения OPENROUTER_API_KEY, никуда не пишется. Прокси — OPENROUTER_PROXY
- * (socks5h://…, http://…; тогда запросы идут через curl). Повтор при 429 и 5xx — до 4 попыток. */
+/* OpenRouter requests for the scripts (voice-over — scripts/voice.mjs, images — scripts/art.mjs).
+ * Key — only from OPENROUTER_API_KEY in the environment, never written anywhere. Proxy — OPENROUTER_PROXY
+ * (socks5h://…, http://…; requests then go through curl). Retries on 429 and 5xx — up to 4 attempts. */
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -9,7 +9,7 @@ import { basename, join } from 'node:path';
 export const ENDPOINT = 'https://openrouter.ai/api/v1';
 const PROXY = process.env.OPENROUTER_PROXY || '';
 
-/** POST напрямую или через curl с прокси → { status, type, body: Buffer } */
+/** POST directly or through curl with a proxy → { status, type, body: Buffer } */
 async function send(url, headers, json, form = null, timeout = 180) {
   if (!PROXY) {
     let body = json;
@@ -41,7 +41,7 @@ async function send(url, headers, json, form = null, timeout = 180) {
   }
 }
 
-/** POST {endpoint}{path}: JSON-тело или multipart (form: { поле: строка | { file } }) */
+/** POST {endpoint}{path}: a JSON body or multipart (form: { field: string | { file } }) */
 export async function post(path, body, { form = null, endpoint = ENDPOINT, timeout = 180 } = {}) {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) throw new Error('нет OPENROUTER_API_KEY в окружении (video-kit/README.md)');
@@ -52,7 +52,7 @@ export async function post(path, body, { form = null, endpoint = ENDPOINT, timeo
     try {
       res = await send(`${endpoint}${path}`, headers, form ? '' : JSON.stringify(body), form, timeout);
     } catch (e) {
-      // обрыв соединения или таймаут — как 5xx
+      // a dropped connection or a timeout — treated as 5xx
       res = { status: 599, type: '', body: Buffer.from(String(e.message)) };
     }
     if (!(res.status === 429 || res.status >= 500) || attempt >= 4) break;

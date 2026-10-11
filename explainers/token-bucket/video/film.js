@@ -1,13 +1,13 @@
-/* «Почему API отвечает 429?» — ролик-объяснение token bucket (сценарий — SCENARIO.md).
+/* "Why does an API answer 429?" — a token bucket explainer video (the script — SCENARIO.md).
  *
- * Под сценами — постоянный слой с фигурой anatomy (../figure.js): машина работает без остановок весь
- * ролик, её расписание (когда падают монеты, когда приходят запросы) строится по репликам — запросы
- * приезжают к словам, о которых говорят. Состояние машины в каждый момент — из модели ../model.js
- * (simulate → view), поэтому числа в кадре честные. Камера (video-kit/lib/figure.js) наезжает на
- * детали; сцены поверх — только заголовки, подписи-булавки, счётчики и график.
+ * Under the scenes is a persistent layer with the anatomy figure (../figure.js): the machine runs non-stop through the
+ * whole video, and its schedule (when coins drop, when requests arrive) is built from the lines — requests
+ * arrive on the words that talk about them. The machine's state at every moment comes from the model ../model.js
+ * (simulate → view), so the numbers in the frame are honest. The camera (video-kit/lib/figure.js) moves onto
+ * parts; the scenes on top add only titles, pin labels, counters and a chart.
  *
- * Диалог: she — Вера (основной голос), he — Макс (voices.he в voice.config.json).
- * Тексты — text/<язык>.js, стили — scenes.css, движок — ../../../video-kit. */
+ * Dialogue: she — Vera (the main voice), he — Max (voices.he in voice.config.json).
+ * Texts — text/<lang>.js, styles — scenes.css, engine — ../../../video-kit. */
 import { E, css, lerp, pop, rise, seg } from '../../../video-kit/lib/motion.js';
 import { camera, pinLabel, place, shown } from '../../../video-kit/lib/figure.js';
 import { buildFigure, mountFigure } from '../figure.js';
@@ -15,28 +15,28 @@ import { MACHINE, simulate, ticksBetween, travel, view } from '../model.js';
 import en from './text/en.js';
 import ru from './text/ru.js';
 
-export const TEXTS = { en, ru }; // первый язык — основной (английский)
+export const TEXTS = { en, ru }; // the first language is the main one (English)
 export const LANGS = Object.keys(TEXTS);
 
 const FIG = buildFigure();
 const SIZE = { h: [1920, 1080], v: [1080, 1920] };
-// где стоит фигура при zoom 1 (пиксели кадра)
+// where the figure stands at zoom 1 (frame pixels)
 const BOX = { h: { x: 40, y: 50, w: 1840, h: 980 }, v: { x: 30, y: 330, w: 1020, h: 760 } };
 
-/** общее состояние кадра: слой фигуры пишет, сцены читают (слои рисуются раньше сцен) */
+/** shared frame state: the figure layer writes, the scenes read (layers are drawn before scenes) */
 const G = { t: 0, pin: () => [0, 0], sim: null, marks: {} };
 
-// ---------------------------------------------------------------- реплики
+// ---------------------------------------------------------------- lines
 function talk(s, lines, first = {}) {
   return lines.map(([who, text], i) => s.say(text, { ...(i === 0 ? first : {}), ...(who === 'he' ? { voice: 'he' } : {}) }));
 }
-/** момент слова-якоря в любой из реплик сцены */
+/** the moment of a cue word in any of the scene's lines */
 function cue(said, word, off = 0) {
   for (const a of said) if (a.text.includes(word)) return a.at(word, off);
   throw new Error(`нет «${word}» в репликах сцены`);
 }
 
-// ---------------------------------------------------------------- расписание машины по репликам
+// ---------------------------------------------------------------- the machine's schedule from the lines
 function plan(tl) {
   const S = Object.fromEntries(tl.scenes.map((s) => [s.id, s]));
   const g = (id, key) => S[id].start + S[id].q[key];
@@ -46,32 +46,32 @@ function plan(tl) {
   const arr = [];
   const every = (from, to, step) => { for (let t = from; t <= to; t += step) arr.push(Math.round(t * 100) / 100); };
 
-  // вопрос: лёгкий поток чуть чаще пополнения — к концу запас тает
+  // question: a light flow slightly faster than the refill — the reserve melts by the end
   every(1.2, end('hook') - 1.2, 1.6);
-  // ведро: если к «падает» магазин почти полон — пара запросов заберёт монеты (чтобы было куда падать)
+  // bucket: if the magazine is almost full by the "drops" cue, a couple of requests take coins (so there is room to drop into)
   const fall = g('refill', 'fall');
   for (let i = 0; i < 4 && run(arr).tokensAt(fall - 0.2) > 3; i++) arr.push(g('bucket', 'ask') + 0.5 * i);
-  // запрос: первый доезжает, когда говорят «толкатель», дальше — каждые 2,6 с
+  // request: the first one arrives when "pusher" is said, then every 2.6 s
   const req = [];
   for (let t = g('request', 'push') + 0.5; t < end('request') - 0.5; t += 2.6) req.push(Math.round(t * 100) / 100);
-  // всплеск: 10 запросов через 0,35 с, сразу после монеты — за всплеск капнет ровно одна
+  // burst: 10 requests 0.35 s apart, right after a coin — exactly one drops during the burst
   const want = g('burst', 'first') - 0.4;
   const B = ticks.find((t) => t >= want) + 0.05;
   const burst = Array.from({ length: 10 }, (_, i) => Math.round((B + i * 0.35) * 100) / 100);
-  // к всплеску магазин полон: лишние запросы сцены «запрос» убираем с конца
+  // the magazine is full for the burst: extra requests of the "request" scene are dropped from the end
   while (req.length > 1 && run([...arr, ...req, ...burst]).tokensAt(B - 0.01) < MACHINE.capacity) req.pop();
   arr.push(...req, ...burst);
-  // в среднем: по запросу в секунду, 16 с
+  // on average: one request per second, 16 s
   const A = g('average', 'go');
   const N = Math.max(8, Math.min(16, Math.floor(end('average') - 1.5 - A)));
   every(A, A + N - 1, 1);
-  // две ручки: пара запросов, чтобы машина жила
+  // two knobs: a couple of requests to keep the machine alive
   arr.push(g('knobs', 'server'), g('knobs', 'server') + 2.4);
   const sim = run(arr);
   return { sim, marks: { burst: [B, B + 9 * 0.35], average: [A, A + N - 1] } };
 }
 
-// ---------------------------------------------------------------- камера по сценам
+// ---------------------------------------------------------------- camera per scene
 function shots(tl, v) {
   const S = Object.fromEntries(tl.scenes.map((s) => [s.id, s]));
   const g = (id, key) => S[id].start + (key ? S[id].q[key] : 0);
@@ -90,8 +90,8 @@ function shots(tl, v) {
   ];
 }
 
-// ---------------------------------------------------------------- подписи-булавки
-/** куда относить ярлык от точки, px: { h: [dx, dy], v: [dx, dy] } */
+// ---------------------------------------------------------------- pin labels
+/** where to put a tag relative to its dot, px: { h: [dx, dy], v: [dx, dy] } */
 const SIDE = {
   magazine: { h: [-330, -40], v: [-260, -250] },
   stackTop: { h: [-300, -170], v: [210, -240] },
@@ -106,14 +106,14 @@ const SIDE = {
 };
 const pinHtml = (list) => list.map(([id, text]) => `<div class="pin p-${id}"><i class="dot"></i><b class="lbl">${text}</b></div>`).join('');
 const linesHtml = (list, v) => `<svg class="pl" viewBox="0 0 ${SIZE[v ? 'v' : 'h'].join(' ')}">${list.map(([id]) => `<line class="l-${id}"/>`).join('')}</svg>`;
-/** pins: [[id, anchor, a, b?]] — показать булавку id у якоря фигуры с a до b (секунды сцены) */
+/** pins: [[id, anchor, a, b?]] — show pin id at a figure anchor from a to b (scene seconds) */
 function drawPins(ctx, t, pins) {
   for (const [id, anchor, a, b] of pins) {
     pinLabel(ctx.$(`.p-${id}`), ctx.$(`.l-${id}`), G.pin(anchor), shown(t, a, b), { side: SIDE[anchor]?.[ctx.v ? 'v' : 'h'] ?? [200, -120], frame: SIZE[ctx.v ? 'v' : 'h'] });
   }
 }
 
-// ---------------------------------------------------------------- график «в среднем»
+// ---------------------------------------------------------------- the "on average" chart
 const CH = { w: 560, h: 330, T: 16, Y: 16 };
 function chartHtml(T) {
   const L = T.average.chart;
@@ -154,7 +154,7 @@ function drawChart(ctx, A) {
   ctx.$('.chart .n').textContent = String(passed.n);
 }
 
-// ---------------------------------------------------------------- фильм
+// ---------------------------------------------------------------- film
 export default function makeFilm(lang = LANGS[0]) {
   const T = TEXTS[lang];
   if (!T) throw new Error(`нет текстов для языка «${lang}» (есть: ${LANGS.join(', ')})`);
@@ -172,7 +172,7 @@ export default function makeFilm(lang = LANGS[0]) {
       { voice: 'he', name: T.speakers.he.name, role: T.speakers.he.role },
     ],
 
-    // ---------------------------------------------------------------- машина: постоянный слой
+    // ---------------------------------------------------------------- machine: the persistent layer
     layers: [{
       id: 'machine',
       html: () => `<div class="fig iso" data-theme="light">${FIG.svg}</div>`,
@@ -188,7 +188,7 @@ export default function makeFilm(lang = LANGS[0]) {
     }],
 
     scenes: [
-      // ---------------------------------------------------------------- вопрос
+      // ---------------------------------------------------------------- question
       {
         id: 'hook', mood: 'calm',
         build(s) {
@@ -210,7 +210,7 @@ export default function makeFilm(lang = LANGS[0]) {
         },
       },
 
-      // ---------------------------------------------------------------- 01 ведро
+      // ---------------------------------------------------------------- 01 the bucket
       {
         id: 'bucket', kicker: T.bucket.kicker, num: '01', mood: 'calm',
         build(s) {
@@ -231,7 +231,7 @@ export default function makeFilm(lang = LANGS[0]) {
         },
       },
 
-      // ---------------------------------------------------------------- 02 пополнение
+      // ---------------------------------------------------------------- 02 refill
       {
         id: 'refill', kicker: T.refill.kicker, num: '02', mood: 'calm',
         build(s) {
@@ -252,7 +252,7 @@ export default function makeFilm(lang = LANGS[0]) {
         },
       },
 
-      // ---------------------------------------------------------------- 03 запрос
+      // ---------------------------------------------------------------- 03 a request
       {
         id: 'request', kicker: T.request.kicker, num: '03', mood: 'drive',
         build(s) {
@@ -272,7 +272,7 @@ export default function makeFilm(lang = LANGS[0]) {
         },
       },
 
-      // ---------------------------------------------------------------- 04 всплеск
+      // ---------------------------------------------------------------- 04 a burst
       {
         id: 'burst', kicker: T.burst.kicker, num: '04', mood: 'drive',
         build(s) {
@@ -302,7 +302,7 @@ export default function makeFilm(lang = LANGS[0]) {
         },
       },
 
-      // ---------------------------------------------------------------- 05 в среднем
+      // ---------------------------------------------------------------- 05 on average
       {
         id: 'average', kicker: T.average.kicker, num: '05', mood: 'drive',
         build(s) {
@@ -320,7 +320,7 @@ export default function makeFilm(lang = LANGS[0]) {
         },
       },
 
-      // ---------------------------------------------------------------- 06 две ручки
+      // ---------------------------------------------------------------- 06 two knobs
       {
         id: 'knobs', kicker: T.knobs.kicker, num: '06', mood: 'calm',
         build(s) {
@@ -344,7 +344,7 @@ export default function makeFilm(lang = LANGS[0]) {
         },
       },
 
-      // ---------------------------------------------------------------- финал
+      // ---------------------------------------------------------------- finale
       {
         id: 'end', mood: 'end',
         build(s) {
@@ -365,7 +365,7 @@ export default function makeFilm(lang = LANGS[0]) {
   };
 }
 
-// для отладки в Node: node -e "import('./film.js').then(m => m.debug('ru'))"
+// for debugging in Node: node -e "import('./film.js').then(m => m.debug('ru'))"
 export async function debug(lang = 'ru') {
   const { compile } = await import('../../../video-kit/lib/timeline.js');
   const tl = compile(makeFilm(lang));

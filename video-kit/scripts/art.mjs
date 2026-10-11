@@ -1,21 +1,21 @@
-/* ИИ-картинки ролика (AI-ART.md): art.js проекта → листы-референсы art/refs/*.jpg → кадры
- * art/shots/*.jpg (с приложенными референсами) + манифест art/art.json + галерея art/index.html.
- * Генерация — OpenRouter Image API (по умолчанию Seedream 5.0 Flash).
+/* AI images for a video (AI-ART.md): the project's art.js → reference sheets art/refs/*.jpg → shots
+ * art/shots/*.jpg (with the references attached) + manifest art/art.json + gallery art/index.html.
+ * Generation — OpenRouter Image API (Seedream 5.0 Flash by default).
  *
- *   node scripts/art.mjs                    # новое и изменённое: сначала листы, потом кадры
- *   node scripts/art.mjs --dry              # только план и примерная цена
- *   node scripts/art.mjs --only hook,wolf   # только эти (и недостающие референсы к ним)
- *   node scripts/art.mjs --redo hook        # та же постановка, новая попытка (новый seed); старая — в art/takes/
- *   node scripts/art.mjs --takes 3 --only hook   # три варианта в art/takes/ (на выбор, текущий не трогается)
- *   node scripts/art.mjs --pick hook 123456      # взять вариант с этим seed из art/takes/
- *   node scripts/art.mjs --gallery          # только пересобрать галерею
+ *   node scripts/art.mjs                    # new and changed: sheets first, then shots
+ *   node scripts/art.mjs --dry              # only the plan and an approximate price
+ *   node scripts/art.mjs --only hook,wolf   # only these (and their missing references)
+ *   node scripts/art.mjs --redo hook        # same setup, a new attempt (new seed); the old one goes to art/takes/
+ *   node scripts/art.mjs --takes 3 --only hook   # three variants in art/takes/ (to choose from; the current one is untouched)
+ *   node scripts/art.mjs --pick hook 123456      # take the variant with this seed from art/takes/
+ *   node scripts/art.mjs --gallery          # only rebuild the gallery
  *
- * Запускается из папки проекта (art.js, film.js) или с --project <папка>; обычно через make art.
+ * Run from the project folder (art.js, film.js) or with --project <folder>; usually via make art.
  *
- * Отпечаток картинки — модель, формат, полный промпт, seed и содержимое файлов её референсов:
- * изменили промпт или перегенерировали лист персонажа — устарели и перерисуются все кадры с ним.
- * lock: true у элемента — не перерисовывать (только предупредить, что устарел).
- * Ключ — OPENROUTER_API_KEY в окружении (или local.mk), прокси — OPENROUTER_PROXY. */
+ * An image's fingerprint is the model, aspect, full prompt, seed and the contents of its reference files:
+ * change a prompt or regenerate a character sheet, and every shot with it becomes stale and is redrawn.
+ * lock: true on an item — never redraw it (only warn that it is stale).
+ * Key — OPENROUTER_API_KEY in the environment (or local.mk), proxy — OPENROUTER_PROXY. */
 import { execFileSync } from 'node:child_process';
 import { createHash, randomInt } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
@@ -35,9 +35,9 @@ const cfgFile = join(ROOT, 'art.js');
 if (!existsSync(cfgFile)) throw new Error(`нет art.js в ${ROOT} (AI-ART.md)`);
 const CFG = (await import(pathToFileURL(cfgFile).href)).default;
 const MODEL = CFG.model ?? 'bytedance-seed/seedream-5-0-flash';
-const PRICE = CFG.price ?? 0.018; // $ за картинку — только для плана; настоящая цена — из ответа API
+const PRICE = CFG.price ?? 0.018; // $ per image — only for the plan; the real price comes from the API response
 const PARALLEL = CFG.parallel ?? 4;
-const REF_PX = CFG.refPx ?? 1280; // референсы уходят в запрос уменьшенными до этой ширины
+const REF_PX = CFG.refPx ?? 1280; // references are sent downscaled to this width
 
 for (const d of ['refs', 'shots', 'takes']) mkdirSync(join(ART, d), { recursive: true });
 const MANIFEST = join(ART, 'art.json');
@@ -49,7 +49,7 @@ const save = () => {
   writeFileSync(TK, `${JSON.stringify(TAKEN, null, 2)}\n`);
 };
 
-// ---------------------------------------------------------------- элементы и зависимости
+// ---------------------------------------------------------------- items and dependencies
 const ITEMS = new Map();
 for (const [dir, list] of [['refs', CFG.refs ?? {}], ['shots', CFG.shots ?? {}]]) {
   for (const [id, it] of Object.entries(list)) {
@@ -76,7 +76,7 @@ const sha = (x) => createHash('sha256').update(x).digest('hex');
 const defaultSeed = (id) => parseInt(sha(`seed:${id}`).slice(0, 8), 16) % 2147483647;
 const seedOf = (it) => it.seed ?? M.items[it.id]?.seed ?? defaultSeed(it.id);
 
-/** полный промпт: легенда референсов + постановка + стиль */
+/** full prompt: reference legend + setup + style */
 function promptOf(it) {
   const legend = it.refs.length
     ? `Reference images: ${it.refs.map((r, i) => {
@@ -88,7 +88,7 @@ function promptOf(it) {
   return `${legend}${it.prompt.trim()}${CFG.style ? ` Style: ${CFG.style.trim()}` : ''}`;
 }
 
-/** отпечаток: всё, от чего зависит картинка (у референсов — содержимое их файлов) */
+/** fingerprint: everything the image depends on (for references — the contents of their files) */
 const fileHash = (f) => sha(readFileSync(f)).slice(0, 12);
 function hashOf(it, seed = seedOf(it)) {
   const refs = it.refs.map((r) => {
@@ -98,13 +98,13 @@ function hashOf(it, seed = seedOf(it)) {
   return sha(JSON.stringify([MODEL, it.resolution ?? CFG.resolution ?? '2K', it.aspect ?? '9:16', promptOf(it), seed, refs])).slice(0, 12);
 }
 
-/** уменьшенный референс как data-URL */
+/** downscaled reference as a data URL */
 function refData(file) {
   const buf = execFileSync('ffmpeg', ['-v', 'error', '-i', file, '-vf', `scale='min(${REF_PX},iw)':-2`, '-q:v', '3', '-f', 'mjpeg', 'pipe:1'], { maxBuffer: 1 << 26 });
   return `data:image/jpeg;base64,${buf.toString('base64')}`;
 }
 
-/** один запрос к API → JPEG в out; → { cost, w, h } */
+/** one API request → JPEG at out; → { cost, w, h } */
 async function generate(it, seed, out) {
   const body = {
     model: MODEL, prompt: promptOf(it), n: 1, seed,
@@ -128,10 +128,10 @@ async function generate(it, seed, out) {
 }
 
 const rel = (f) => f.replace(`${ART}/`, '');
-// черновик: seed и отпечаток в имени (тот же seed с другим промптом — другая картинка)
+// a take: seed and fingerprint in the name (the same seed with another prompt is another image)
 const takeName = (id, x) => `${id}@${x.seed}.${x.hash}.jpg`;
 const takeFile = (id, x) => join(TAKES, takeName(id, x));
-/** текущую картинку — в черновики (чтобы можно было вернуть: --pick id seed) */
+/** move the current image to takes (so it can be restored: --pick id seed) */
 function shelve(it) {
   const m = M.items[it.id];
   if (!existsSync(it.file) || !m) return;
@@ -140,7 +140,7 @@ function shelve(it) {
   TAKEN[it.id] = [...(TAKEN[it.id] ?? []).filter((y) => takeName(it.id, y) !== takeName(it.id, x)), x];
 }
 
-// ---------------------------------------------------------------- очередь с ограничением параллельности
+// ---------------------------------------------------------------- queue with limited concurrency
 let running = 0;
 const waiting = [];
 const slot = async (fn) => {
@@ -149,7 +149,7 @@ const slot = async (fn) => {
   try { return await fn(); } finally { running--; waiting.shift()?.(); }
 };
 
-// ---------------------------------------------------------------- режимы
+// ---------------------------------------------------------------- modes
 const only = typeof opt('only') === 'string' ? opt('only').split(',') : null;
 const redo = typeof opt('redo') === 'string' ? opt('redo').split(',') : [];
 for (const id of [...(only ?? []), ...redo]) if (!ITEMS.has(id)) throw new Error(`нет «${id}» в art.js`);
@@ -159,7 +159,7 @@ if (opt('pick')) {
   const id = opt('pick');
   const seed = Number(args[args.indexOf('--pick') + 2]);
   const it = ITEMS.get(id);
-  // последний черновик с этим seed
+  // the latest take with this seed
   const take = (TAKEN[id] ?? []).filter((x) => x.seed === seed && existsSync(takeFile(id, x))).at(-1);
   if (!it || !take) throw new Error(`нет черновика ${id} с seed ${seed} в art/takes/`);
   if (it.seed !== undefined) console.warn(`  ⚠ в art.js у «${id}» задан seed: ${it.seed} — уберите его, иначе выбор не удержится`);
@@ -189,13 +189,13 @@ if (opt('pick')) {
   }
   console.log(`выбрать: make art-pick ID=<id> SEED=<seed> (варианты — в art/index.html)`);
 } else if (!opt('gallery')) {
-  // нужные элементы: --only и их недостающие референсы, иначе все
+  // items needed: --only and their missing references, otherwise all
   const want = new Set(only ?? ITEMS.keys());
   if (only) {
     const add = (id) => { for (const r of ITEMS.get(id).refs) { if (!existsSync(ITEMS.get(r).file)) { want.add(r); add(r); } } };
     only.forEach(add);
   }
-  // план (по текущим файлам; референсы, которые перерисуются, меняют отпечатки зависимых)
+  // plan (from the current files; references that will be redrawn change the fingerprints of their dependants)
   const plan = [];
   const will = new Set();
   for (const id of order) {
@@ -253,9 +253,9 @@ if (opt('pick')) {
 if (spent) console.log(`потрачено: $${spent.toFixed(3)}`);
 save();
 
-// ---------------------------------------------------------------- галерея art/index.html
+// ---------------------------------------------------------------- gallery art/index.html
 const esc = (x) => String(x ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-// потрачено всего: текущие картинки + черновики (в том числе заменённые)
+// total spent: current images + takes (including replaced ones)
 const total = [...Object.values(M.items), ...Object.values(TAKEN).flat()].reduce((a, m) => a + (m.cost ?? 0), 0);
 const card = (it) => {
   const m = M.items[it.id];

@@ -1,8 +1,8 @@
-/* {{NAME}}: палитра и вёрстка сцен. Подключается после {{KIT}}/stage/base.css.
- * Кадр 1920×1080; вертикальный — #stage.v (1080×1920), субтитры в кадре — #stage.cc
- * (строка ≈330px от низа: всё важное в вертикали держите выше ~1500px). */
+/* {{NAME}}: palette and scene layout. Loaded after {{KIT}}/stage/base.css.
+ * Frame 1920×1080; vertical — #stage.v (1080×1920), captions in the frame — #stage.cc
+ * (the line is ≈330px from the bottom: keep everything important in the vertical frame above ~1500px). */
 :root {
-  /* палитра проекта — поменяйте под тему инфографики */
+  /* project palette — change it to fit the topic */
   --bg: #EDEFF3; --paper: #F8F9FB; --mist: #DCE2EC; --line: #D8DEE8; --haze: #D3E1F0;
   --ink: #0F1A2E; --ink2: #2C3A55; --muted: #56627A; --cloud: #9AA4B6;
   --accent: #3346E8; --accent-d: #2433B8; --accent-soft: #DDE1FF; --accent-on-dark: #8E9AFF;
@@ -27,7 +27,7 @@
 .e-h1 { position: absolute; left: 0; right: 0; top: 330px; margin: 0; text-align: center; font: 400 130px/1.05 Serif; letter-spacing: -.03em; }
 .e-foot { position: absolute; left: 0; right: 0; bottom: 140px; text-align: center; color: var(--muted); }
 
-/* ================================================================ вертикальный кадр 1080×1920 */
+/* ================================================================ vertical frame 1080×1920 */
 #stage.v .s-title .t-eyebrow { left: 86px; top: 520px; }
 #stage.v .s-title .t-h1 { left: 78px; top: 566px; width: 940px; font-size: 130px; }
 #stage.v .s-title .t-by { left: 86px; top: 1150px; width: 900px; }

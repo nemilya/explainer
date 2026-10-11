@@ -1,11 +1,11 @@
-/* vision.mjs — спросить vision-модель (OpenRouter) о картинке. Для проверки кадров ролика,
- * когда среда не показывает изображения агенту напрямую (Read возвращает «Unsupported Image»).
+/* vision.mjs — ask a vision model (OpenRouter) about an image. For checking video frames
+ * when the environment doesn't show images to the agent directly (Read returns "Unsupported Image").
  *
- *   node video-kit/scripts/vision.mjs <image.png|jpg> "<вопрос>" [--model M] [--local path/to/local.mk]
+ *   node video-kit/scripts/vision.mjs <image.png|jpg> "<question>" [--model M] [--local path/to/local.mk]
  *
- * Ключ/прокси — из окружения OPENROUTER_API_KEY / OPENROUTER_PROXY или из local.mk (ищется в cwd,
- * либо путь через --local). Модель по умолчанию — anthropic/claude-haiku-5.5 (или CHECK_MODEL).
- * Запрос повторяет budget-pages/video/engine/scripts/check.mjs (max_tokens: 1000, data-URI). */
+ * Key/proxy — from OPENROUTER_API_KEY / OPENROUTER_PROXY in the environment or from local.mk (looked up in cwd,
+ * or a path via --local). Default model — anthropic/claude-haiku-5.5 (or CHECK_MODEL).
+ * The request mirrors budget-pages/video/engine/scripts/check.mjs (max_tokens: 1000, data URI). */
 import { readFileSync, writeFileSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';

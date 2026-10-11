@@ -1,8 +1,8 @@
-/* {{NAME}}: палитра и вёрстка сцен. Подключается после video-kit/stage/base.css и anatomy/kit/iso.css.
- * Кадр 1920×1080; вертикальный — #stage.v (1080×1920), субтитры в кадре — #stage.cc.
- * Фигура — постоянный слой .l-machine (film.layers), сцены поверх — подписи, счётчики, график. */
+/* {{NAME}}: palette and scene layout. Loaded after video-kit/stage/base.css and anatomy/kit/iso.css.
+ * Frame 1920×1080; vertical — #stage.v (1080×1920), captions in the frame — #stage.cc.
+ * The figure is the persistent layer .l-machine (film.layers), the scenes on top — labels, counters, a chart. */
 :root {
-  /* бумага и чернила — как у светлой темы anatomy, акцент — синий anatomy */
+  /* paper and ink — like anatomy's light theme, the accent — anatomy blue */
   --bg: #F2F2EF; --paper: #FBFBFA; --mist: #E7E7E3; --line: #DADAD5; --haze: #ECECE8;
   --ink: #18181A; --ink2: #3A3A3E; --muted: #6E6E73; --cloud: #9A9A9F;
   --accent: #3E63DD; --accent-d: #2F4FB8; --accent-soft: #DFE6FB; --accent-on-dark: #9DB2F5;
@@ -10,17 +10,17 @@
 }
 #bg { display: none; }
 
-/* ================================================================ машина */
+/* ================================================================ machine */
 .l-machine .fig { position: absolute; left: 0; top: 0; will-change: transform; }
 .l-machine .fig.iso { --anatomy-weight: 1.1px; background: none; }
 #stage.v .l-machine .fig.iso { --anatomy-weight: 1px; }
 
-/* ================================================================ участники */
+/* ================================================================ participants */
 .spk[data-voice="he"] .ava { background: var(--he); }
 .spk[data-voice="he"].on .ava { color: var(--paper); }
 #cc[data-voice="he"] span { box-shadow: inset 6px 0 0 var(--he); }
 
-/* ================================================================ подписи-булавки */
+/* ================================================================ pin labels */
 .pl { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 .pl line { stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; }
 .pin { position: absolute; left: 0; top: 0; }
@@ -28,21 +28,21 @@
 .pin .lbl { position: absolute; left: 0; top: 0; will-change: transform; padding: 12px 20px; border-radius: 14px; background: var(--paper); box-shadow: 0 0 0 2px var(--accent), 0 10px 30px rgba(24, 24, 26, .1); font: 500 34px/1.15 Sans, sans-serif; color: var(--ink); white-space: nowrap; }
 .pin .lbl b { font-weight: 700; color: var(--accent-d); }
 
-/* ================================================================ вопрос */
+/* ================================================================ question */
 .ttl { position: absolute; left: 140px; top: 150px; width: 980px; }
 .ttl .eyebrow { color: var(--accent-d); }
 .ttl h1 { margin: 22px 0 0 -4px; font: 400 100px/1.02 Serif; letter-spacing: -.03em; }
 .ttl h1 em { color: var(--no); }
 .code-chip { display: inline-block; margin-top: 34px; padding: 14px 22px; border-radius: 12px; background: var(--ink); color: #fff; font-size: 30px; letter-spacing: .02em; text-transform: none; box-shadow: inset 6px 0 0 var(--no); }
 
-/* ================================================================ финал */
+/* ================================================================ finale */
 .fin { position: absolute; left: 140px; top: 170px; width: 900px; }
 .fin h1 { margin: 0 0 30px -4px; font: 400 120px/1 Serif; letter-spacing: -.03em; }
 .fin .ln { margin: 12px 0; font: 400 40px/1.25 Sans, sans-serif; color: var(--ink2); }
 .fin .ln b { color: var(--accent-d); font-weight: 700; }
 .fin .cta { margin-top: 40px; color: var(--accent-d); }
 
-/* ================================================================ вертикальный кадр 1080×1920 */
+/* ================================================================ vertical frame 1080×1920 */
 #stage.v .ttl { left: 80px; top: 1160px; width: 920px; }
 #stage.v .ttl h1 { font-size: 92px; text-wrap: balance; }
 #stage.v .pin .lbl { font-size: 32px; }

@@ -1,23 +1,23 @@
-/* Таймлайн ролика: сцены из film.js → абсолютное время сцен, реплик и звуков.
- * Работает и в браузере (stage/), и в Node (scripts/): без DOM и без часов.
+/* Video timeline: scenes from film.js → absolute times of scenes, lines and sound effects.
+ * Works both in the browser (stage/) and in Node (scripts/): no DOM and no clocks.
  *
- * Сцена — { id, kicker, num, mood, build(s), html, draw(t, q, ctx) }.
- * build описывает время сцены через s и возвращает q — моменты, которые потом читает draw:
- *   s.say(text, {at})   реплика голоса → { t0, t1, dur, at(фрагмент) }; длительность — из
- *                       манифеста озвучки (voice/<язык>.json), без него — оценка по длине текста.
- *                       at('фрагмент') — когда примерно звучит этот кусок реплики (по доле текста);
- *                       voice: 'роль' — другой голос (voices в voice.config.json), например персонажа
- *   s.sfx(t, kind, arg) звуковой эффект (lib/sound.mjs)
- *   s.hold(t)           сцена длится минимум до t
- *   s.p(сек)            пауза с поправкой на темп языка (манифест озвучки: pace; 1 — как написано)
- * Реплики задают темп: после новой озвучки все действия сами встают на место.
- * Пауза между репликами — gap из манифеста (по умолчанию GAP). */
+ * A scene — { id, kicker, num, mood, build(s), html, draw(t, q, ctx) }.
+ * build describes the scene's time through s and returns q — the moments draw reads later:
+ *   s.say(text, {at})   a voice line → { t0, t1, dur, at(fragment) }; duration — from
+ *                       the voice-over manifest (voice/<lang>.json), without it — estimated from the text length.
+ *                       at('fragment') — roughly when this piece of the line is heard (by its share of the text);
+ *                       voice: 'role' — another voice (voices in voice.config.json), e.g. a character
+ *   s.sfx(t, kind, arg) a sound effect (lib/sound.mjs)
+ *   s.hold(t)           the scene lasts at least until t
+ *   s.p(sec)            a pause adjusted for the language's pace (voice-over manifest: pace; 1 — as written)
+ * The lines set the pace: after a new voice-over every action falls into place by itself.
+ * Pause between lines — gap from the manifest (GAP by default). */
 
-export const GAP = 0.35; // пауза между репликами
-export const XF = 0.7; // перекрёстная смена сцен
+export const GAP = 0.35; // pause between lines
+export const XF = 0.7; // scene crossfade
 export const estimate = (text) => 0.4 + text.length / 14;
 
-// паузы на знаках препинания — «весят» как несколько букв
+// pauses on punctuation "weigh" as several letters
 const weight = (s) => s.length + 5 * (s.match(/[,.:;!?—…]/g) || []).length;
 
 function builder(durOf, { gap = GAP, pace = 1 } = {}) {
@@ -50,7 +50,7 @@ function builder(durOf, { gap = GAP, pace = 1 } = {}) {
   return s;
 }
 
-/** film + манифест озвучки → { scenes, events, duration } */
+/** film + voice-over manifest → { scenes, events, duration } */
 export function compile(film, voice = null) {
   const lines = voice?.lines ?? {};
   const durOf = (text) => lines[text]?.dur ?? estimate(text);
@@ -71,5 +71,5 @@ export function compile(film, voice = null) {
   return { scenes, events, duration: start };
 }
 
-/** реплики ролика (для озвучки и субтитров) */
+/** the video's lines (for voice-over and subtitles) */
 export const voiceLines = (tl) => tl.events.filter((e) => e.type === 'voice');

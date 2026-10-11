@@ -1,22 +1,22 @@
-/* Язык до первой отрисовки (как в nemilya/scantunnel). Классический блокирующий скрипт в <head>.
- * Порядок выбора:
- *   1. явный выбор — explainer-lang в localStorage (клик по EN/RU, «Открыть» или × в плашке);
- *   2. основной язык браузера, если это не основная локаль сайта (ru-RU → ru);
- *   3. страна по часовому поясу: Россия, Беларусь, Казахстан → ru (пояс не меняется от VPN и не
- *      требует GeoIP — сайт остаётся статикой);
- *   4. основная локаль (en).
- * Уводим (location.replace) только с основной страницы и только человека, пришедшего снаружи:
- * не ботов (индексация основной), не переходы внутри сайта. С /ru/ не уводим никогда — прямая
- * ссылка важнее; там landing.js по тому же выбору показывает плашку «Эта страница есть на …».
- * Автовыбор не запоминается: в explainer-lang попадает только то, что человек выбрал сам. */
+/* Language before first paint (as in nemilya/scantunnel). A classic blocking script in <head>.
+ * Choice order:
+ *   1. an explicit choice — explainer-lang in localStorage (a click on EN/RU, "Open" or × on the banner);
+ *   2. the browser's main language, if it is not the site's main locale (ru-RU → ru);
+ *   3. the country by time zone: Russia, Belarus, Kazakhstan → ru (the zone doesn't change with a VPN and
+ *      needs no GeoIP — the site stays static);
+ *   4. the main locale (en).
+ * Redirect (location.replace) only from the main page and only a person coming from outside:
+ * not bots (the main page gets indexed), not navigation inside the site. Never redirect from /ru/ — a direct
+ * link matters more; there landing.js uses the same choice to show a banner "This page is available in …".
+ * The auto-choice is not saved: explainer-lang holds only what the person chose themselves. */
 (function (g) {
   var TZ = {
-    // Беларусь
+    // Belarus
     'Europe/Minsk': 'ru',
-    // Казахстан
+    // Kazakhstan
     'Asia/Almaty': 'ru', 'Asia/Qostanay': 'ru', 'Asia/Qyzylorda': 'ru', 'Asia/Aqtobe': 'ru',
     'Asia/Aqtau': 'ru', 'Asia/Atyrau': 'ru', 'Asia/Oral': 'ru',
-    // Россия
+    // Russia
     'Europe/Kaliningrad': 'ru', 'Europe/Moscow': 'ru', 'W-SU': 'ru', 'Europe/Kirov': 'ru',
     'Europe/Volgograd': 'ru', 'Europe/Astrakhan': 'ru', 'Europe/Saratov': 'ru',
     'Europe/Ulyanovsk': 'ru', 'Europe/Samara': 'ru', 'Asia/Yekaterinburg': 'ru',
@@ -29,7 +29,7 @@
   var BOT = /bot|crawl|spider|slurp|preview|facebookexternalhit|lighthouse/i;
   var KEY = 'explainer-lang';
 
-  /** o: {saved, langs, tz, available: ['en', 'ru'] (первая — основная)} → код локали */
+  /** o: {saved, langs, tz, available: ['en', 'ru'] (the first is the main one)} → locale code */
   function pick(o) {
     var avail = o.available || [];
     var def = avail[0];
@@ -45,11 +45,11 @@
   g.exLang = { pick: pick, TZ: TZ, BOT: BOT, KEY: KEY, current: null };
 
   var d = g.document;
-  if (!d) return; // тесты (node)
+  if (!d) return; // tests (node)
   var saved = null;
-  try { saved = g.localStorage.getItem(KEY); } catch (e) { /* приватный режим */ }
+  try { saved = g.localStorage.getItem(KEY); } catch (e) { /* private mode */ }
   var tz = '';
-  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* старый браузер */ }
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* an old browser */ }
   var nav = g.navigator || {};
   var alts = d.querySelectorAll('link[rel="alternate"][hreflang][data-href]');
   var available = [];
@@ -71,6 +71,6 @@
   if (BOT.test(nav.userAgent || '')) return;
   try {
     if (d.referrer && new URL(d.referrer).origin === g.location.origin) return;
-  } catch (e) { /* кривой referrer — считаем внешним */ }
+  } catch (e) { /* a broken referrer — treat as external */ }
   g.location.replace(hrefs[want] + g.location.search + g.location.hash);
 })(this);

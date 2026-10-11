@@ -1,7 +1,7 @@
-/* {{TITLE}} — ролик-объяснение. Заготовка explainer (video-kit/template-explainer): фигура anatomy
- * в постоянном слое (машина работает весь ролик), камера наезжает на детали, сцены поверх — заголовки
- * и подписи-булавки. Диалог: she — объясняет (основной голос), he — спрашивает (voices.he).
- * Полный пример — explainers/token-bucket/video/film.js. Тексты — text/<язык>.js, стили — scenes.css. */
+/* {{TITLE}} — an explainer video. The explainer stub (video-kit/template-explainer): the anatomy figure
+ * in a persistent layer (the machine runs through the whole video), the camera moves onto parts, the scenes on top — titles
+ * and pin labels. Dialogue: she — explains (the main voice), he — asks (voices.he).
+ * A full example — explainers/token-bucket/video/film.js. Texts — text/<lang>.js, styles — scenes.css. */
 import { css, E, rise, seg } from '{{KIT}}/lib/motion.js';
 import { camera, pinLabel, place, shown } from '{{KIT}}/lib/figure.js';
 import { buildFigure, mountFigure } from '../figure.js';
@@ -9,7 +9,7 @@ import { state } from '../model.js';
 import en from './text/en.js';
 import ru from './text/ru.js';
 
-export const TEXTS = { en, ru }; // первый язык — основной (английский)
+export const TEXTS = { en, ru }; // the first language is the main one (English)
 export const LANGS = Object.keys(TEXTS);
 
 const FIG = buildFigure();
@@ -23,7 +23,7 @@ function cue(said, word) {
   throw new Error(`нет «${word}» в репликах сцены`);
 }
 
-/** камера: шоты в глобальном времени ролика по началам сцен и их q */
+/** camera: shots in the video's global time, from scene starts and their q */
 function shots(tl, v) {
   const S = Object.fromEntries(tl.scenes.map((s) => [s.id, s]));
   const g = (id, key) => S[id].start + (key ? S[id].q[key] : 0);
@@ -58,7 +58,7 @@ export default function makeFilm(lang = LANGS[0]) {
         const s = state(t);
         fig.apply(s);
         G.t = t;
-        // движущаяся деталь — якорь, который едет вместе с ней
+        // a moving part — an anchor that travels with it
         const anchors = { ...FIG.anchors, carriage: fig.carriage(s) };
         G.pin = place(ctx.$('.fig'), FIG, BOX[ctx.v ? 'v' : 'h'], cam(t, anchors), anchors).pin;
       },

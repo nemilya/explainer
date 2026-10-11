@@ -1,4 +1,4 @@
-/* Лендинг token-bucket, русский. Ключи — как в en.mjs (проверяет сборка). Значения — HTML. */
+/* token-bucket landing page, Russian. Keys — as in en.mjs (checked by the build). Values are HTML. */
 export default {
   langName: 'Русский',
   ogLocale: 'ru_RU',

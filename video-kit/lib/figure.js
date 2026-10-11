@@ -1,19 +1,19 @@
-/* Фигура anatomy в ролике: камера (наезды, панорамы), булавки-подписи к деталям, пересчёт точек
- * фигуры в координаты кадра. Всё — чистые функции времени, как и остальной video-kit.
+/* An anatomy figure in a video: camera (zooms, pans), pin labels on parts, converting figure points
+ * to frame coordinates. All pure functions of time, like the rest of video-kit.
  *
- * Фигура живёт в постоянном слое ролика (film.layers, stage/stage.js) и не пропадает между сценами:
- * машина работает непрерывно, камера плавно переезжает, а сцены поверх — только текст и подписи.
+ * The figure lives in a persistent layer of the video (film.layers, stage/stage.js) and stays between scenes:
+ * the machine runs continuously, the camera glides, and the scenes on top add only text and labels.
  *
  *   const cam = camera([{ t: 0, at: 'machine', zoom: 1 }, { t: 12, at: 'magazine', zoom: 2.4, pos: [0.64, 0.5] }]);
- *   const view = place(wrap, fig, box, cam(t), anchors);   // ставит transform обёртке <svg>
- *   const [x, y] = view.pin('magazine');                    // точка детали → пиксели кадра
+ *   const view = place(wrap, fig, box, cam(t), anchors);   // sets the transform of the <svg> wrapper
+ *   const [x, y] = view.pin('magazine');                    // a part's point → frame pixels
  *
- * Кадр (box) — где фигура стоит при zoom 1: { x, y, w, h } в пикселях кадра; фигура вписывается в него.
- * Шот: t — когда камера начинает ехать, d — сколько едет (1.4 с), at — имя якоря фигуры или [x, y]
- * в координатах viewBox, zoom — увеличение, pos — куда в кадре встаёт точка at (доли, [0.5, 0.5] — центр). */
+ * The box is where the figure stands at zoom 1: { x, y, w, h } in frame pixels; the figure is fitted into it.
+ * A shot: t — when the camera starts moving, d — how long it moves (1.4 s), at — a figure anchor name or [x, y]
+ * in viewBox coordinates, zoom — magnification, pos — where in the frame the point at lands (fractions, [0.5, 0.5] — center). */
 import { E, clamp, lerp, seg } from './motion.js';
 
-/** камера по шотам → (t) => { at: [x, y], zoom, pos: [fx, fy] } */
+/** camera from shots → (t) => { at: [x, y], zoom, pos: [fx, fy] } */
 export function camera(shots, anchors = {}) {
   const pt = (a) => (Array.isArray(a) ? a : anchors[a] ?? (() => { throw new Error(`нет якоря «${a}»`); })());
   const list = [...shots].sort((a, b) => a.t - b.t).map((s) => ({ d: 1.4, zoom: 1, pos: [0.5, 0.5], ...s }));
@@ -25,7 +25,7 @@ export function camera(shots, anchors = {}) {
       if (t < s.t) break;
       const k = E.io(seg(t, s.t, s.t + s.d));
       const to = P(s.at);
-      // наезд по логарифму масштаба — скорость увеличения ровная
+      // zoom along the log of the scale — an even magnification speed
       cur = {
         at: [lerp(cur.at[0], to[0], k), lerp(cur.at[1], to[1], k)],
         zoom: Math.exp(lerp(Math.log(cur.zoom), Math.log(s.zoom), k)),
@@ -36,8 +36,8 @@ export function camera(shots, anchors = {}) {
   };
 }
 
-/** поставить фигуру (обёртку el с <svg viewBox="0 0 fig.W fig.H"> шириной fig.W px) по камере.
- * → { scale, pin(name | [x, y]) → [x, y] в пикселях кадра } */
+/** place the figure (wrapper el with <svg viewBox="0 0 fig.W fig.H"> fig.W px wide) by the camera.
+ * → { scale, pin(name | [x, y]) → [x, y] in frame pixels } */
 export function place(el, fig, box, cam, anchors = fig.anchors) {
   const fit = Math.min(box.w / fig.W, box.h / fig.H);
   const S = fit * cam.zoom;
@@ -58,10 +58,10 @@ export function place(el, fig, box, cam, anchors = fig.anchors) {
   return { scale: S, pin };
 }
 
-/** подпись-булавка: точка на детали, линия, ярлык. el — <div class="pin"> с <i class="dot">, <b class="lbl">;
- * line — <line> в полноэкранном svg слоя подписей. side: [dx, dy] — куда отнести ярлык от точки (px).
- * k — видимость 0..1 (линия прорисовывается, ярлык всплывает); frame — [ширина, высота] кадра:
- * ярлык не выходит за его края (и не залезает под подпись главы сверху). */
+/** a pin label: a dot on the part, a line, a tag. el — <div class="pin"> with <i class="dot">, <b class="lbl">;
+ * line — a <line> in the full-frame svg of the label layer. side: [dx, dy] — where to put the tag relative to the dot (px).
+ * k — visibility 0..1 (the line draws, the tag pops up); frame — [width, height] of the frame:
+ * the tag never leaves it (and doesn't slide under the chapter label at the top). */
 export function pinLabel(el, line, [x, y], k, { side = [120, -80], frame = null, margin = 40 } = {}) {
   if (!el) return;
   const [dx, dy] = side;
@@ -73,7 +73,7 @@ export function pinLabel(el, line, [x, y], k, { side = [120, -80], frame = null,
   const lbl = el.querySelector('.lbl');
   if (dot) dot.style.transform = `translate(${x}px, ${y}px) scale(${clamp(k * 2)})`;
   if (lbl) {
-    // ярлык держим в кадре (frame — [ширина, высота] кадра): сдвигаем вдоль, линия всё равно ведёт к точке
+    // keep the tag inside the frame (frame — [width, height]): shift it, the line still leads to the dot
     const w = lbl.offsetWidth;
     const h = lbl.offsetHeight;
     let left = dx < 0 ? x + dx - w : x + dx;
@@ -84,7 +84,7 @@ export function pinLabel(el, line, [x, y], k, { side = [120, -80], frame = null,
     }
     lbl.style.transform = `translate(${left.toFixed(1)}px, ${top.toFixed(1)}px) translateY(${(1 - kt) * 14}px)`;
     lbl.style.opacity = kt;
-    // конец линии — ближайшая точка рамки ярлыка
+    // the line ends at the nearest point of the tag's box
     if (line) {
       const ex = Math.min(Math.max(x, left), left + w);
       const ey = Math.min(Math.max(y, top), top + h);
@@ -107,5 +107,5 @@ export function pinLabel(el, line, [x, y], k, { side = [120, -80], frame = null,
   }
 }
 
-/** видимость подписи: появляется в a, уходит в b (секунды сцены) */
+/** label visibility: appears at a, leaves at b (scene seconds) */
 export const shown = (t, a, b = null, fin = 0.7, fout = 0.4) => Math.min(seg(t, a, a + fin), b == null ? 1 : 1 - seg(t, b, b + fout));

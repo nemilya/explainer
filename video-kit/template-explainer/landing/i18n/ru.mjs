@@ -1,4 +1,4 @@
-/* Лендинг «{{TITLE}}», Русский. Ключи во всех языках одинаковые (проверяет сборка: make landing). Значения — HTML. */
+/* Landing page "{{TITLE}}", Russian. Keys are the same in every language (checked by the build: make landing). Values are HTML. */
 export default {
   langName: 'Русский',
   ogLocale: 'ru_RU',

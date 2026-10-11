@@ -1,9 +1,9 @@
-/* {{TITLE}} — фигура на ките anatomy ({{ROOT}}/anatomy/kit/iso-kit.mjs). Заготовка: плита на ножках,
- * две направляющие и каретка, которая ездит по модели. Замените её своей машиной: правила — в
- * {{ROOT}}/anatomy/SKILL.md (объект вместо схемы, 40–80 деталей, порядок отрисовки, одна lit-деталь).
+/* {{TITLE}} — a figure on the anatomy kit ({{ROOT}}/anatomy/kit/iso-kit.mjs). A stub: a plate on feet,
+ * two rails and a carriage that moves by the model. Replace it with your machine: the rules are in
+ * {{ROOT}}/anatomy/SKILL.md (an object instead of a diagram, 40–80 parts, painter's order, one lit part).
  *
  * buildFigure() → { svg, P, W, H, anchors, parts }; mountFigure(svgEl, fig) → { apply(state) }.
- * anchors — точки деталей в координатах viewBox: к ним едет камера ролика и цепляются подписи. */
+ * anchors — part points in viewBox coordinates: the video camera moves to them and labels attach to them. */
 import * as k from '{{ROOT}}/anatomy/kit/iso-kit.mjs';
 import { MODEL } from './model.js';
 
@@ -40,7 +40,7 @@ export function mountFigure(svgEl, fig) {
   const car = svgEl.querySelector('[data-l="carriage"]');
   return {
     apply(s) { car.setAttribute('transform', k.translateAlong(fig.P, [s.x, 0, 0])); },
-    /** якорь движущейся детали в текущем положении (для подписей ролика) */
+    /** the anchor of a moving part at its current position (for video labels) */
     carriage: (s) => k.iso([s.x, 0, 11], fig.P),
   };
 }

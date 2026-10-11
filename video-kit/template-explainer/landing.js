@@ -1,6 +1,6 @@
-/* Лендинг «{{TITLE}}»: живая фигура (figure.js + model.js), ролик и язык. Страница собирается
- * explainers/build.mjs (make landing) из landing/index.html и landing/i18n/<code>.mjs; строки для скрипта —
- * в <script type="application/json" id="i18n">. Полный пример с кнопками и счётчиками — explainers/token-bucket. */
+/* Landing page "{{TITLE}}": the live figure (figure.js + model.js), the video and the language. The page is built by
+ * explainers/build.mjs (make landing) from landing/index.html and landing/i18n/<code>.mjs; strings for the script —
+ * in <script type="application/json" id="i18n">. A full example with buttons and counters — explainers/token-bucket. */
 import { buildFigure, mountFigure } from './figure.js';
 import { state } from './model.js';
 import { suggestLanguage } from '../suggest.js';
@@ -11,7 +11,7 @@ const fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]);
 suggestLanguage();
 videoSection();
 
-// живая фигура: модель — функция времени
+// live figure: the model is a function of time
 const FIG = buildFigure();
 const stage = document.querySelector('.iso-stage');
 stage.innerHTML = FIG.svg;

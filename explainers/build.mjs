@@ -1,36 +1,36 @@
 #!/usr/bin/env node
-/* Сборка страниц сайта: шаблон + словари → статические HTML на каждый язык (как в nemilya/scantunnel).
+/* Builds the site's pages: template + dictionaries → static HTML for every language (as in nemilya/scantunnel).
  *
- *   node explainers/build.mjs              собрать (make landing)
- *   node explainers/build.mjs --check      только проверить, что собранное актуально (тест)
+ *   node explainers/build.mjs              build (make landing)
+ *   node explainers/build.mjs --check      only check that the built pages are up to date (test)
  *
- * Страницы:
- *   каталог  explainers/catalog/index.html + i18n/<code>.mjs            → /index.html, /ru/index.html
- *   тема     explainers/<slug>/landing/index.html + i18n/<code>.mjs     → explainers/<slug>/index.html,
+ * Pages:
+ *   catalog  explainers/catalog/index.html + i18n/<code>.mjs            → /index.html, /ru/index.html
+ *   topic    explainers/<slug>/landing/index.html + i18n/<code>.mjs     → explainers/<slug>/index.html,
  *                                                                          explainers/<slug>/ru/index.html
- * Языки и адрес сайта — site.mjs в корне (первая локаль — основная, в корне папки страницы).
+ * Languages and the site address — site.mjs in the root (the first locale is the main one, at the root of the page's folder).
  *
- * Шаблон:  {{key}} — строка из словаря (HTML можно) или служебное значение (см. vars);
- *          <!--if флаг-->…<!--else-->…<!--end-->;
- *          <!--each ключ-->…{{.}} или {{.0}} {{.1}}…<!--/each--> — по массиву словаря.
- * Объект `js` словаря уходит в страницу как JSON (<script type="application/json" id="i18n">) —
- * строки для скриптов. Наборы ключей всех языков обязаны совпадать — иначе ошибка сборки.
- * Ролик темы (video/): MP4 из video/out/ на каждый язык и формат, главы — из таймлайна ролика с
- * длительностями озвучки; нет MP4 — живой плеер video/index.html. */
+ * Template:  {{key}} — a dictionary string (HTML allowed) or a service value (see vars);
+ *          <!--if flag-->…<!--else-->…<!--end-->;
+ *          <!--each key-->…{{.}} or {{.0}} {{.1}}…<!--/each--> — over a dictionary array.
+ * The dictionary's `js` object goes into the page as JSON (<script type="application/json" id="i18n">) —
+ * strings for scripts. Every language must have the same set of keys — otherwise the build fails.
+ * A topic's video (video/): MP4s from video/out/ for every language and format, chapters — from the video's timeline
+ * with the voice-over durations; no MP4 — the live player video/index.html. */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
-const GENERATED = '<!-- Собрано explainers/build.mjs из шаблона и i18n/ — не править руками: make landing -->';
+const GENERATED = '<!-- Built by explainers/build.mjs from the template and i18n/ — do not edit by hand: make landing -->';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const imp = (p) => import(`${pathToFileURL(p).href}?v=${fs.statSync(p).mtimeMs}`);
 const rel = (from, to) => { const r = path.posix.relative(from, to); return r ? `${r}/` : ''; };
 const fmt = (sec) => `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}`;
 
-/** Все словари страницы — с одинаковым набором ключей (и типом значения, длиной списка). */
+/** All dictionaries of a page have the same set of keys (and value types, list lengths). */
 export function checkKeys(dicts, where) {
   const sig = (d, pre = '') => Object.entries(d).flatMap(([k, v]) => (v && typeof v === 'object' && !Array.isArray(v)
     ? sig(v, `${pre}${k}.`) : [`${pre}${k}:${Array.isArray(v) ? `arr${v.length}` : typeof v}`])).sort();
@@ -44,7 +44,7 @@ export function checkKeys(dicts, where) {
   }
 }
 
-/** Ссылка со страницы from на страницу to: относительная на одном домене, иначе абсолютная. */
+/** A link from page from to page to: relative on the same domain, absolute otherwise. */
 export function linkBetween(fromUrl, toUrl) {
   const a = new URL(fromUrl);
   const b = new URL(toUrl);
@@ -75,7 +75,7 @@ function render(template, vars, dict, where) {
   });
 }
 
-// ---------------------------------------------------------------- ролик темы
+// ---------------------------------------------------------------- a topic's video
 async function videoOf(topicDir, code, t, up) {
   const vdir = path.join(topicDir, 'video');
   if (!fs.existsSync(path.join(vdir, 'film.js'))) return null;
@@ -97,7 +97,7 @@ async function videoOf(topicDir, code, t, up) {
   }
   const hash = (v) => [code !== LANGS[0] ? code : '', v ? 'v' : ''].filter(Boolean).join('-');
   const live = (v) => `${up}video/index.html${hash(v) ? `#${hash(v)}` : ''}`;
-  // лёгкая версия для сайта (make web → out/web/), иначе полная из out/
+  // the light version for the site (make web → out/web/), otherwise the full one from out/
   const pickFile = (f) => (exists(`out/web/${f}`) ? `out/web/${f}` : exists(`out/${f}`) ? `out/${f}` : null);
   const one = (v) => {
     const mp4 = pickFile(`${name}${sfx}${v ? '-vertical-captions' : ''}.mp4`);
@@ -117,7 +117,7 @@ async function videoOf(topicDir, code, t, up) {
   return { block, duration: fmt(tl.duration), poster: poster ? `video/${poster}` : '' };
 }
 
-// ---------------------------------------------------------------- страницы
+// ---------------------------------------------------------------- pages
 export async function pages() {
   const site = (await imp(path.join(ROOT, 'site.mjs'))).default;
   const codes = site.locales.map((l) => l.code);
@@ -137,14 +137,14 @@ export async function pages() {
       const url = urlOf(locale);
       const alternates = site.locales.map((l) => `<link rel="alternate" hreflang="${l.code}" href="${urlOf(l)}" data-href="${linkBetween(url, urlOf(l))}" data-suggest="${esc(p.dicts[l.code].suggest)}" data-go="${esc(p.dicts[l.code].suggestGo)}">`)
         .concat(`<link rel="alternate" hreflang="x-default" href="${urlOf(site.locales[0])}">`).join('\n');
-      // текущий язык — первым, остальные в порядке site.locales
+      // the current language first, the rest in site.locales order
       const order = [locale, ...site.locales.filter((l) => l !== locale)];
       const langSwitch = order.map((l) => `<a href="${linkBetween(url, urlOf(l))}" hreflang="${l.code}" lang="${l.code}" data-lang="${l.code}" title="${esc(p.dicts[l.code].langName)}"${l === locale ? ' aria-current="page"' : ''}>${l.code.toUpperCase()}</a>`).join('');
       const root = rel(dir.replace(/\/$/, ''), '') || './';
       const up = rel(dir.replace(/\/$/, ''), p.base.replace(/\/$/, ''));
       const vars = {
         lang: locale.code, canonical: url, alternates, langSwitch, root, up,
-        home: linkBetween(url, `${site.url}${locale.dir ? `${locale.dir}/` : ''}`), // каталог на том же языке
+        home: linkBetween(url, `${site.url}${locale.dir ? `${locale.dir}/` : ''}`), // the catalog in the same language
         generated: GENERATED,
         js: `<script type="application/json" id="i18n">${JSON.stringify(t.js ?? {}).replace(/</g, '\\u003c')}</script>`,
         flags: { video: false, main: locale === site.locales[0] },
@@ -156,7 +156,7 @@ export async function pages() {
         vars.videoDuration = v?.duration ?? '';
         vars.ogImage = v?.poster ? `${site.url}${p.base}${v.poster}` : '';
       } else {
-        // каталог: карточки тем на языке страницы
+        // catalog: topic cards in the page's language
         const cards = [];
         for (const q of list.filter((x) => x.topic)) {
           const c = q.dicts[locale.code].card;
@@ -172,7 +172,7 @@ export async function pages() {
       out.push({ file: path.join(ROOT, dir, 'index.html'), html: render(template, vars, t, `${p.id}/${locale.code}`) });
     }
   }
-  // sitemap: все страницы со всеми языками
+  // sitemap: every page in every language
   const urls = list.map((p) => site.locales.map((l) => `${site.url}${p.base}${l.dir ? `${l.dir}/` : ''}`));
   const sm = urls.map((group) => group.map((u) => `  <url>\n    <loc>${esc(u)}</loc>\n${group.map((a, i) => `    <xhtml:link rel="alternate" hreflang="${site.locales[i].code}" href="${esc(a)}"/>`).join('\n')}\n    <xhtml:link rel="alternate" hreflang="x-default" href="${esc(group[0])}"/>\n  </url>`).join('\n')).join('\n');
   out.push({ file: path.join(ROOT, 'sitemap.xml'), html: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${sm}\n</urlset>\n` });

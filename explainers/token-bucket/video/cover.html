@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Обложка</title>
-<!-- Обложка для Reels / Shorts: 1080×1920, всё важное — в зоне 4:5 (y 285…1635), которую Instagram
-     оставляет в сетке профиля. Тексты — cover в text/<язык>.js; машина — та же фигура в момент всплеска.
-     Снимок: make cover [LNG=en] -->
+<!-- Cover for Reels / Shorts: 1080×1920, everything important inside the 4:5 zone (y 285…1635) that Instagram
+     keeps in the profile grid. Texts — cover in text/<lang>.js; the machine — the same figure mid-burst.
+     Snapshot: make cover [LNG=ru] -->
 <link rel="stylesheet" href="../../../video-kit/stage/base.css">
 <link rel="stylesheet" href="../../../anatomy/kit/iso.css">
 <link rel="stylesheet" href="scenes.css">
@@ -43,7 +43,7 @@
       <p class="sub">${C.sub}</p>
       <div class="foot mono">${C.foot}</div>
     </div>`;
-  // машина в разгар всплеска: часть карточек с монетами, одна — в лотке 429
+  // the machine mid-burst: some cards carry coins, one is in the 429 tray
   const sim = simulate({ ticks: ticksBetween(0, 20), arrivals: Array.from({ length: 10 }, (_, i) => 4.05 + i * 0.35) });
   mountFigure(document.querySelector('#cv svg'), FIG).apply(view(sim, 7.3));
   place(document.querySelector('#cv .fig'), FIG, { x: 0, y: 240, w: 1080, h: 640 }, camera([{ t: 0, at: 'magazine', zoom: 1.45, pos: [0.56, 0.5] }], FIG.anchors)(0));

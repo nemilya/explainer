@@ -1,29 +1,29 @@
-/* Token bucket — честная модель, на которой держится и фигура, и ролик, и лендинг.
+/* Token bucket — the honest model that the figure, the video and the landing page all stand on.
  *
- * Ведро на `capacity` жетонов. Каждые `period` секунд в него падает один жетон (скорость r = 1/period);
- * если ведро полно — жетон пропадает (переполнение). Каждый запрос забирает один жетон; нет жетона —
- * отказ (HTTP 429 Too Many Requests). Отсюда два обещания: всплеск — не больше capacity запросов подряд,
- * в среднем — не больше r запросов в секунду; за любое окно T пройдёт не больше capacity + r·T.
+ * A bucket of `capacity` tokens. Every `period` seconds one token drops into it (rate r = 1/period);
+ * if the bucket is full the token is lost (overflow). Every request takes one token; no token —
+ * a rejection (HTTP 429 Too Many Requests). Hence two promises: a burst is at most capacity requests in a row,
+ * on average at most r requests per second; in any window T at most capacity + r·T get through.
  *
- * Всё — чистые функции времени: simulate() один раз проигрывает события, view(sim, t) отдаёт
- * положение каждой движущейся детали машины в момент t (для покадрового рендера и для живой страницы).
- * Мир машины — в единицах фигуры (figure.js): ось x — вдоль ленты, z — вверх. */
+ * All pure functions of time: simulate() plays the events once, view(sim, t) returns
+ * the position of every moving part of the machine at moment t (for frame-by-frame rendering and for the live page).
+ * The machine's world is in figure units (figure.js): x runs along the belt, z is up. */
 
 export const MACHINE = {
-  capacity: 5, // монет в магазине — ёмкость ведра (b)
-  period: 2, // секунд между монетами — r = 0.5 жетона/с
-  speed: 60, // скорость ленты, ед./с
-  beltFrom: -106, // начало ленты (там появляется запрос)
-  beltTo: 92, // конец ленты (дальше — лоток пропущенных)
-  kickX: 30, // где толкатель сбрасывает отказ
-  eject: 0.3, // с — монета едет из магазина на карточку
-  feed: 1.0, // с — от выпуска монеты из бункера до приземления
+  capacity: 5, // coins in the magazine — the bucket capacity (b)
+  period: 2, // seconds between coins — r = 0.5 tokens/s
+  speed: 60, // belt speed, units/s
+  beltFrom: -106, // start of the belt (a request appears there)
+  beltTo: 92, // end of the belt (then the tray of passed requests)
+  kickX: 30, // where the kicker pushes a rejected request off
+  eject: 0.3, // s — the coin travels from the magazine onto the card
+  feed: 1.0, // s — from releasing a coin from the hopper to its landing
 };
 
-export const COIN = 4; // толщина монеты (шаг стопки)
-export const BASE_Z = 16; // верх основания магазина — дно стопки
-export const CHUTE_Z = 41.5; // дно жёлоба
-export const CARD_Z = 12; // низ карточки на ленте
+export const COIN = 4; // coin thickness (stack step)
+export const BASE_Z = 16; // top of the magazine base — the bottom of the stack
+export const CHUTE_Z = 41.5; // chute floor
+export const CARD_Z = 12; // bottom of a card on the belt
 export const CARD_H = 3;
 
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -32,10 +32,10 @@ const io = (k) => (k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2);
 const out = (k) => 1 - (1 - k) ** 3;
 const lerp = (a, b, k) => a + (b - a) * k;
 
-/** время, когда запрос, приходящий к магазину в `arrival`, появляется в начале ленты */
+/** the time a request that reaches the magazine at `arrival` appears at the start of the belt */
 export const travel = (m = MACHINE) => -m.beltFrom / m.speed;
 
-/** монеты каждые period с начиная с from (первая — в from + period · phase) до to */
+/** coins every period s from `from` (the first at from + period · phase) to `to` */
 export function ticksBetween(from, to, period = MACHINE.period, phase = 1) {
   const out = [];
   for (let t = from + period * phase; t <= to + 1e-9; t += period) out.push(Math.round(t * 1000) / 1000);
@@ -43,8 +43,8 @@ export function ticksBetween(from, to, period = MACHINE.period, phase = 1) {
 }
 
 /**
- * Проиграть события.  start — жетонов в начале; ticks — моменты приземления монет; arrivals — моменты,
- * когда запросы доходят до магазина. Одновременные: сначала монета, потом запрос.
+ * Play the events.  start — tokens at the start; ticks — coin landing times; arrivals — the times
+ * requests reach the magazine. Simultaneous ones: the coin first, then the request.
  * → { capacity, start, ticks: [{ t, kept, n }], reqs: [{ t, ok, te, n }], tokensAt(t), stats(t) }
  */
 export function simulate({ capacity = MACHINE.capacity, start = capacity, ticks = [], arrivals = [], m = MACHINE } = {}) {
@@ -65,7 +65,7 @@ export function simulate({ capacity = MACHINE.capacity, start = capacity, ticks 
       if (kept) lastLand = e.t;
     } else {
       const ok = n >= 1;
-      // монета выезжает за eject с до прихода карточки, но не раньше, чем упала последняя монета
+      // the coin leaves `eject` s before the card arrives, but not before the last coin has landed
       const te = ok ? Math.max(e.t - m.eject, n === 1 ? Math.min(lastLand, e.t - 0.08) : -Infinity) : null;
       if (ok) n--;
       R.push({ t: e.t, ok, te, n, id: e.id });
@@ -90,14 +90,14 @@ export function simulate({ capacity = MACHINE.capacity, start = capacity, ticks 
 }
 
 /**
- * Положение всех движущихся деталей в момент t.
+ * Positions of all moving parts at moment t.
  * → { stack: { count, drop }, coins: [{ x, y, z, a }], cards: [{ x, y, z, a, coin, where }],
  *     flap, paddle, push, lamp: { ok, k }, dial, belt, stats }
- *   where — слой карточки: belt | bin | tray (для порядка отрисовки).
+ *   where — the card's layer: belt | bin | tray (for painter's order).
  */
 export function view(sim, t, m = MACHINE) {
   const cap = sim.capacity;
-  // ---- стопка: жетоны модели, но монета уходит из стопки, как только начала выезжать (te)
+  // ---- stack: the model's tokens, but a coin leaves the stack as soon as it starts moving out (te)
   let count = sim.start;
   let lastTe = -Infinity;
   for (const k of sim.ticks) if (k.kept && k.t <= t) count++;
@@ -106,7 +106,7 @@ export function view(sim, t, m = MACHINE) {
   const drop = t < lastTe + 0.34 ? 1 - io(seg(t, lastTe + 0.1, lastTe + 0.34)) : 0;
 
   const coins = [];
-  // ---- монеты из бункера: жёлоб → магазин (или поверх заслонки → стакан переполнения)
+  // ---- coins from the hopper: chute → magazine (or over the flap → the overflow cup)
   for (const k of sim.ticks) {
     const t0 = k.t - m.feed;
     if (t < t0 || t > k.t + 0.05) continue;
@@ -129,14 +129,14 @@ export function view(sim, t, m = MACHINE) {
       }
     }
   }
-  // ---- монета из магазина на карточку
+  // ---- a coin from the magazine onto a card
   for (const r of sim.reqs) {
     if (!r.ok || t < r.te || t >= r.t) continue;
     const s = io(seg(t, r.te, r.t));
     coins.push({ x: 0, y: lerp(-16, 21.5, s), z: lerp(BASE_Z, CARD_Z + CARD_H, seg(s, 0.8, 1)), a: 1, where: 'eject' });
   }
 
-  // ---- карточки-запросы
+  // ---- request cards
   const cards = [];
   let inTray = 0;
   let inBin = 0;
@@ -145,7 +145,7 @@ export function view(sim, t, m = MACHINE) {
     if (t < born) continue;
     const x = m.speed * (t - r.t);
     if (r.ok) {
-      const off = r.t + m.beltTo / m.speed; // съехала с ленты
+      const off = r.t + m.beltTo / m.speed; // left the belt
       if (t < off) cards.push({ x, y: 18, z: CARD_Z, a: seg(t, born, born + 0.25), coin: t >= r.t, where: 'belt' });
       else {
         const f = seg(t, off, off + 0.3);
@@ -172,7 +172,7 @@ export function view(sim, t, m = MACHINE) {
     }
   }
 
-  // ---- толкатель отказов, толкатель магазина, лампа
+  // ---- rejection kicker, magazine pusher, lamp
   let paddle = 0;
   let push = 0;
   let lamp = { ok: true, k: 0 };
@@ -188,11 +188,11 @@ export function view(sim, t, m = MACHINE) {
     }
   }
 
-  // ---- заслонка: закрыта, пока магазин полон (плавно — доля последних 0.25 с, когда он был полон)
+  // ---- flap: closed while the magazine is full (smoothly — the share of the last 0.25 s it was full)
   let full = 0;
   for (let i = 0; i < 6; i++) full += sim.tokensAt(t - (i / 5) * 0.25) >= cap ? 1 / 6 : 0;
 
-  // ---- стрелка часов бункера: оборот между соседними монетами
+  // ---- hopper clock hand: one turn between neighbouring coins
   let prev = null;
   let next = null;
   for (const k of sim.ticks) { if (k.t <= t) prev = k.t; else { next = k.t; break; } }

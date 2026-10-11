@@ -1,9 +1,9 @@
-/* Язык на странице (общее для каталога и тем). Автовыбор до отрисовки — explainers/lang.js в <head>.
- * Здесь: клик по EN/RU запоминается; пришли по прямой ссылке на «чужой» язык и выбора ещё не было —
- * ненавязчивая плашка «Эта страница есть на … → Открыть» (× — остаться и больше не предлагать). */
+/* Language on the page (shared by the catalog and topics). The auto-choice before paint — explainers/lang.js in <head>.
+ * Here: a click on EN/RU is remembered; arriving by a direct link in "another" language with no choice made yet —
+ * an unobtrusive banner "This page is available in … → Open" (× — stay and don't offer again). */
 const store = {
   get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
-  set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* приватный режим */ } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
 };
 
 export function suggestLanguage() {

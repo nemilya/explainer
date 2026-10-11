@@ -1,5 +1,5 @@
 {
-  "_": "Настройки озвучки (make voice). Ключ — только в окружении OPENROUTER_API_KEY или local.mk, не здесь. name — имя роликов в out/ (по умолчанию — имя папки инфографики). Сверху — основной язык (первый в LANGS), в langs.<язык> — поправки других: voice, instructions, tempo (ускорение речи), gap (пауза между репликами, с), pace (множитель пауз сцен), language, verify.skip. Голоса Gemini TTS: мужские — Charon, Orus, Iapetus, Puck, Fenrir; женские — Kore, Aoede, Leda, Zephyr.",
+  "_": "Voice-over settings (make voice). The key lives only in OPENROUTER_API_KEY in the environment or local.mk, never here. name — the video file name in out/ (default — the name of the topic folder). On top — the main language (first in LANGS), langs.<lang> — overrides for the others: voice, instructions, tempo (speech speed-up), gap (pause between lines, s), pace (multiplier for scene pauses), language, verify.skip. Gemini TTS voices: male — Charon, Orus, Iapetus, Puck, Fenrir; female — Kore, Aoede, Leda, Zephyr.",
   "name": "{{NAME}}",
   "endpoint": "https://openrouter.ai/api/v1",
   "model": "google/gemini-3.8-flash-lite-tts",

@@ -1,5 +1,5 @@
-/* Тексты по-русски. say — реплики [кто, текст]: 'she' — объясняет (основной голос), 'he' — спрашивает.
- * cue — слова-якоря (дословно из реплик). Числа голосу — словами, в кадре — цифрами. */
+/* Russian texts. say — lines [who, text]: 'she' — explains (the main voice), 'he' — asks.
+ * cue — cue words (verbatim from the lines). Numbers for the voice — in words, on screen — in digits. */
 export default {
   ui: { title: '{{TITLE}}', brand: 'Explainer · {{TITLE}}', chapters: { hook: 'Вопрос', end: 'Финал' }, watch: 'Смотреть', menu: 'Главы' },
   speakers: { she: { name: 'Вера', role: 'объясняет' }, he: { name: 'Макс', role: 'спрашивает' } },

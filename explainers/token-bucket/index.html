@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Собрано explainers/build.mjs из шаблона и i18n/ — не править руками: make landing -->
+<!-- Built by explainers/build.mjs from the template and i18n/ — do not edit by hand: make landing -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -17,7 +17,7 @@
 <meta property="og:description" content="A token bucket built as a machine: a live isometric model, a narrated dialogue video and an explanation of rate limiting.">
 <meta property="og:image" content="https://explainer.nemilya.me/explainers/token-bucket/video/out/web/poster.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<!-- язык до первой отрисовки: с основной страницы уводит на язык читателя (explainers/lang.js) -->
+<!-- language before first paint: the main page redirects to the reader's language (explainers/lang.js) -->
 <script src="../../explainers/lang.js"></script>
 <link rel="stylesheet" href="../../anatomy/kit/iso.css">
 <link rel="stylesheet" href="../../explainers/landing.css">
@@ -38,7 +38,7 @@
     <ul class="questions"><li>What does 429 Too Many Requests mean?</li><li>How many requests can I send at once?</li><li>Why does the average settle at exactly r per second?</li><li>What should a client do after a 429?</li></ul>
   </div>
 
-  <!-- 01: живая машина -->
+  <!-- 01: live machine -->
   <section id="machine">
     <div class="sec-head mono"><span class="n">01</span><span>The machine</span></div>
     <h2>A token bucket you can touch</h2>
@@ -67,7 +67,7 @@
     </figure>
   </section>
 
-  <!-- 02: ролик -->
+  <!-- 02: video -->
   <section id="video">
     <div class="sec-head mono"><span class="n">02</span><span>The video · 2:27</span></div>
     <h2>Vera explains, Max asks</h2>
@@ -81,7 +81,7 @@
     <ul class="chapters"><li><button type="button" data-t="0.05"><span class="mono">· · 0:00</span>Question</button></li><li><button type="button" data-t="15.35"><span class="mono">01 · 0:15</span>The bucket</button></li><li><button type="button" data-t="28.39"><span class="mono">02 · 0:28</span>Refill</button></li><li><button type="button" data-t="51.97"><span class="mono">03 · 0:52</span>A request</button></li><li><button type="button" data-t="70.15"><span class="mono">04 · 1:10</span>A burst</button></li><li><button type="button" data-t="88.44"><span class="mono">05 · 1:28</span>On average</button></li><li><button type="button" data-t="114.05"><span class="mono">06 · 1:54</span>Two knobs</button></li><li><button type="button" data-t="139.22"><span class="mono">· · 2:19</span>Finale</button></li></ul>
   </section>
 
-  <!-- 03: суть -->
+  <!-- 03: the gist -->
   <section id="facts">
     <div class="sec-head mono"><span class="n">03</span><span>The gist</span></div>
     <h2>Four facts about a token bucket</h2>
@@ -89,7 +89,7 @@
     <div class="formula">in any T seconds, at most <b>b</b> + <b>r</b>·T requests get through<small>In our machine b = 5, r = 0.5/s: in 10 seconds at most 5 + 0.5·10 = 10 requests.</small></div>
   </section>
 
-  <!-- 04: в коде -->
+  <!-- 04: code -->
   <section id="code">
     <div class="sec-head mono"><span class="n">04</span><span>Code</span></div>
     <h2>The same algorithm in twelve lines</h2>

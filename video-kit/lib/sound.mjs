@@ -1,11 +1,11 @@
-/* Музыка и звуковые эффекты — синтез в коде, без сэмплов и лицензий (Node).
+/* Music and sound effects — synthesized in code, no samples and no licenses (Node).
  *
- * Музыка: спокойный эмбиент ~76 BPM в ре миноре (Dm – B♭ – F – C): пэд всё время, «фортепианное»
- * арпеджио, мягкий бас; настроение задаёт сцена (mood в film.js):
- *   calm  — пэд и редкое арпеджио;  drive — восьмые, бас, тихий пульс «часов»;
- *   dark  — пэд, гул и редкие колокольчики;  end — пэд и арпеджио, затухание.
- * Под голосом музыка приседает (это делает ffmpeg в scripts/voice.mjs).
- * Звуки — по событиям таймлайна (sfx). Детерминировано: шум из ГПСЧ с зерном. */
+ * Music: calm ambient at ~76 BPM in D minor (Dm – B♭ – F – C): a pad all the time, a "piano"
+ * arpeggio, a soft bass; the scene sets the mood (mood in film.js):
+ *   calm  — pad and a sparse arpeggio;  drive — eighths, bass, a quiet "clock" pulse;
+ *   dark  — pad, a drone and rare bells;  end — pad and arpeggio, fading out.
+ * The music ducks under the voice (ffmpeg does it in scripts/voice.mjs).
+ * Sound effects come from timeline events (sfx). Deterministic: noise from a seeded PRNG. */
 import { writeFileSync } from 'node:fs';
 
 export const SR = 48000;
@@ -23,7 +23,7 @@ function rng(seed) {
   };
 }
 
-/** тон с огибающей: f→f1 (глайд), вибрато, обертоны */
+/** a tone with an envelope: f→f1 (glide), vibrato, overtones */
 function tone(buf, t0, { f, f1 = f, dur, a = 0.1, att = 0.004, dec = dur / 4, parts = [1], vib = 0, vibf = 6, curve = 'exp' }) {
   const i0 = Math.max(0, Math.round(t0 * SR));
   const n = Math.min(buf.length - i0, Math.round(dur * SR));
@@ -40,7 +40,7 @@ function tone(buf, t0, { f, f1 = f, dur, a = 0.1, att = 0.004, dec = dur / 4, pa
     buf[i0 + i] += a * env * v;
   }
 }
-/** шум: bright 0..1 (или функция от k), shape: hit (удар) | swell (нарастание-спад) | rise (нарастание) */
+/** noise: bright 0..1 (or a function of k), shape: hit | swell (rise and fall) | rise */
 function noise(buf, t0, { dur, a = 0.05, att = 0.002, dec = dur / 5, shape = 'hit', bright = 0.5, seed = 1 }) {
   const r = rng(seed);
   const i0 = Math.max(0, Math.round(t0 * SR));
@@ -66,41 +66,41 @@ function noise(buf, t0, { dur, a = 0.05, att = 0.002, dec = dur / 5, shape = 'hi
   }
 }
 
-// ---------------------------------------------------------------- эффекты (buf, t, arg, seed)
+// ---------------------------------------------------------------- effects (buf, t, arg, seed)
 const PENTA = [0, 2, 4, 7, 9, 12, 14, 16];
 const FX = {
-  // смена сцены: мягкий воздушный «вжух»
+  // scene change: a soft airy "whoosh"
   whoosh: (b, t, _, s) => noise(b, t - 0.15, { dur: 0.8, a: 0.075, shape: 'swell', bright: (k) => 0.15 + 0.55 * Math.sin(Math.PI * k), seed: s }),
   swish: (b, t, _, s) => { noise(b, t, { dur: 0.45, a: 0.07, shape: 'swell', bright: (k) => 0.3 + 0.6 * k, seed: s }); tone(b, t + 0.2, { f: mtof(86), dur: 0.4, a: 0.02, dec: 0.12 }); },
-  // появление элемента: мягкий тон, высота растёт с номером
+  // an element appears: a soft tone, the pitch rises with the index
   pop: (b, t, i = 0) => { const m = 74 + PENTA[i % PENTA.length]; tone(b, t, { f: mtof(m) * 0.75, f1: mtof(m), dur: 0.22, a: 0.08, dec: 0.07, parts: [1, 0.25] }); tone(b, t, { f: mtof(m + 12), dur: 0.5, a: 0.012, dec: 0.15 }); },
-  // «тик» деревянной палочкой
+  // a "tick" of a wooden stick
   tick: (b, t, i = 0) => tone(b, t, { f: mtof(84 + PENTA[i % PENTA.length]), dur: 0.1, a: 0.05, dec: 0.03, parts: [1, 0, 0.3] }),
-  // росчерк маркером (зачёркивание)
+  // a marker stroke (strike-through)
   strike: (b, t, _, s) => { noise(b, t, { dur: 0.34, a: 0.09, shape: 'swell', bright: (k) => 0.55 + 0.35 * k, seed: s }); tone(b, t, { f: 260, f1: 180, dur: 0.3, a: 0.025, dec: 0.12 }); },
-  // мягкий глубокий удар — смысловой акцент
+  // a soft deep hit — an emphasis
   impact: (b, t, _, s) => {
     tone(b, t, { f: 78, f1: 38, dur: 1.4, a: 0.32, att: 0.006, dec: 0.38, parts: [1, 0.35, 0.1] });
     noise(b, t, { dur: 0.4, a: 0.1, dec: 0.08, bright: 0.12, seed: s });
     noise(b, t + 0.02, { dur: 1.6, a: 0.025, dec: 0.6, bright: 0.05, seed: s + 1 });
     tone(b, t, { f: mtof(62), dur: 2.2, a: 0.025, att: 0.01, dec: 0.8, parts: [1, 0, 0.3] });
   },
-  // нарастание перед переломом (arg — длительность)
+  // a build-up before a turn (arg — duration)
   riser: (b, t, d = 2, s) => {
     noise(b, t, { dur: d, a: 0.07, shape: 'rise', bright: (k) => 0.1 + 0.75 * k, seed: s });
     tone(b, t, { f: 180, f1: 720, dur: d, a: 0.018, att: d * 0.7, dec: 9, vib: 0.006, vibf: 5 });
   },
-  // колокольчик (вопросы)
+  // a bell (questions)
   bell: (b, t, i = 0) => { const m = 74 + [0, 3, 7, 10][i % 4]; tone(b, t, { f: mtof(m), dur: 2.6, a: 0.06, att: 0.003, dec: 0.8, parts: [1, 0, 0.32, 0, 0.12, 0, 0.05] }); tone(b, t, { f: mtof(m + 12) * 1.003, dur: 1.6, a: 0.015, dec: 0.4 }); },
   chime: (b, t) => [62, 69, 74, 77, 81].forEach((m, i) => tone(b, t + i * 0.09, { f: mtof(m), dur: 3.4, a: 0.032, att: 0.01, dec: 1.3, parts: [1, 0.2, 0.05] })),
 };
 export const FX_KINDS = Object.keys(FX);
 
-// ---------------------------------------------------------------- музыка
+// ---------------------------------------------------------------- music
 const BPM = 76;
 const BEAT = 60 / BPM;
 const BAR = BEAT * 4;
-// i – VI – III – VII в ре миноре; bass — нота баса (3-я октава), ch — аккорд
+// i – VI – III – VII in D minor; bass — the bass note (3rd octave), ch — the chord
 const PROG = [
   { bass: 50, ch: [62, 65, 69] }, // Dm
   { bass: 46, ch: [62, 65, 70] }, // B♭
@@ -113,7 +113,7 @@ function music(buf, scenes, duration) {
   const sceneAt = (t) => scenes.reduce((a, s, i) => (t >= s.start ? i : a), 0);
   const moodAt = (t) => scenes[sceneAt(t)].mood;
   const end = duration - 0.5;
-  // восьмые: арпеджио, бас, пульс
+  // eighths: arpeggio, bass, pulse
   for (let step = 0, t = 0.1; t < end - 0.4; step++, t += BEAT / 2) {
     const mood = moodAt(t);
     const bar = Math.floor(step / 8);
@@ -134,7 +134,7 @@ function music(buf, scenes, duration) {
       if (pos === 0 && bar % 2 === 0) tone(buf, t, { f: mtof(c.ch[2] + 12), dur: 3, a: 0.02, dec: 1.0, parts: [1, 0, 0.3, 0, 0.1] });
     }
   }
-  // пэд: по такту, тихо, всё время
+  // pad: one per bar, quiet, all the time
   for (let bar = 0, t = 0; t < end; bar++, t += BAR) {
     const c = PROG[bar % PROG.length];
     const dark = moodAt(t + 0.1) === 'dark';
@@ -148,7 +148,7 @@ function music(buf, scenes, duration) {
   }
 }
 
-/** → { music, fx } — Float32Array моно SR Гц. tl — compile(film, voice) */
+/** → { music, fx } — Float32Array mono at SR Hz. tl — compile(film, voice) */
 export function synth(tl) {
   const n = Math.ceil(tl.duration * SR) + SR;
   const mus = new Float32Array(n);
@@ -162,7 +162,7 @@ export function synth(tl) {
   return { music: mus, fx };
 }
 
-/** Float32 [-1..1] → WAV 16 бит моно (мягкое ограничение) */
+/** Float32 [-1..1] → WAV 16-bit mono (soft limiting) */
 export function wav(path, data) {
   const buf = Buffer.alloc(44 + data.length * 2);
   buf.write('RIFF', 0); buf.writeUInt32LE(36 + data.length * 2, 4); buf.write('WAVE', 8);

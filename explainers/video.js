@@ -1,7 +1,7 @@
-/* Ролик на лендинге темы (общее для всех тем): переключатель 16:9 / 9:16 и главы.
- * Разметку собирает explainers/build.mjs: .video[data-f="h"|"v"] с <video> (out/web/ или out/)
- * или с живым плеером <iframe>, .chapters button[data-t]. На телефоне в портретной ориентации,
- * если есть вертикальный ролик, сразу показываем 9:16. */
+/* The video on a topic's landing page (shared by all topics): the 16:9 / 9:16 switch and chapters.
+ * The markup comes from explainers/build.mjs: .video[data-f="h"|"v"] with a <video> (out/web/ or out/)
+ * or with the live player <iframe>, .chapters button[data-t]. On a phone in portrait orientation,
+ * if there is a vertical video, 9:16 is shown right away. */
 export function videoSection(root = document.getElementById('video')) {
   if (!root) return;
   const boxes = [...root.querySelectorAll('.video[data-f]')];

@@ -1,15 +1,15 @@
-/* Новая тема explainer или новый ролик.
+/* A new explainer topic or a new video.
  *
- *   node video-kit/scripts/new.mjs explainers/<slug> --title "Как работает …"
- *       тема целиком из template-explainer/: QUESTIONS.md (бриф), model.js, figure.js (anatomy),
- *       index.html + landing.js (лендинг), video/ (film.js, text/, scenes.css, voice.config.json, …).
- *       Дальше: cd explainers/<slug>/video && make preview.
+ *   node video-kit/scripts/new.mjs explainers/<slug> --title "How … works"
+ *       a whole topic from template-explainer/: QUESTIONS.md (brief), model.js, figure.js (anatomy),
+ *       landing/ + landing.js (landing page), video/ (film.js, text/, scenes.css, voice.config.json, …).
+ *       Next: cd explainers/<slug>/video && make preview; make landing in the repo root.
  *
- *   node video-kit/scripts/new.mjs <папка> --plain [--name имя] [--art]
- *       только ролик <папка>/video из template/ (как в infographics: титул, тезисы, финал);
- *       --art — ещё art.js для роликов на ИИ-картинках (AI-ART.md).
+ *   node video-kit/scripts/new.mjs <folder> --plain [--name name] [--art]
+ *       only a video <folder>/video from template/ (as in infographics: title, points, finale);
+ *       --art — also art.js for videos made of AI images (AI-ART.md).
  *
- * Пути до video-kit и корня репозитория подставляются сами ({{KIT}}, {{ROOT}}). */
+ * Paths to video-kit and to the repo root are filled in automatically ({{KIT}}, {{ROOT}}). */
 import { cpSync, existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs';
 import { basename, join, relative, resolve, sep } from 'node:path';
 

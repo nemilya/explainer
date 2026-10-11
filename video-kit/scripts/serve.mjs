@@ -1,9 +1,9 @@
-/* Локальный статический сервер для make preview (плеер ролика). Запуск из папки проекта:
- *   node <video-kit>/scripts/serve.mjs [порт=8790]
- * Отдаёт корень репозитория (проекту нужен и сам video-kit) и печатает адрес плеера проекта.
- * Отличие от python3 -m http.server — поддержка Range (206 Partial Content): без неё
- * Chrome не перематывает MP4 (плеер ролика).
- * Только для локального просмотра: слушает 127.0.0.1. */
+/* Local static server for make preview (the video player) and make serve. Run from the project folder:
+ *   node <video-kit>/scripts/serve.mjs [port=8790]
+ * Serves the repo root (a project needs video-kit too) and prints the project's player URL.
+ * Unlike python3 -m http.server it supports Range (206 Partial Content): without it
+ * Chrome can't seek an MP4 (the video player).
+ * For local viewing only: listens on 127.0.0.1. */
 import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
@@ -35,7 +35,7 @@ createServer(async (req, res) => {
     let start = 0;
     let end = st.size - 1;
     if (m && (m[1] || m[2])) {
-      start = m[1] ? Number(m[1]) : Math.max(0, st.size - Number(m[2])); // bytes=-N — последние N байт
+      start = m[1] ? Number(m[1]) : Math.max(0, st.size - Number(m[2])); // bytes=-N — the last N bytes
       end = m[1] && m[2] ? Math.min(Number(m[2]), st.size - 1) : st.size - 1;
       if (start > end || start >= st.size) { res.writeHead(416, { 'Content-Range': `bytes */${st.size}` }).end(); return; }
       res.writeHead(206, { ...head, 'Content-Range': `bytes ${start}-${end}/${st.size}`, 'Content-Length': end - start + 1 });

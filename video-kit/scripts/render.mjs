@@ -1,30 +1,30 @@
-/* Ролик → MP4 1920×1080 (H.264 + AAC + субтитры): Chromium снимает кадры сцены, ffmpeg склеивает.
- * Запускается из папки проекта (film.js, index.html; результат — в её out/) или с --project <папка>;
- * обычно через make в проекте. <имя> — см. scripts/project.mjs.
+/* Video → MP4 1920×1080 (H.264 + AAC + subtitles): Chromium captures the frames, ffmpeg joins them.
+ * Run from the project folder (film.js, index.html; output goes to its out/) or with --project <folder>;
+ * usually via make in the project. <name> — see scripts/project.mjs.
  *
- *   node scripts/render.mjs                    # out/<имя>.mp4 (+ звук voice/<язык>.m4a и субтитры .vtt, если есть)
- *   node scripts/render.mjs --stills 3,20,41   # только PNG-кадры для проверки → out/still-*.png
- *   node scripts/render.mjs --poster           # только обложка out/poster.jpg
- *   node scripts/render.mjs --mute             # без звука
- *   node scripts/render.mjs --vertical         # вертикальная версия 1080×1920 → out/<имя>-vertical.mp4
- *   node scripts/render.mjs --lang en          # другой язык (text/en.js, voice/en.*) → out/<имя>-en.mp4
- *   node scripts/render.mjs --cover --lang en  # обложка для Reels 1080×1920 (cover.html) → out/cover-en.jpg
- *   node scripts/render.mjs --vertical --lang en --captions   # субтитры прямо в кадре → out/<имя>-en-vertical-captions.mp4
- *                                              # (флаги сочетаются между собой и с --stills / --poster)
- *   FPS=25 node scripts/render.mjs --from 30 --to 60   # кусок (для отладки)
- *   CRF=23 node scripts/render.mjs             # качество H.264 (по умолчанию 19; больше — меньше файл:
- *                                              # ИИ-картинкам с наездом хватает 22–24)
+ *   node scripts/render.mjs                    # out/<name>.mp4 (+ audio voice/<lang>.m4a and subtitles .vtt, if present)
+ *   node scripts/render.mjs --stills 3,20,41   # only PNG frames for checking → out/still-*.png
+ *   node scripts/render.mjs --poster           # only the poster out/poster.jpg
+ *   node scripts/render.mjs --mute             # no audio
+ *   node scripts/render.mjs --vertical         # vertical version 1080×1920 → out/<name>-vertical.mp4
+ *   node scripts/render.mjs --lang ru          # another language (text/ru.js, voice/ru.*) → out/<name>-ru.mp4
+ *   node scripts/render.mjs --cover --lang ru  # Reels cover 1080×1920 (cover.html) → out/cover-ru.jpg
+ *   node scripts/render.mjs --vertical --lang ru --captions   # captions burned into the frame → out/<name>-ru-vertical-captions.mp4
+ *                                              # (flags combine with each other and with --stills / --poster)
+ *   FPS=25 node scripts/render.mjs --from 30 --to 60   # a part (for debugging)
+ *   CRF=23 node scripts/render.mjs             # H.264 quality (19 by default; higher — smaller file:
+ *                                              # AI images with a slow zoom are fine at 22–24)
  *
- * Чтобы не перегревать ноутбук (x264 занимает все ядра, Chromium — ещё одно):
- *   на Mac по умолчанию — аппаратный кодек VideoToolbox, процессор почти свободен (ENC=sw — x264)
- *   ENC=hw      — аппаратный кодек и на Linux/Windows (NVIDIA NVENC)
- *   THREADS=2   — x264 не больше 2 потоков (preset medium)
- *   PAUSE=40    — пауза между кадрами, мс (меньше нагрев, дольше рендер)
- *   NICE=10     — пониженный приоритет ffmpeg и Chromium (по умолчанию 10; 0 — как есть)
- * Лёгкая версия для сайта (720p) — scripts/web.mjs (make web).
+ * To keep a laptop from overheating (x264 takes every core, Chromium one more):
+ *   on a Mac by default — the hardware VideoToolbox encoder, the CPU stays almost free (ENC=sw — x264)
+ *   ENC=hw      — a hardware encoder on Linux/Windows too (NVIDIA NVENC)
+ *   THREADS=2   — x264 uses at most 2 threads (preset medium)
+ *   PAUSE=40    — a pause between frames, ms (less heat, slower render)
+ *   NICE=10     — lower priority for ffmpeg and Chromium (10 by default; 0 — unchanged)
+ * A light version for the site (720p) — scripts/web.mjs (make web).
  *
- * Кадры детерминированы: index.html?render, на каждый кадр window.__video.seek(t) и скриншот.
- * Сеть не нужна: шрифты локальные, внешние запросы обрываются. */
+ * Frames are deterministic: index.html?render, window.__video.seek(t) and a screenshot for every frame.
+ * No network needed: fonts are local, external requests are aborted. */
 import { spawn } from 'node:child_process';
 import { setPriority } from 'node:os';
 import { createReadStream, existsSync, mkdirSync, statSync } from 'node:fs';
@@ -37,15 +37,15 @@ import { SERVE_ROOT, project } from './project.mjs';
 
 const args = process.argv.slice(2);
 const P = await project(args);
-const ROOT = P.dir; // проект: index.html, cover.html, voice/, out/
+const ROOT = P.dir; // project: index.html, cover.html, voice/, out/
 const OUT = join(ROOT, 'out');
 const FPS = Number(process.env.FPS || 30);
 const CRF = String(process.env.CRF || 19);
 const PAUSE = Number(process.env.PAUSE || 0);
 const NICE = Number(process.env.NICE ?? 10);
-/** аппаратный кодек: на macOS по умолчанию (VideoToolbox есть всегда), ENC=hw — и на Linux/Windows (NVENC), ENC=sw — x264 */
+/** hardware encoder: default on macOS (VideoToolbox is always there), ENC=hw — on Linux/Windows too (NVENC), ENC=sw — x264 */
 const HW = process.env.ENC ? process.env.ENC === 'hw' : process.platform === 'darwin';
-/** кодек: аппаратный — битрейт по размеру кадра (≈9 Мбит/с на 1920×1080), иначе x264 с CRF */
+/** codec: hardware — bitrate by frame size (≈9 Mbit/s at 1920×1080), otherwise x264 with CRF */
 function videoCodec(pixels) {
   const threads = process.env.THREADS ? ['-threads', process.env.THREADS] : [];
   if (HW) {
@@ -56,10 +56,10 @@ function videoCodec(pixels) {
   }
   return ['-c:v', 'libx264', '-preset', process.env.THREADS ? 'medium' : 'slow', '-crf', CRF, ...threads];
 }
-/** пониженный приоритет процесса (не мешать остальной работе на ноутбуке) */
-const lower = (pid) => { if (NICE && pid) { try { setPriority(pid, NICE); } catch { /* нет прав — как есть */ } } };
+/** lower the process priority (don't get in the way of other work on the laptop) */
+const lower = (pid) => { if (NICE && pid) { try { setPriority(pid, NICE); } catch { /* no permission — leave as is */ } } };
 const LANG = args.includes('--lang') ? args[args.indexOf('--lang') + 1] : P.langs[0];
-// ролик только в вертикальном формате (film.formats = ['v']) — вертикальный кадр и без флага
+// a vertical-only video (film.formats = ['v']) — vertical frame even without the flag
 const VERT = args.includes('--vertical') || P.makeFilm(LANG).formats?.join() === 'v';
 const CAPS = args.includes('--captions');
 const SUFFIX = `${LANG !== P.langs[0] ? `-${LANG}` : ''}${VERT ? '-vertical' : ''}${CAPS ? '-captions' : ''}`;
@@ -72,7 +72,7 @@ const TYPES = {
 };
 
 const server = createServer((req, res) => {
-  // сервер отдаёт корень репозитория: проекту нужен и сам video-kit (../../video-kit/…)
+  // the server serves the repo root: a project needs video-kit too (../../video-kit/…)
   const p = join(SERVE_ROOT, decodeURIComponent(new URL(req.url, 'http://x').pathname).replace(/\/$/, '/index.html'));
   try {
     if (!p.startsWith(SERVE_ROOT) || !statSync(p).isFile()) throw new Error();
@@ -91,7 +91,7 @@ page.on('pageerror', (e) => { console.error(e); process.exitCode = 1; });
 page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) console.error(m.text()); });
 mkdirSync(OUT, { recursive: true });
 if (opt('cover')) {
-  // обложка — отдельная страница, кадр всегда вертикальный
+  // the cover is a separate page, always a vertical frame
   await page.setViewportSize({ width: 1080, height: 1920 });
   await page.goto(`${base}cover.html?lang=${LANG}`);
   await page.waitForFunction(() => window.__cover?.ready, null, { timeout: 60000 });
@@ -111,7 +111,7 @@ const rel = (p) => p.replace(`${ROOT}/`, '');
 
 const stills = opt('stills');
 if (stills) {
-  // кадры по порядку времени: seek назад перезагружает страницу
+  // frames in time order: seeking backwards reloads the page
   const ts = String(stills).split(',').map(Number).sort((a, b) => a - b);
   for (const t of ts) {
     await seek(t);
@@ -132,7 +132,7 @@ if (stills) {
   const voice = join(ROOT, 'voice', `${LANG}.m4a`);
   const vtt = join(ROOT, 'voice', `${LANG}.vtt`);
   const withAudio = existsSync(voice) && !opt('mute');
-  // субтитры — отдельной дорожкой (включаются в плеере), только для целого ролика
+  // subtitles as a separate track (turned on in the player), only for a whole video
   const withSubs = withAudio && !part && existsSync(vtt);
   const inputs = [
     ...(withAudio ? ['-ss', String(from), '-t', String(to - from), '-i', voice] : []),

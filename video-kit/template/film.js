@@ -1,19 +1,19 @@
-/* {{NAME}} — сценарий ролика. Заготовка video-kit: три сцены (титул, три тезиса, финал) — замените
- * своими. Тексты — в text/<язык>.js, стили сцен — в scenes.css, движок — в {{KIT}}.
+/* {{NAME}} — the video script. The video-kit stub: three scenes (title, three points, finale) — replace them
+ * with your own. Texts — in text/<lang>.js, scene styles — in scenes.css, the engine — in {{KIT}}.
  *
- * Сцена: { id, kicker?, num?, mood?, theme?, build(s), html, draw(t, q, ctx) }
- *   build(s) — время: s.say(текст) → { t0, t1, at('слово') }, s.sfx(t, звук), s.hold(t), s.p(пауза);
- *              возвращает q — моменты, на которые завязана анимация;
- *   html     — вёрстка: строка или ({ v }) => строка (v — вертикальный кадр 1080×1920);
- *   draw(t, q, ctx) — кадр в момент t (секунды от начала сцены); ctx.$ / ctx.$$ — поиск в сцене, ctx.v.
- * mood — музыка: calm | drive | dark | end; theme — фон сцены: dark | accent.
- * Звуки: whoosh swish pop tick strike impact riser bell chime (video-kit/lib/sound.mjs).
- * Всё привязано к репликам: после новой озвучки тайминги подстраиваются сами. */
+ * A scene: { id, kicker?, num?, mood?, theme?, build(s), html, draw(t, q, ctx) }
+ *   build(s) — time: s.say(text) → { t0, t1, at('word') }, s.sfx(t, sound), s.hold(t), s.p(pause);
+ *              returns q — the moments the animation hangs on;
+ *   html     — markup: a string or ({ v }) => string (v — the vertical frame 1080×1920);
+ *   draw(t, q, ctx) — the frame at moment t (seconds from the scene start); ctx.$ / ctx.$$ — query inside the scene, ctx.v.
+ * mood — music: calm | drive | dark | end; theme — scene background: dark | accent.
+ * Sounds: whoosh swish pop tick strike impact riser bell chime (video-kit/lib/sound.mjs).
+ * Everything is tied to the lines: after a new voice-over the timings adjust themselves. */
 import { E, css, pop, rise, seg, words } from '{{KIT}}/lib/motion.js';
 import en from './text/en.js';
 import ru from './text/ru.js';
 
-export const TEXTS = { ru, en }; // первый язык — основной
+export const TEXTS = { ru, en }; // the first language is the main one
 export const LANGS = Object.keys(TEXTS);
 
 const wordsOf = (list) => list.map((w) => (w === '<br>' ? '<br>' : `<span class="w">${w}</span>`)).join(' ').replace(/ <br> /g, '<br>');
@@ -25,9 +25,9 @@ export default function makeFilm(lang = LANGS[0]) {
     lang,
     title: T.ui.title,
     ui: T.ui,
-    poster: 3, // кадр-превью
+    poster: 3, // preview frame
     scenes: [
-      // ---------------------------------------------------------------- титул
+      // ---------------------------------------------------------------- title
       {
         id: 'title', mood: 'calm',
         build(s) {
@@ -47,7 +47,7 @@ export default function makeFilm(lang = LANGS[0]) {
         },
       },
 
-      // ---------------------------------------------------------------- три тезиса: карточка на каждом слове-якоре
+      // ---------------------------------------------------------------- three points: a card on every cue word
       {
         id: 'points', kicker: T.points.kicker, num: '01', mood: 'drive',
         build(s) {
@@ -68,7 +68,7 @@ export default function makeFilm(lang = LANGS[0]) {
         },
       },
 
-      // ---------------------------------------------------------------- вывод на цветном фоне
+      // ---------------------------------------------------------------- the verdict on a colored background
       {
         id: 'verdict', mood: 'dark', theme: 'accent',
         build(s) {
@@ -83,7 +83,7 @@ export default function makeFilm(lang = LANGS[0]) {
         },
       },
 
-      // ---------------------------------------------------------------- финал
+      // ---------------------------------------------------------------- finale
       {
         id: 'end', mood: 'end',
         build(s) {

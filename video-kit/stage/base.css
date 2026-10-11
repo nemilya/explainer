@@ -1,8 +1,8 @@
-/* video-kit: базовое оформление роликов — шрифты, токены по умолчанию, кадр, сцены, подписи глав,
- * полоса прогресса, субтитры и плеер. Кадр 1920×1080, вертикальный — 1080×1920 (#stage.v),
- * субтитры в кадре — #stage.cc. Палитру и вёрстку сцен задаёт проект (scenes.css рядом с film.js):
- * он подключается после этого файла и переопределяет токены :root.
- * Шрифты: Source Serif 4 (Serif), Golos Text (Sans), JetBrains Mono (Mono) — OFL, см. fonts/. */
+/* video-kit: base styling of videos — fonts, default tokens, the frame, scenes, chapter labels,
+ * progress bar, subtitles and the player. Frame 1920×1080, vertical — 1080×1920 (#stage.v),
+ * captions in the frame — #stage.cc. The palette and scene layout come from the project (scenes.css next to film.js):
+ * it is loaded after this file and overrides the :root tokens.
+ * Fonts: Source Serif 4 (Serif), Golos Text (Sans), JetBrains Mono (Mono) — OFL, see fonts/. */
 @font-face { font-family: Serif; font-weight: 400; src: url(../fonts/serif-400-cyr.woff2) format('woff2'); unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
 @font-face { font-family: Serif; font-weight: 400; src: url(../fonts/serif-400-lat.woff2) format('woff2'); unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2122, U+2190-21FF, U+2212, U+2248; }
 @font-face { font-family: Serif; font-weight: 400; font-style: italic; src: url(../fonts/serif-400i-cyr.woff2) format('woff2'); unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
@@ -22,11 +22,11 @@
   --bg: #EDEFF3; --paper: #F8F9FB; --mist: #DCE2EC; --line: #D8DEE8; --haze: #D3E1F0;
   --ink: #0F1A2E; --ink2: #2C3A55; --muted: #56627A; --cloud: #9AA4B6;
   --accent: #3346E8; --accent-d: #2433B8; --accent-soft: #DDE1FF; --steel: #8FA3CC; --civic: #0B7A6A; --sky: #5BB6E0;
-  --accent-on-dark: #8E9AFF; /* акцент на тёмно-синем фоне (контраст) */
+  --accent-on-dark: #8E9AFF; /* accent on a dark blue background (contrast) */
 }
 * { box-sizing: border-box; }
 
-/* ================================================================ кадр */
+/* ================================================================ frame */
 #stage {
   position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: clip;
   background: var(--bg); transform-origin: 0 0; font-family: Sans, sans-serif; color: var(--ink);
@@ -39,10 +39,10 @@
 .b3 { width: 380px; height: 380px; background: #C7D2E8; opacity: .28; }
 
 #scenes { position: absolute; inset: 0; }
-/* постоянные слои под сценами (film.layers): фигура anatomy, машина */
+/* persistent layers under the scenes (film.layers): an anatomy figure, a machine */
 .layer { position: absolute; inset: 0; overflow: clip; }
 
-/* участники диалога (film.speakers): плашки внизу слева, подсвечен тот, кто говорит */
+/* dialogue participants (film.speakers): badges at the bottom left, the speaker is highlighted */
 #speakers { position: absolute; left: 140px; bottom: 44px; display: flex; gap: 26px; }
 .spk { display: flex; align-items: center; gap: 14px; opacity: .45; transition: none; }
 .spk.on { opacity: 1; }
@@ -63,16 +63,16 @@
 .scene.dark .strike::after { background: var(--accent-on-dark); }
 .scene.accent { background: var(--accent); color: #fff; }
 
-/* общая типографика сцен */
+/* shared scene typography */
 .mono { font: 400 22px/1.1 Mono, monospace; letter-spacing: .1em; text-transform: uppercase; }
 .scene em { font-style: italic; color: var(--accent); }
 .h2 { position: absolute; left: 140px; top: 140px; margin: 0; font: 400 78px/1.08 Serif; letter-spacing: -.015em; }
 .w { display: inline-block; }
-/* зачёркивание и подчёркивание рисуются по --k (0..1) */
+/* strike-through and underline are drawn by --k (0..1) */
 .strike { position: relative; display: inline-block; }
 .strike::after { content: ''; position: absolute; left: -6px; right: -6px; top: 56%; height: 6px; border-radius: 3px; background: var(--accent); transform: scaleX(var(--k, 0)); transform-origin: 0 50%; }
 
-/* ================================================================ слои поверх сцен */
+/* ================================================================ layers above the scenes */
 #chrome { position: absolute; inset: 0; pointer-events: none; }
 #kicker { position: absolute; left: 140px; top: 64px; display: flex; gap: 18px; align-items: center; font: 400 23px/1 Mono, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--cloud); }
 #kicker .num { color: var(--accent); }
@@ -90,8 +90,8 @@
 #cc i.on { color: var(--accent-on-dark); }
 
 
-/* ================================================================ вертикальный кадр 1080×1920 (?v)
- * Поля 80px; смысловое — между 200 и 1650px по высоте (снизу в Reels/Shorts — подписи и кнопки). */
+/* ================================================================ vertical frame 1080×1920 (?v)
+ * Margins 80px; the meaningful part — between 200 and 1650px in height (Reels/Shorts put captions and buttons at the bottom). */
 #stage.v { width: 1080px; height: 1920px; }
 #stage.v .b1 { width: 1000px; height: 1000px; }
 #stage.v .b2 { width: 760px; height: 760px; }
@@ -99,13 +99,13 @@
 #stage.v #brand { display: none; }
 #stage.v #speakers { left: 80px; top: 176px; bottom: auto; gap: 22px; }
 #stage.v .spk .ava { width: 52px; height: 52px; font-size: 24px; }
-/* субтитры — над нижней полосой интерфейса Reels/Shorts (≈320px снизу) */
+/* captions — above the bottom strip of the Reels/Shorts interface (≈320px from the bottom) */
 #stage.v #cc { bottom: 330px; max-width: 940px; }
 #stage.v #cc span { font-size: 48px; padding: 8px 22px; border-radius: 14px; }
 #stage.v .mono { font-size: 24px; }
 #stage.v .h2 { left: 80px; top: 200px; width: 920px; font-size: 72px; text-wrap: balance; }
 
-/* ================================================================ плеер (в рендере скрыт) */
+/* ================================================================ player (hidden in render) */
 html { color-scheme: dark; }
 html, body { margin: 0; height: 100%; }
 body { background: #0B1222; color: #E6EAF2; font: 15px/1.4 Sans, system-ui, sans-serif; overflow: hidden; }
@@ -150,6 +150,6 @@ body.render #frame { overflow: visible; }
   #cover .btn { width: 76px; height: 76px; }
 }
 
-/* ================================================================ ИИ-кадры (lib/art.js: shot('id') → <img class="shot">)
- * Картинка на весь кадр; движение — ken() / shake() из lib/motion.js (transform). */
+/* ================================================================ AI shots (lib/art.js: shot('id') → <img class="shot">)
+ * The image fills the frame; motion — ken() / shake() from lib/motion.js (transform). */
 .shot { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 50%; display: block; user-select: none; }

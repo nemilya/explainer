@@ -1,24 +1,24 @@
-/* Сцена ролика и плеер. Кадр — функция времени: window.__video.seek(t) приводит все сцены и слои
- * к моменту t (сцены рисуются заново каждый кадр, состояния нет). scripts/render.mjs снимает
- * кадры подряд (?render); без него это интерактивный плеер: звук, главы, субтитры, перемотка.
- * Формат и язык — в адресе: ?v / ?lang=en или #v, #en, #en-v (v — вертикальный кадр 1080×1920,
- * иначе 1920×1080; язык — text/<язык>.js проекта, озвучка voice/<язык>.*; по умолчанию — первый язык
- * из LANGS в film.js).
+/* The video stage and player. A frame is a function of time: window.__video.seek(t) brings every scene and layer
+ * to moment t (scenes are redrawn every frame, there is no state). scripts/render.mjs captures
+ * frames one by one (?render); without it this is an interactive player: audio, chapters, subtitles, seeking.
+ * Format and language are in the URL: ?v / ?lang=ru or #v, #ru, #ru-v (v — vertical frame 1080×1920,
+ * otherwise 1920×1080; language — the project's text/<lang>.js, voice-over voice/<lang>.*; default — the first language
+ * in LANGS in film.js).
  *
- * Контракт проекта (папка страницы): film.js — export default makeFilm(lang) → { title, ui, scenes, poster?,
- *   formats? (['v'] — только вертикальный кадр), captions? (true — субтитры в плеере включены сразу),
- *   layers? — постоянные слои под сценами (фигура, машина): [{ id, html({ v }), draw(t, tl, ctx) }],
- *     t — время от начала ролика, tl — { scenes (start, dur, q каждой сцены), events, duration };
- *   speakers? — участники диалога: [{ voice: '' | 'he' | …, name, role }] — плашки «кто говорит»
- *     (voice '' — основной голос; остальные — роли из s.say(…, { voice })) }
- * и export LANGS; voice/<язык>.json — манифест озвучки (без него длительности оцениваются по тексту).
- * ?captions — субтитры прямо в кадре (для вшитых в видео субтитров, render.mjs --captions).
- * Картинки в вёрстке сцен (<img>, например ИИ-кадры art/shots/…) декодируются до старта.
- * Клавиши: пробел/K — пауза, ←/→ — 5 с, N/P — глава, C — субтитры, M — звук, F — весь экран. */
+ * Project contract (the page's folder): film.js — export default makeFilm(lang) → { title, ui, scenes, poster?,
+ *   formats? (['v'] — vertical frame only), captions? (true — subtitles on in the player from the start),
+ *   layers? — persistent layers under the scenes (a figure, a machine): [{ id, html({ v }), draw(t, tl, ctx) }],
+ *     t — time from the start of the video, tl — { scenes (start, dur, q of every scene), events, duration };
+ *   speakers? — dialogue participants: [{ voice: '' | 'he' | …, name, role }] — "who is speaking" badges
+ *     (voice '' — the main voice; others — roles from s.say(…, { voice })) }
+ * and export LANGS; voice/<lang>.json — the voice-over manifest (without it durations are estimated from the text).
+ * ?captions — captions right in the frame (for subtitles burned into the video, render.mjs --captions).
+ * Images in scene markup (<img>, e.g. AI shots art/shots/…) are decoded before the start.
+ * Keys: Space/K — pause, ←/→ — 5 s, N/P — chapter, C — subtitles, M — sound, F — full screen. */
 import { E, clamp, seg } from '../lib/motion.js';
 import { XF, compile } from '../lib/timeline.js';
 
-// проект — папка страницы плеера: film.js, scenes.css, voice/ (video-kit — только движок)
+// the project is the player page's folder: film.js, scenes.css, voice/ (video-kit is only the engine)
 const { default: makeFilm, LANGS } = await import(new URL('film.js', document.baseURI).href);
 const PARAMS = new URLSearchParams(location.search);
 const RENDER = PARAMS.has('render');
@@ -37,17 +37,17 @@ const $ = (id) => document.getElementById(id);
 const stage = $('stage');
 if (V) { stage.classList.add('v'); document.body.classList.add('vertical'); }
 
-// ---------------------------------------------------------------- таймлайн
+// ---------------------------------------------------------------- timeline
 let voice = null;
 try {
   const r = await fetch(new URL(`voice/${LANG}.json`, document.baseURI));
   if (r.ok) voice = await r.json();
-} catch { /* без озвучки — длительности по оценке */ }
+} catch { /* no voice-over — estimated durations */ }
 const TL = compile(film, voice);
 const CUES = TL.events.filter((e) => e.type === 'voice');
 
-// субтитры короткими фразами (как в Reels): фраза — до ~26 знаков или до знака препинания,
-// время слова — по доле текста с паузами на знаках (как at() в таймлайне)
+// subtitles in short phrases (as in Reels): a phrase is up to ~26 characters or up to a punctuation mark,
+// a word's time — by its share of the text with pauses on punctuation (like at() in the timeline)
 const weight = (x) => x.length + 5 * (x.match(/[,.:;!?—…]/g) || []).length;
 const PHRASES = CUES.flatMap((c) => {
   const words = c.text.split(/\s+/).reduce((a, w) => {
@@ -76,7 +76,7 @@ const PHRASES = CUES.flatMap((c) => {
 const esc = (x) => x.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const SC = TL.scenes;
 
-// ---------------------------------------------------------------- постоянные слои и сцены: вёрстка один раз
+// ---------------------------------------------------------------- persistent layers and scenes: markup once
 const host = $('scenes');
 const LAYERS = (film.layers ?? []).map((ly) => {
   const el = document.createElement('div');
@@ -85,7 +85,7 @@ const LAYERS = (film.layers ?? []).map((ly) => {
   host.parentNode.insertBefore(el, host);
   return { ly, ctx: { root: el, v: V, $: (q) => el.querySelector(q), $$: (q) => [...el.querySelectorAll(q)] } };
 });
-// участники диалога: плашки, подсвечивается тот, кто сейчас говорит
+// dialogue participants: badges, the one speaking right now is highlighted
 const SPEAKERS = film.speakers ?? [];
 let speakersEl = null;
 if (SPEAKERS.length) {
@@ -109,7 +109,7 @@ const ctxs = roots.map((root, i) => ({
   $$: (s) => [...root.querySelectorAll(s)],
 }));
 
-// главы: подряд идущие сцены с одной подписью — одна глава
+// chapters: consecutive scenes with the same label make one chapter
 const NAMES = film.ui.chapters;
 $('brand').textContent = film.ui.brand;
 const CHAPTERS = [];
@@ -120,7 +120,7 @@ SC.forEach((s, i) => {
   CHAPTERS.push({ name, num: s.num ?? '', start: s.start, end: s.start + s.dur, scene: i });
 });
 
-// ---------------------------------------------------------------- кадр
+// ---------------------------------------------------------------- frame
 const sceneAt = (t) => SC.reduce((a, s, i) => (t >= s.start ? i : a), 0);
 const chapterAt = (t) => CHAPTERS.reduce((a, c, i) => (t >= c.start ? i : a), 0);
 const kick = $('kicker');
@@ -171,7 +171,7 @@ function frame(t) {
   }
   shown = on;
 
-  // фон: медленно плывущие пятна
+  // background: slowly drifting blobs
   const b = stage.querySelectorAll('.blob');
   const pos = [
     [1300 + 80 * Math.sin(t * 0.11), -380 + 60 * Math.cos(t * 0.13)],
@@ -180,7 +180,7 @@ function frame(t) {
   ];
   b.forEach((el, j) => { el.style.transform = `translate(${(pos[j][0] * W) / 1920}px, ${(pos[j][1] * H) / 1080}px)`; });
 
-  // подпись главы: въезжает в начале серии сцен с одной подписью, уходит в конце
+  // chapter label: slides in at the start of a run of scenes with one label, leaves at its end
   const s = SC[i];
   if (s.kicker) {
     let f = i;
@@ -201,7 +201,7 @@ function frame(t) {
   $('brand').style.opacity = plain(i) ? (i > 0 && !plain(i - 1) ? 1 - k : 0) : (i > 0 && plain(i - 1) ? k : 1);
   $('progress').firstChild.style.transform = `scaleX(${t / TL.duration})`;
 
-  // субтитры (только в плеере)
+  // subtitles (player only)
   stage.classList.toggle('cc', !cc.hidden);
   if (!cc.hidden) {
     const ph = PHRASES.find((p) => t >= p.t0 && t < p.t1);
@@ -210,28 +210,28 @@ function frame(t) {
     if (key !== ccKey) {
       ccKey = key;
       cc.firstChild.innerHTML = ph ? ph.words.map((w, j) => `<i${j === on ? ' class="on"' : ''}>${esc(w.w)}</i>`).join(' ') : '';
-      cc.dataset.voice = ph?.voice ?? ''; // реплика персонажа (s.say(…, { voice })) — можно покрасить в scenes.css
+      cc.dataset.voice = ph?.voice ?? ''; // a character's line (s.say(…, { voice })) — can be colored in scenes.css
     }
     cc.style.opacity = ph ? 1 : 0;
   }
 }
 
-// ---------------------------------------------------------------- запуск
-// картинки сцен (ИИ-кадры art/…) должны быть декодированы до первого кадра: рендер покадровый
+// ---------------------------------------------------------------- start
+// scene images (AI shots art/…) must be decoded before the first frame: rendering is frame by frame
 await Promise.all([...document.images].map((img) => img.decode().catch(() => console.error(`нет картинки: ${img.getAttribute('src')}`))));
-// все шрифты (@font-face движка и проекта) — заранее: в скрытых сценах браузер сам их не грузит
+// all fonts (@font-face of the engine and the project) — up front: the browser won't load them for hidden scenes
 await Promise.all([...document.fonts].map((f) => f.load().catch(() => {})));
 await document.fonts.ready;
 frame(0);
 const seek = async (t) => frame(t);
 window.__video = {
   ready: true, seek, duration: TL.duration, scenes: SC, chapters: CHAPTERS, width: W, height: H,
-  poster: film.poster ?? 3.2, // кадр для обложки плеера и poster.jpg
+  poster: film.poster ?? 3.2, // the frame for the player cover and poster.jpg
 };
 
 if (!RENDER) player();
 
-// ---------------------------------------------------------------- плеер
+// ---------------------------------------------------------------- player
 function player() {
   const frameEl = $('frame');
   const audio = $('audio');
@@ -246,7 +246,7 @@ function player() {
   audio.src = audio.dataset.src.replace('{lang}', LANG);
   $('watch').textContent = film.ui.watch;
   $('menu-btn').textContent = film.ui.menu;
-  const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { /* приватный режим */ } return null; };
+  const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { /* private mode */ } return null; };
 
   const fit = () => {
     const r = frameEl.getBoundingClientRect();
@@ -257,7 +257,7 @@ function player() {
   new ResizeObserver(fit).observe(frameEl);
   fit();
 
-  // главы: отметки на дорожке и меню
+  // chapters: marks on the track and the menu
   track.querySelector('.ticks').innerHTML = CHAPTERS.slice(1).map((c) => `<i class="tick" style="left:${(c.start / TL.duration) * 100}%"></i>`).join('');
   menu.innerHTML = CHAPTERS.map((c, i) => `<button type="button" role="menuitem" data-i="${i}"><span class="n">${c.num || '·'}</span><span>${c.name}</span><span class="tm">${fmt(c.start)}</span></button>`).join('');
   $('dur').textContent = fmt(TL.duration);
@@ -271,7 +271,7 @@ function player() {
   const go = (x) => {
     x = clamp(x, 0, TL.duration);
     t0 = x; wall = performance.now();
-    if (hasAudio) { try { audio.currentTime = x; } catch { /* ещё не загружено */ } }
+    if (hasAudio) { try { audio.currentTime = x; } catch { /* not loaded yet */ } }
     frame(x);
   };
   const setPlaying = (v) => {
@@ -310,8 +310,8 @@ function player() {
   $('prev').onclick = () => jumpChapter(-1);
   $('next').onclick = () => jumpChapter(1);
   $('cc-btn').onclick = () => setCC(cc.hidden);
-  // формат кадра: 16:9 ↔ 9:16 (страница перезагружается в другом формате)
-  // формат кадра и язык: страница перезагружается с новым #хешем (#en-v, #v, #en …)
+  // frame format: 16:9 ↔ 9:16 (the page reloads in the other format)
+  // frame format and language: the page reloads with a new #hash (#ru-v, #v, #ru …)
   const reopen = ({ v = V, lang = LANG }) => {
     const u = new URL(location.href);
     const hadParams = u.searchParams.has('v') || u.searchParams.has('lang');
@@ -345,10 +345,10 @@ function player() {
     if (document.fullscreenElement) document.exitFullscreen();
     else el.requestFullscreen?.().catch(() => {});
   };
-  // щелчок по кадру — пауза
+  // a click on the frame — pause
   stage.addEventListener('click', () => { if ($('cover').style.display === 'none') toggle(); });
 
-  // перемотка по дорожке
+  // seeking on the track
   const posAt = (e) => { const r = track.getBoundingClientRect(); return clamp((e.clientX - r.left) / r.width) * TL.duration; };
   let drag = false;
   track.addEventListener('pointerdown', (e) => { drag = true; track.setPointerCapture(e.pointerId); go(posAt(e)); });

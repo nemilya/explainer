@@ -1,13 +1,13 @@
-/* Фигура «Token bucket» на ките anatomy (../../anatomy/kit/iso-kit.mjs): машина, чья работа и есть
- * алгоритм. Магазин на 5 монет — ведро (ёмкость b); бункер с часами роняет монету каждые 2 с —
- * пополнение (скорость r); когда магазин полон, верхняя монета закрывает заслонку, и лишняя монета
- * катится мимо в стакан переполнения. По ленте едут запросы: у магазина толкатель кладёт на карточку
- * нижнюю монету (пропущен → лоток «200»), а если монет нет — толкатель сбоку сбрасывает карточку
- * в лоток «429». Все числа и движения — из model.js.
+/* The "Token bucket" figure on the anatomy kit (../../anatomy/kit/iso-kit.mjs): a machine whose working is
+ * the algorithm. A magazine of 5 coins is the bucket (capacity b); a hopper with a clock drops a coin every 2 s —
+ * the refill (rate r); when the magazine is full, the top coin closes a flap and the extra coin
+ * rolls past into the overflow cup. Requests ride the belt: at the magazine a pusher puts the bottom coin
+ * on the card (passed → the "200" tray), and with no coins left a side kicker pushes the card
+ * into the "429" tray. Every number and motion comes from model.js.
  *
- * buildFigure() → { svg, P, W, H, anchors } — строка SVG (статичное + пустые слои движущихся деталей);
- * mountFigure(svgEl, fig) → { apply(view) } — расставить детали по view(sim, t) из model.js.
- * Модуль работает и в браузере, и в Node (без DOM при сборке). */
+ * buildFigure() → { svg, P, W, H, anchors } — the SVG string (static parts + empty layers for moving parts);
+ * mountFigure(svgEl, fig) → { apply(view) } — place the parts by view(sim, t) from model.js.
+ * The module works both in the browser and in Node (no DOM while building). */
 import * as k from '../../anatomy/kit/iso-kit.mjs';
 import { BASE_Z, CARD_H, CARD_Z, CHUTE_Z, COIN, MACHINE } from './model.js';
 
@@ -15,15 +15,15 @@ export const W = 640;
 export const H = 400;
 const AZ = 58;
 
-// ---------------------------------------------------------------- план мира (ед. ≈ мм машины)
+// ---------------------------------------------------------------- world plan (units ≈ mm of the machine)
 const PLATE = { x: -128, y: -46, w: 270, d: 120, r: 8 };
 const PLATE_H = 10;
 const FOOT_H = 5;
-const MAG = [0, -16]; // ось магазина
+const MAG = [0, -16]; // magazine axis
 const COIN_R = 6;
-const POST_R = 11; // радиус расстановки стоек магазина
+const POST_R = 11; // radius at which the magazine posts stand
 const POST_TOP = 40;
-const BASE = { x: -13, y: -29, w: 26, d: 26, r: 2 }; // основание магазина, верх — BASE_Z
+const BASE = { x: -13, y: -29, w: 26, d: 26, r: 2 }; // magazine base, top — BASE_Z
 const HOPPER = { x: -76, y: -31, w: 30, d: 30, r: 3 };
 const HOPPER_Z = [34, 58];
 const DIAL = [-61, -16];
@@ -58,7 +58,7 @@ export function buildFigure({ label } = {}) {
   const depth = ([x, y]) => k.depthOf([x, y, 0], P);
   const byDepth = (pts) => [...pts].sort((a, b) => depth(a) - depth(b));
 
-  // ---------------------------------------------------------------- основание
+  // ---------------------------------------------------------------- base
   function plate() {
     const out = [`<path class="iso-halo" d="${k.haloOf(PLATE, -PLATE_H - FOOT_H, PLATE_H, P)}"/>`];
     for (const [x, y] of byDepth(k.corners(PLATE, 22))) {
@@ -70,13 +70,13 @@ export function buildFigure({ label } = {}) {
     const screws = k.corners(PLATE, 10);
     out.push(L(screws.map(([x, y]) => k.ring(x, y, 2.2, 0, P, 16)).join(''), { tone: 'lo' }));
     out.push(D(screws.map(([x, y]) => at([x, y, 0])), { size: 0.5 }));
-    // линейка вдоль переднего края
+    // ruler along the front edge
     const strip = { x: -96, y: PLATE.y + PLATE.d - 14, w: 100, d: 6, r: 1 };
     out.push(S(k.slabOf(strip, 0, 0.6, P, 3), { tone: 'lo', crease: 'none' }));
     const ticks = k.topTicks(strip.x + 4, strip.x + strip.w - 4, 4, 5, strip.y + 0.8, 0.6, [2, 3.4], P);
     out.push(L(ticks.minor, { tone: 'lo' }), L(ticks.major, { tone: 'mid' }));
     out.push(D([at([strip.x + 2, strip.y + 3, 0.6]), at([strip.x + strip.w - 2, strip.y + 3, 0.6])], { size: 0.45 }));
-    // табличка
+    // label plate
     const label = { x: -116, y: PLATE.y + PLATE.d - 30, w: 34, d: 18, r: 1.5 };
     out.push(S(k.slabOf(label, 0, 0.8, P, 3, 0.3), { tone: 'mid' }));
     out.push(k.faceTextSvg(k.topMatrix([label.x + 3.5, label.y + 6.5], 0.8, P, 'x'), 'TOKEN BUCKET', { size: 2.6, tone: 'mid' }));
@@ -85,7 +85,7 @@ export function buildFigure({ label } = {}) {
     return out.join('');
   }
 
-  // ---------------------------------------------------------------- бункер с часами: пополнение
+  // ---------------------------------------------------------------- hopper with a clock: the refill
   function feeder() {
     const out = [];
     const [x, y] = DIAL;
@@ -98,16 +98,16 @@ export function buildFigure({ label } = {}) {
     out.push(L(k.sideSeam(HOPPER, HOPPER_Z[0] + 6, P, 4), { tone: 'faint' }));
     out.push(L(k.planOutline(k.insetPlan(HOPPER, 2.5), HOPPER_Z[1], P, 4), { tone: 'faint' }));
     out.push(D(k.corners(HOPPER, 3).map(([a, b]) => at([a, b, HOPPER_Z[1]])), { size: 0.45 }));
-    // устье жёлоба на правой грани
+    // chute mouth on the right face
     out.push(L(k.pathOf([[CHUTE.from, CHUTE.y0 + 1, HOPPER_Z[0] + 5], [CHUTE.from, CHUTE.y1 - 1, HOPPER_Z[0] + 5], [CHUTE.from, CHUTE.y1 - 1, HOPPER_Z[0] + 13], [CHUTE.from, CHUTE.y0 + 1, HOPPER_Z[0] + 13]].map(at), true), { tone: 'lo' }));
-    // табличка скорости на передней грани
+    // rate plate on the front face
     const fy = HOPPER.y + HOPPER.d;
     out.push(k.faceTextSvg(k.sideMatrix([HOPPER.x + 5, fy, HOPPER_Z[1] - 8], 0, P, 'left'), 'r = 1 / 2 s', { size: 3, tone: 'mid' }));
     out.push(L([12, 15].map((dz) => k.segment([HOPPER.x + 5, fy, HOPPER_Z[1] - dz], [HOPPER.x + (dz > 13 ? 14 : 20), fy, HOPPER_Z[1] - dz], P)).join(''), { tone: 'faint', free: true }));
-    // ручка темпа
+    // tempo knob
     const kn = [HOPPER.x + HOPPER.w - 6, fy + 2.2];
     out.push(S(k.slabOf({ x: kn[0] - 1.4, y: fy, w: 2.8, d: 2.4, r: 0.6 }, HOPPER_Z[0] + 8, 3, P, 2), { tone: 'mid', crease: 'none' }));
-    // часы на крышке
+    // clock on the lid
     out.push(cyl(x, y, DIAL_R + 1.5, HOPPER_Z[1], 1, { tone: 'mid' }, 48));
     out.push(cyl(x, y, DIAL_R, HOPPER_Z[1] + 1, 1.5, { tone: 'hi', crease: 'lo' }, 48, 0.4));
     out.push(L(k.knurl(x, y, DIAL_R, HOPPER_Z[1] + 1, DIAL_TOP, 60, P, 0.25), { tone: 'lo' }));
@@ -123,7 +123,7 @@ export function buildFigure({ label } = {}) {
     return k.lineOnTop([x - Math.sin(a) * 2.4, y + Math.cos(a) * 2.4], [x + Math.sin(a) * (DIAL_R - 3), y - Math.cos(a) * (DIAL_R - 3)], DIAL_TOP + 0.2, P);
   };
 
-  // ---------------------------------------------------------------- магазин: ведро на 5 монет
+  // ---------------------------------------------------------------- magazine: a bucket of 5 coins
   const postAngles = [45, 135, 225, 315].map((a) => (a * Math.PI) / 180);
   const posts = postAngles.map((a) => [MAG[0] + POST_R * Math.cos(a), MAG[1] + POST_R * Math.sin(a)]);
   const [vx, vy] = k.towardViewer(P);
@@ -134,7 +134,7 @@ export function buildFigure({ label } = {}) {
   function magazineBase() {
     const out = [];
     out.push(`<path class="iso-halo" d="${k.haloOf(k.insetPlan(BASE, 2), 0, 1, P)}" style="filter:blur(4px)"/>`);
-    // направляющая толкателя сзади
+    // pusher guide at the back
     out.push(slab({ x: -5, y: -38, w: 10, d: 9 }, 0, 14, { tone: 'mid' }, 3, 0.4));
     out.push(L(k.lineOnTop([-3, -36], [-3, -31], 14, P) + k.lineOnTop([3, -36], [3, -31], 14, P), { tone: 'faint' }));
     out.push(S(k.slabOf(BASE, 0, BASE_Z, P, 4, 0.8), { tone: 'mid' }));
@@ -152,9 +152,9 @@ export function buildFigure({ label } = {}) {
     out.push(...front.map(post));
     for (const [x, y] of posts) out.push(cyl(x, y, 1.6, POST_TOP - 1.2, 1.2, { tone: 'mid' }, 16));
     out.push(L(k.ring(MAG[0], MAG[1], POST_R, POST_TOP, P, 48), { tone: 'lo' }));
-    // язычок от магазина к ленте
+    // tongue from the magazine to the belt
     out.push(slab({ x: -6.5, y: BASE.y + BASE.d, w: 13, d: 5 }, BASE_Z - 1.2, 1.2, { tone: 'mid' }, 2, 0.2));
-    // риски уровня на правой задней стойке: 5 монет — ёмкость b
+    // level marks on the right back post: 5 coins — capacity b
     const [px, py] = posts.reduce((a, p) => (p[0] - p[1] > a[0] - a[1] ? p : a));
     const marks = [];
     for (let i = 1; i <= 5; i++) marks.push(k.segment([px + 1.1, py, BASE_Z + i * COIN], [px + (i === 5 ? 5 : 3), py, BASE_Z + i * COIN], P));
@@ -163,7 +163,7 @@ export function buildFigure({ label } = {}) {
     return out.join('');
   }
 
-  // ---------------------------------------------------------------- жёлоб с заслонкой
+  // ---------------------------------------------------------------- chute with a flap
   const lip = (y) => ({ x: CHUTE.from, y, w: CHUTE.to - CHUTE.from, d: 1 });
   function chuteBack() {
     const out = [];
@@ -181,7 +181,7 @@ export function buildFigure({ label } = {}) {
     return out.join('');
   }
 
-  // ---------------------------------------------------------------- стакан переполнения
+  // ---------------------------------------------------------------- overflow cup
   function cup() {
     const [x, y] = CUP;
     const out = [`<path class="iso-halo" d="${k.haloOf({ x: x - CUP_R, y: y - CUP_R, w: CUP_R * 2, d: CUP_R * 2, r: CUP_R }, 0, 1, P)}" style="filter:blur(3px)"/>`];
@@ -192,7 +192,7 @@ export function buildFigure({ label } = {}) {
     return out.join('');
   }
 
-  // ---------------------------------------------------------------- толкатель отказов и лампа
+  // ---------------------------------------------------------------- rejection kicker and lamp
   function kicker() {
     const out = [slab(KICK, 0, KICK_TOP, { tone: 'mid' }, 4, 0.6)];
     out.push(L(k.sideSeam(KICK, 4, P, 4), { tone: 'faint' }));
@@ -208,7 +208,7 @@ export function buildFigure({ label } = {}) {
   ].join('');
   const rodAt = (len) => (len > 0.3 ? slab({ x: 29, y: 2 - 0.01, w: 2, d: len + 1 }, 16.5, 2, { tone: 'mid', crease: 'none' }, 2) : '');
 
-  // ---------------------------------------------------------------- лента
+  // ---------------------------------------------------------------- belt
   function beltBack() {
     const out = [];
     for (const x of [-102, -36, 46, 86]) out.push(slab({ x: x - 3, y: 1, w: 6, d: 34 }, 0, 3, { tone: 'mid' }, 2, 0.3));
@@ -232,7 +232,7 @@ export function buildFigure({ label } = {}) {
     return out.join('');
   }
 
-  // ---------------------------------------------------------------- лотки: 429 и 200
+  // ---------------------------------------------------------------- trays: 429 and 200
   const walls = (box) => ({
     back: slab({ x: box.x, y: box.y, w: box.w, d: WALL }, 0, BOX_H, { tone: 'mid' }, 2, 0.2),
     left: slab({ x: box.x, y: box.y, w: WALL, d: box.d }, 0, BOX_H, { tone: 'mid' }, 2, 0.2),
@@ -250,7 +250,7 @@ export function buildFigure({ label } = {}) {
       L(k.segment([box.x + 14, fy, 4.6], [box.x + box.w - 4, fy, 4.6], P), { tone: 'faint', free: true })].join('');
   }
 
-  // ---------------------------------------------------------------- подвижные детали: монета, карточка
+  // ---------------------------------------------------------------- moving parts: coin, card
   const coinSvg = [
     S(k.cylinder(0, 0, COIN_R, 0, COIN - 0.3, P, 32, 0.4), { tone: 'hi', lit: true }),
     L(k.ring(0, 0, COIN_R - 1.5, COIN - 0.3, P, 32), { tone: 'lo' }),
@@ -267,7 +267,7 @@ export function buildFigure({ label } = {}) {
 
   const svg = k.figureSvg({
     width: W, height: H,
-    label: label ?? 'Машина token bucket: магазин на пять монет, бункер с часами роняет монету каждые 2 секунды, лента везёт запросы. Запрос, получивший монету, уходит в лоток 200; запрос без монеты толкатель сбрасывает в лоток 429.',
+    label: label ?? 'A token bucket machine: a magazine of five coins, a hopper with a clock that drops a coin every 2 seconds, and a belt of requests. A request that gets a coin goes to the 200 tray; one without a coin is pushed into the 429 tray.',
     body: [
       plate(),
       feeder(),
@@ -296,7 +296,7 @@ export function buildFigure({ label } = {}) {
     ],
   });
 
-  // точки для камеры и подписей ролика (координаты viewBox)
+  // points for the video camera and labels (viewBox coordinates)
   const anchors = Object.fromEntries(Object.entries({
     machine: [-10, 10, 20],
     feeder: [DIAL[0], DIAL[1], HOPPER_Z[0] + 14],
@@ -321,7 +321,7 @@ export function buildFigure({ label } = {}) {
   };
 }
 
-/** Навесить движение на вставленный в страницу <svg> фигуры. */
+/** Attach motion to the figure's <svg> inserted into the page. */
 export function mountFigure(svgEl, fig) {
   const { P, parts } = fig;
   const $ = (name) => svgEl.querySelector(`[data-l="${name}"]`);

@@ -1,4 +1,4 @@
-/* Каталог, English (основной). Ключи — как в ru.mjs. */
+/* Catalog, English (the main language). Keys — as in ru.mjs. */
 export default {
   langName: 'English',
   ogLocale: 'en_US',
