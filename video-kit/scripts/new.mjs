@@ -1,0 +1,59 @@
+/* Новая тема explainer или новый ролик.
+ *
+ *   node video-kit/scripts/new.mjs explainers/<slug> --title "Как работает …"
+ *       тема целиком из template-explainer/: QUESTIONS.md (бриф), model.js, figure.js (anatomy),
+ *       index.html + landing.js (лендинг), video/ (film.js, text/, scenes.css, voice.config.json, …).
+ *       Дальше: cd explainers/<slug>/video && make preview.
+ *
+ *   node video-kit/scripts/new.mjs <папка> --plain [--name имя] [--art]
+ *       только ролик <папка>/video из template/ (как в infographics: титул, тезисы, финал);
+ *       --art — ещё art.js для роликов на ИИ-картинках (AI-ART.md).
+ *
+ * Пути до video-kit и корня репозитория подставляются сами ({{KIT}}, {{ROOT}}). */
+import { cpSync, existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs';
+import { basename, join, relative, resolve, sep } from 'node:path';
+
+const KIT = resolve(import.meta.dirname, '..');
+const ROOT = resolve(KIT, '..');
+const args = process.argv.slice(2);
+const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
+const src = args.find((a, i) => !a.startsWith('--') && !['--name', '--title'].includes(args[i - 1]));
+if (!src) {
+  console.error('usage: node video-kit/scripts/new.mjs explainers/<slug> --title "…"   |   <папка> --plain [--name имя] [--art]');
+  process.exit(1);
+}
+const target = resolve(src);
+if (!target.startsWith(ROOT + sep)) { console.error(`папка должна лежать в ${ROOT}`); process.exit(1); }
+const plain = args.includes('--plain');
+const dir = plain ? join(target, 'video') : target;
+const name = opt('name') ?? basename(target);
+const title = opt('title') ?? name;
+if (existsSync(join(dir, plain ? 'film.js' : 'model.js'))) { console.error(`уже есть: ${dir}`); process.exit(1); }
+
+if (plain) {
+  cpSync(join(KIT, 'template'), dir, { recursive: true });
+  if (args.includes('--art')) cpSync(join(KIT, 'template-art'), dir, { recursive: true });
+} else {
+  cpSync(join(KIT, 'template-explainer'), dir, { recursive: true });
+}
+const gi = join(plain ? dir : join(dir, 'video'), 'gitignore');
+if (existsSync(gi)) renameSync(gi, gi.replace(/gitignore$/, '.gitignore'));
+
+const fill = (d) => {
+  for (const f of readdirSync(d)) {
+    const p = join(d, f);
+    if (statSync(p).isDirectory()) { fill(p); continue; }
+    const s = readFileSync(p, 'utf8');
+    if (!s.includes('{{')) continue;
+    const kitRel = relative(dirname(p), KIT).split(sep).join('/');
+    const rootRel = relative(dirname(p), ROOT).split(sep).join('/') || '.';
+    writeFileSync(p, s.replaceAll('{{KIT}}', kitRel).replaceAll('{{ROOT}}', rootRel).replaceAll('{{NAME}}', name).replaceAll('{{TITLE}}', title));
+  }
+};
+function dirname(p) { return p.slice(0, p.lastIndexOf(sep)); }
+fill(dir);
+
+const rel = relative(process.cwd(), dir) || '.';
+console.log(plain
+  ? `→ ${rel}  (движок: ${relative(dir, KIT)})\n  дальше: cd ${rel} && make preview`
+  : `→ ${rel}: QUESTIONS.md, model.js, figure.js, index.html, video/\n  1) заполните QUESTIONS.md  2) model.js и figure.js (anatomy/SKILL.md)  3) video/: сценарий\n  посмотреть: cd ${rel}/video && make preview  (лендинг — ${rel}/index.html)`);

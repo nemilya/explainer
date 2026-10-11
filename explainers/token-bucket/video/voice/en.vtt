@@ -1,0 +1,81 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:09.660
+My script calls an API, and a minute later it gets four twenty-nine: Too Many Requests. Who is counting me?
+
+2
+00:00:09.960 --> 00:00:13.700
+Most likely a token bucket. Look, I built one as a machine.
+
+3
+00:00:16.700 --> 00:00:24.350
+This magazine holds five coins. That’s the bucket, and five is its capacity, called b.
+
+4
+00:00:24.650 --> 00:00:26.840
+And where do the coins come from?
+
+5
+00:00:28.940 --> 00:00:38.300
+From the hopper. The clock counts two seconds, and one coin drops into the magazine. That’s the refill rate, r: half a coin per second.
+
+6
+00:00:38.600 --> 00:00:41.700
+And if the magazine is already full?
+
+7
+00:00:42.000 --> 00:00:50.320
+Then the top coin closes a flap, and the new one rolls past, into the cup. You can’t save more than five: extra tokens are lost.
+
+8
+00:00:52.520 --> 00:01:00.190
+Now the requests. Each one rides the belt, and at the magazine a pusher puts the bottom coin on it.
+
+9
+00:01:00.490 --> 00:01:04.410
+Got a coin — the request goes through, two hundred OK.
+
+10
+00:01:04.710 --> 00:01:08.300
+So one request costs one token.
+
+11
+00:01:10.600 --> 00:01:13.750
+What if I send ten requests at once?
+
+12
+00:01:14.050 --> 00:01:21.550
+The first five take the whole reserve. While they ride, one more coin drops, and one more gets through.
+
+13
+00:01:21.850 --> 00:01:25.990
+The rest are out of luck: the kicker pushes them into the four twenty-nine tray.
+
+14
+00:01:28.890 --> 00:01:33.130
+And if I send one request per second, for a long time?
+
+15
+00:01:33.430 --> 00:01:43.830
+At first the reserve covers you. Then the magazine runs dry, and exactly as many get through as drip in: one request every two seconds.
+
+16
+00:01:44.130 --> 00:01:51.800
+So the rule is simple: in any T seconds, at most b plus r times T requests get through.
+
+17
+00:01:54.500 --> 00:01:57.720
+So a rate limit has two knobs?
+
+18
+00:01:58.020 --> 00:02:08.460
+Yes. Capacity b allows short bursts, and the rate r holds the average flow. The server is protected, and a normal client barely notices the limit.
+
+19
+00:02:08.760 --> 00:02:17.370
+And if you get a four twenty-nine, don’t hammer it again. Wait as long as the Retry-After header says: by then a new coin will drop.
+
+20
+00:02:19.770 --> 00:02:21.990
+Got it. I’ll teach my script to wait.

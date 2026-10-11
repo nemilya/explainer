@@ -1,0 +1,64 @@
+/* Запросы к OpenRouter для скриптов (озвучка — scripts/voice.mjs, картинки — scripts/art.mjs).
+ * Ключ — только из окружения OPENROUTER_API_KEY, никуда не пишется. Прокси — OPENROUTER_PROXY
+ * (socks5h://…, http://…; тогда запросы идут через curl). Повтор при 429 и 5xx — до 4 попыток. */
+import { execFileSync } from 'node:child_process';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { basename, join } from 'node:path';
+
+export const ENDPOINT = 'https://openrouter.ai/api/v1';
+const PROXY = process.env.OPENROUTER_PROXY || '';
+
+/** POST напрямую или через curl с прокси → { status, type, body: Buffer } */
+async function send(url, headers, json, form = null, timeout = 180) {
+  if (!PROXY) {
+    let body = json;
+    if (form) {
+      body = new FormData();
+      for (const [k, v] of Object.entries(form)) {
+        if (v.file) body.append(k, new Blob([readFileSync(v.file)]), basename(v.file));
+        else body.append(k, v);
+      }
+    }
+    const res = await fetch(url, { method: 'POST', headers, body, signal: AbortSignal.timeout(timeout * 1000) });
+    return { status: res.status, type: res.headers.get('content-type') || '', body: Buffer.from(await res.arrayBuffer()) };
+  }
+  const tmp = mkdtempSync(join(tmpdir(), 'infographics-or-'));
+  const conf = join(tmp, 'curl.conf');
+  const out = join(tmp, 'body');
+  const q = (v) => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  writeFileSync(conf, [
+    `url = ${q(url)}`, `proxy = ${q(PROXY)}`, 'request = "POST"', 'silent', 'show-error',
+    `max-time = ${timeout}`, `output = ${q(out)}`, 'write-out = "%{http_code} %{content_type}"',
+    ...(form ? Object.entries(form).map(([k, v]) => `form = ${q(v.file ? `${k}=@${v.file}` : `${k}=${v}`)}`) : ['data-binary = "@-"']),
+    ...Object.entries(headers).map(([k, v]) => `header = ${q(`${k}: ${v}`)}`),
+  ].join('\n'), { mode: 0o600 });
+  try {
+    const [code, type = ''] = execFileSync('curl', ['--config', conf], { input: form ? '' : json, maxBuffer: 1 << 26 }).toString().trim().split(' ');
+    return { status: Number(code), type, body: existsSync(out) ? readFileSync(out) : Buffer.alloc(0) };
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+}
+
+/** POST {endpoint}{path}: JSON-тело или multipart (form: { поле: строка | { file } }) */
+export async function post(path, body, { form = null, endpoint = ENDPOINT, timeout = 180 } = {}) {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) throw new Error('нет OPENROUTER_API_KEY в окружении (video-kit/README.md)');
+  const headers = { authorization: `Bearer ${key}`, 'x-title': 'Infographics video' };
+  if (!form) headers['content-type'] = 'application/json';
+  let res;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      res = await send(`${endpoint}${path}`, headers, form ? '' : JSON.stringify(body), form, timeout);
+    } catch (e) {
+      // обрыв соединения или таймаут — как 5xx
+      res = { status: 599, type: '', body: Buffer.from(String(e.message)) };
+    }
+    if (!(res.status === 429 || res.status >= 500) || attempt >= 4) break;
+    console.warn(`  … ${path}: HTTP ${res.status}, повтор через ${5 * attempt} с`);
+    await new Promise((ok) => setTimeout(ok, 5000 * attempt));
+  }
+  if (res.status < 200 || res.status >= 300) throw new Error(`${path}: HTTP ${res.status} ${res.body.toString('utf8').slice(0, 300)}`);
+  return res;
+}

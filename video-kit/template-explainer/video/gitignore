@@ -1,0 +1,7 @@
+local.mk
+out/still-*.png
+out/part-*.mp4
+# кеш реплик (make voice пересоздаёт только изменённые)
+voice/clips/
+# черновики ИИ-картинок (make art-takes, art-redo)
+art/takes/

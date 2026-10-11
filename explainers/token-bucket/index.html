@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему API отвечает 429? — Token bucket · Explainer</title>
+<meta name="description" content="Token bucket, собранный в железе: живая изометрическая машина, ролик-диалог и объяснение лимита запросов.">
+<link rel="stylesheet" href="../../anatomy/kit/iso.css">
+<link rel="stylesheet" href="../landing.css">
+<script type="module" src="landing.js"></script>
+</head>
+<body class="iso" data-theme="light">
+<main class="page">
+  <header class="top">
+    <a class="mono" href="../../" data-t="catalog">← Explainer</a>
+    <div class="langs mono"><button type="button" data-lang="ru">RU</button><button type="button" data-lang="en">EN</button></div>
+  </header>
+
+  <div class="hero">
+    <div class="eyebrow mono" data-t="eyebrow"></div>
+    <h1 data-t="h1"></h1>
+    <p class="lede" data-t="lede"></p>
+    <ul class="questions" data-t="questions"></ul>
+  </div>
+
+  <!-- 01: живая машина -->
+  <section id="machine">
+    <div class="sec-head mono"><span class="n">01</span><span data-t="s1kicker"></span></div>
+    <h2 data-t="s1h"></h2>
+    <p class="sub" data-t="s1sub"></p>
+    <figure class="iso-figure">
+      <div class="iso-plate">
+        <div class="iso-plate-corners" aria-hidden="true">
+          <span class="iso-plate-corner" data-corner="fig">Fig 1</span>
+          <span class="iso-plate-corner" data-corner="title" data-t="figTitle"></span>
+          <span class="iso-plate-corner" data-corner="hint" data-t="figHint"></span>
+          <span class="iso-plate-corner" data-corner="readout" data-readout></span>
+        </div>
+        <div class="iso-stage" tabindex="0" role="group"></div>
+      </div>
+      <div class="controls">
+        <button class="btn" type="button" id="send"><span data-t="send"></span><kbd>Space</kbd></button>
+        <button class="btn ghost" type="button" id="burst"><span data-t="burst"></span><kbd>B</kbd></button>
+        <div class="seg" role="group" id="rate"><span data-t="rate"></span><button type="button" data-p="1">1 / 1 s</button><button type="button" data-p="2">1 / 2 s</button><button type="button" data-p="4">1 / 4 s</button></div>
+      </div>
+      <div class="meter">
+        <div class="m-tok"><b id="m-tok">5 / 5</b><span data-t="mTok"></span></div>
+        <div class="m-ok"><b id="m-ok">0</b><span data-t="mOk"></span></div>
+        <div class="m-no"><b id="m-no">0</b><span data-t="mNo"></span></div>
+      </div>
+      <figcaption class="iso-legend"><span class="iso-caption" data-t="caption"></span></figcaption>
+    </figure>
+  </section>
+
+  <!-- 02: ролик -->
+  <section id="video">
+    <div class="sec-head mono"><span class="n">02</span><span data-t="s2kicker"></span></div>
+    <h2 data-t="s2h"></h2>
+    <p class="sub" data-t="s2sub"></p>
+    <div class="vtabs">
+      <div class="seg" role="group" id="fmt"><span data-t="fmt"></span><button type="button" data-f="h">16:9</button><button type="button" data-f="v">9:16</button></div>
+      <a class="btn ghost" id="live" target="_blank" rel="noopener" data-t="live"></a>
+    </div>
+    <div class="video" id="player"></div>
+    <ul class="chapters" id="chapters"></ul>
+  </section>
+
+  <!-- 03: суть -->
+  <section id="facts">
+    <div class="sec-head mono"><span class="n">03</span><span data-t="s3kicker"></span></div>
+    <h2 data-t="s3h"></h2>
+    <div class="facts" data-t="facts"></div>
+    <div class="formula" data-t="formula"></div>
+  </section>
+
+  <!-- 04: в коде -->
+  <section id="code">
+    <div class="sec-head mono"><span class="n">04</span><span data-t="s4kicker"></span></div>
+    <h2 data-t="s4h"></h2>
+    <p class="sub" data-t="s4sub"></p>
+    <pre data-t="code"></pre>
+  </section>
+
+  <p class="foot" data-t="foot"></p>
+</main>
+</body>
+</html>

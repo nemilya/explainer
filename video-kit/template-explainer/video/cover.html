@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Обложка</title>
+<!-- Обложка для Reels / Shorts: 1080×1920, всё важное — в зоне 4:5 (y 285…1635), которую Instagram
+     оставляет в сетке профиля. Тексты — cover в text/<язык>.js; машина — та же фигура.
+     Снимок: make cover [LNG=en] -->
+<link rel="stylesheet" href="{{KIT}}/stage/base.css">
+<link rel="stylesheet" href="{{ROOT}}/anatomy/kit/iso.css">
+<link rel="stylesheet" href="scenes.css">
+<style>
+  html, body { margin: 0; background: var(--bg); overflow: hidden; }
+  #cv { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: clip; background: var(--bg); color: var(--ink); font-family: Sans, sans-serif; }
+  #cv .fig { position: absolute; left: 0; top: 0; transform-origin: 0 0; --anatomy-weight: 1.3px; }
+  #cv .col { position: absolute; left: 90px; top: 1080px; width: 900px; display: flex; flex-direction: column; }
+  #cv .eyebrow { color: var(--accent-d); font-size: 28px; }
+  #cv h1 { margin: 24px 0 0 -6px; width: 940px; font: 400 128px/0.98 Serif; letter-spacing: -.035em; }
+  #cv h1 em { font-style: italic; color: var(--no); }
+  #cv .sub { margin: 36px 0 0; width: 880px; font: 400 44px/1.25 Serif; color: var(--ink2); text-wrap: balance; }
+  #cv .foot { margin-top: 40px; color: var(--accent-d); font-size: 24px; }
+</style>
+</head>
+<body class="render">
+<div id="cv"></div>
+<script type="module">
+  import { TEXTS, LANGS } from './film.js';
+  import { buildFigure, mountFigure } from '../figure.js';
+  import { state } from '../model.js';
+  import { camera, place } from '{{KIT}}/lib/figure.js';
+  const params = new URLSearchParams(location.search);
+  const lang = [params.get('lang'), ...location.hash.slice(1).split('-')].find((x) => LANGS.includes(x)) ?? LANGS[0];
+  const C = TEXTS[lang].cover;
+  document.documentElement.lang = lang;
+  const h1 = C.h1.map((w) => (w === '<br>' ? '<br>' : `<span>${w}</span>`)).join(' ').replace(/ <br> /g, '<br>');
+  const FIG = buildFigure();
+  document.getElementById('cv').innerHTML = `
+    <div class="fig iso" data-theme="light">${FIG.svg}</div>
+    <div class="col">
+      <div class="eyebrow mono">${C.eyebrow}</div>
+      <h1>${h1}</h1>
+      <p class="sub">${C.sub}</p>
+      <div class="foot mono">${C.foot}</div>
+    </div>`;
+  mountFigure(document.querySelector('#cv svg'), FIG).apply(state(1.5));
+  place(document.querySelector('#cv .fig'), FIG, { x: 0, y: 240, w: 1080, h: 640 }, camera([{ t: 0, at: 'machine', zoom: 1.2, pos: [0.5, 0.5] }], FIG.anchors)(0));
+  await document.fonts.ready;
+  await Promise.all(['400 20px Serif', 'italic 400 20px Serif', '400 20px Sans', '20px Mono'].map((f) => document.fonts.load(f, 'Abc Абв')));
+  window.__cover = { ready: true };
+</script>
+</body>
+</html>

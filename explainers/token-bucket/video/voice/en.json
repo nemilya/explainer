@@ -1,0 +1,96 @@
+{
+  "model": "google/gemini-3.8-flash-lite-tts",
+  "voice": "Aoede",
+  "gap": 0.3,
+  "lines": {
+    "My script calls an API, and a minute later it gets four twenty-nine: Too Many Requests. Who is counting me?": {
+      "dur": 8.46,
+      "clip": "clips/3390ab1eb013.wav",
+      "voice": "he"
+    },
+    "Most likely a token bucket. Look, I built one as a machine.": {
+      "dur": 3.74,
+      "clip": "clips/4d6f5496a5ab.wav"
+    },
+    "This magazine holds five coins. That’s the bucket, and five is its capacity, called b.": {
+      "dur": 7.65,
+      "clip": "clips/d6be9835e867.wav"
+    },
+    "And where do the coins come from?": {
+      "dur": 2.19,
+      "clip": "clips/36dbbe9e66cd.wav",
+      "voice": "he"
+    },
+    "From the hopper. The clock counts two seconds, and one coin drops into the magazine. That’s the refill rate, r: half a coin per second.": {
+      "dur": 9.36,
+      "clip": "clips/a4984e325007.wav"
+    },
+    "And if the magazine is already full?": {
+      "dur": 3.1,
+      "clip": "clips/11e0afb8d2ae.wav",
+      "voice": "he"
+    },
+    "Then the top coin closes a flap, and the new one rolls past, into the cup. You can’t save more than five: extra tokens are lost.": {
+      "dur": 8.32,
+      "clip": "clips/2872fcc74231.wav"
+    },
+    "Now the requests. Each one rides the belt, and at the magazine a pusher puts the bottom coin on it.": {
+      "dur": 7.67,
+      "clip": "clips/e4d966df9ca2.wav"
+    },
+    "Got a coin — the request goes through, two hundred OK.": {
+      "dur": 3.92,
+      "clip": "clips/07524e21e53e.wav"
+    },
+    "So one request costs one token.": {
+      "dur": 3.59,
+      "clip": "clips/909eb5d95046.wav",
+      "voice": "he"
+    },
+    "What if I send ten requests at once?": {
+      "dur": 3.15,
+      "clip": "clips/3bd4268fff22.wav",
+      "voice": "he"
+    },
+    "The first five take the whole reserve. While they ride, one more coin drops, and one more gets through.": {
+      "dur": 7.5,
+      "clip": "clips/ea4ea4b86076.wav"
+    },
+    "The rest are out of luck: the kicker pushes them into the four twenty-nine tray.": {
+      "dur": 4.14,
+      "clip": "clips/0f140584d341.wav"
+    },
+    "And if I send one request per second, for a long time?": {
+      "dur": 4.24,
+      "clip": "clips/67c4427256b9.wav",
+      "voice": "he"
+    },
+    "At first the reserve covers you. Then the magazine runs dry, and exactly as many get through as drip in: one request every two seconds.": {
+      "dur": 10.4,
+      "clip": "clips/4710d7b36bb2.wav"
+    },
+    "So the rule is simple: in any T seconds, at most b plus r times T requests get through.": {
+      "dur": 7.67,
+      "clip": "clips/30c6c283240b.wav"
+    },
+    "So a rate limit has two knobs?": {
+      "dur": 3.22,
+      "clip": "clips/ccd7883cde04.wav",
+      "voice": "he"
+    },
+    "Yes. Capacity b allows short bursts, and the rate r holds the average flow. The server is protected, and a normal client barely notices the limit.": {
+      "dur": 10.44,
+      "clip": "clips/a5fc9465f0de.wav"
+    },
+    "And if you get a four twenty-nine, don’t hammer it again. Wait as long as the Retry-After header says: by then a new coin will drop.": {
+      "dur": 8.61,
+      "clip": "clips/3f1cdab89dc2.wav"
+    },
+    "Got it. I’ll teach my script to wait.": {
+      "dur": 2.22,
+      "clip": "clips/7f8c4f4f50a1.wav",
+      "voice": "he"
+    }
+  },
+  "duration": 146.99
+}

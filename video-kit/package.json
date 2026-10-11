@@ -1,0 +1,9 @@
+{
+  "name": "video-kit",
+  "private": true,
+  "description": "Движок роликов с озвучкой по инфографикам (README.md). npm нужен только для рендера кадров (Playwright + Chromium).",
+  "type": "module",
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}
