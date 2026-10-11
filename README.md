@@ -55,6 +55,21 @@ make cover && make cover LNG=en    # обложки Reels
 (например, `node video-kit/scripts/serve.mjs` из корня → http://127.0.0.1:8790/) или выложите репозиторий на
 GitHub Pages.
 
+## anatomy: сопровождение
+
+`anatomy/` — копия [wheresryan22/anatomy](https://github.com/wheresryan22/anatomy) на коммите **`240a9bf`**, без
+изменений (наши правки — только в `video-kit/` и `explainers/`). Обновить из мастер-репозитория:
+
+```bash
+git clone https://github.com/wheresryan22/anatomy /tmp/anatomy
+git -C /tmp/anatomy log --oneline 240a9bf..HEAD             # что изменилось с нашей версии
+git -C /tmp/anatomy diff --stat 240a9bf..HEAD -- kit SKILL.md references
+rsync -a --delete --exclude .git /tmp/anatomy/ anatomy/       # взять новую версию
+```
+
+После обновления — проверить, что фигуры собираются (`explainers/*/figure.js` импортируют
+`anatomy/kit/iso-kit.mjs`), посмотреть кадры (`make stills`), и записать новый коммит здесь и в `CLAUDE.md`.
+
 ## Требования
 
 Node 22, `ffmpeg`; для рендера — Playwright (`make install` в папке ролика) и Chromium. Ключ OpenRouter нужен
