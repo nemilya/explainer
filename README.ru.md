@@ -2,7 +2,7 @@
 
 [English](README.md) · **Русский**
 
-**Демо: [explainer.nemilya.me](https://explainer.nemilya.me/)** — каталог, тема token bucket: [по-английски](https://explainer.nemilya.me/explainers/token-bucket/) · [по-русски](https://explainer.nemilya.me/explainers/token-bucket/ru/)
+**Демо: [explainer.nemilya.me/ru/](https://explainer.nemilya.me/ru/)** — каталог; пример темы: [Почему API отвечает 429?](https://explainer.nemilya.me/explainers/token-bucket/ru/)
 
 Объяснения «как это работает» в трёх видах из одной модели:
 

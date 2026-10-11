@@ -1,6 +1,6 @@
 # Why does an API answer 429? — token bucket
 
-**English** · [Русский](README.ru.md) · **Live:** [English](https://explainer.nemilya.me/explainers/token-bucket/) · [Русский](https://explainer.nemilya.me/explainers/token-bucket/ru/)
+**English** · [Русский](README.ru.md) · **Live:** [explainer.nemilya.me/explainers/token-bucket/](https://explainer.nemilya.me/explainers/token-bucket/)
 
 An explainer: the token bucket rate-limiting algorithm built as a real machine.
 

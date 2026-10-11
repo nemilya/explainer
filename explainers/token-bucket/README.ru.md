@@ -1,6 +1,6 @@
 # Почему API отвечает 429? — token bucket
 
-[English](README.md) · **Русский**
+[English](README.md) · **Русский** · **Вживую:** [explainer.nemilya.me/explainers/token-bucket/ru/](https://explainer.nemilya.me/explainers/token-bucket/ru/)
 
 Explainer: алгоритм ограничения запросов token bucket, собранный как настоящая машина.
 

@@ -2,7 +2,7 @@
 
 **English** · [Русский](README.ru.md)
 
-**Demo: [explainer.nemilya.me](https://explainer.nemilya.me/)** — the catalog, the token bucket topic: [English](https://explainer.nemilya.me/explainers/token-bucket/) · [Русский](https://explainer.nemilya.me/explainers/token-bucket/ru/)
+**Demo: [explainer.nemilya.me](https://explainer.nemilya.me/)** — the catalog; the example topic: [Why does an API answer 429?](https://explainer.nemilya.me/explainers/token-bucket/)
 
 "How does it work" explainers, built in three forms from one model:
 
