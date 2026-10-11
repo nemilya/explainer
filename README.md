@@ -25,7 +25,7 @@ with the live model.
 
 ```
 anatomy/            isometric figure skill and kit — a copy of wheresryan22/anatomy @ 240a9bf (MIT), kept unmodified
-video-kit/          video engine (from nemilya/infographics) + the figure layer: lib/figure.js (camera, pins),
+video-kit/          video engine with the figure layer: lib/figure.js (camera, pins),
                     film.layers and film.speakers in stage/stage.js; topic template — template-explainer/
 explainers/
   build.mjs         site builder: template + i18n/<lang>.mjs → static HTML per language + assets → dist/ (make dist)
@@ -50,8 +50,8 @@ happens exactly on the word that names it, and after a new voice-over everything
 
 ## Languages
 
-English is the main language; every other language lives in a subfolder with its own URL (as in
-nemilya/scantunnel): `/` and `/ru/`, `/explainers/token-bucket/` and `/explainers/token-bucket/ru/`. Pages are
+English is the main language; every other language lives in a subfolder with its own URL:
+`/` and `/ru/`, `/explainers/token-bucket/` and `/explainers/token-bucket/ru/`. Pages are
 built from one template and per-language dictionaries (`make dist`): each has `<html lang>`, its own
 title/description, `canonical`, `hreflang` for every language plus `x-default` → English, and a shared
 `sitemap.xml`. Dictionaries must have identical keys — the build fails otherwise.

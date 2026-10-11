@@ -2,7 +2,7 @@
 
 [English](README.md) · **Русский**
 
-Общий движок для видео (пришёл из nemilya/infographics): сцены, которые «оживают» синхронно с голосом,
+Движок для видео: сцены, которые «оживают» синхронно с голосом,
 плюс слой **фигуры anatomy** — машина работает весь ролик, камера наезжает на детали, подписи-булавки
 цепляются к ним, а ведущие объясняют (один голос или диалог). Озвучка —
 Gemini TTS через OpenRouter, музыка и звуки синтезируются кодом (без сэмплов). Результаты:
@@ -37,13 +37,13 @@ Gemini TTS через OpenRouter, музыка и звуки синтезиру�
 - Проверка озвучки понимает числа: распознавание пишет «429» цифрами — числительные в реплике тогда не сверяются.
 
 **Ролики на ИИ-картинках** со сквозными героями (листы-референсы персонажей → кадры с ними,
-Seedream через OpenRouter) — [`AI-ART.ru.md`](AI-ART.ru.md); пример — проект karkas-house в nemilya/infographics.
+Seedream через OpenRouter) — [`AI-ART.ru.md`](AI-ART.ru.md).
 
 ## Новый ролик
 
 ```bash
 node video-kit/scripts/new.mjs explainers/my-topic --title "…"   # тема explainer целиком (template-explainer/)
-node video-kit/scripts/new.mjs my-infographic --plain              # только ролик → my-infographic/video (--art — ИИ-картинки)
+node video-kit/scripts/new.mjs my-video --plain                    # только ролик → my-video/video (--art — ИИ-картинки)
 cd explainers/my-topic/video
 make preview      # плеер в браузере (без озвучки длительности оцениваются по тексту)
 # пишем сцены (film.js), тексты (text/ru.js, text/en.js), стили (scenes.css) — смотрим в плеере
@@ -65,7 +65,7 @@ make cover LNG=en              # обложка → out/cover-en.jpg
 ## Проект ролика
 
 ```
-<инфографика>/video/
+<тема>/video/
   film.js            сцены: время (build), вёрстка (html), анимация кадра (draw); export makeFilm(lang), LANGS
   text/<язык>.js     реплики (say), слова-якоря анимации (cue), надписи, обложка (cover), подписи плеера (ui)
   scenes.css         палитра (токены :root) и стили сцен; вертикальная раскладка — #stage.v, под субтитры — #stage.cc

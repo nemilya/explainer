@@ -5,7 +5,7 @@
  *
  * Key/proxy — from OPENROUTER_API_KEY / OPENROUTER_PROXY in the environment or from local.mk (looked up in cwd,
  * or a path via --local). Default model — anthropic/claude-haiku-5.5 (or CHECK_MODEL).
- * The request mirrors budget-pages/video/engine/scripts/check.mjs (max_tokens: 1000, data URI). */
+ * One request with the image as a data URI (max_tokens: 1000). */
 import { readFileSync, writeFileSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';

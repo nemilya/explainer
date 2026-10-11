@@ -1,4 +1,4 @@
-/* Language before first paint (as in nemilya/scantunnel). A classic blocking script in <head>.
+/* Language before first paint. A classic blocking script in <head>.
  * Choice order:
  *   1. an explicit choice — explainer-lang in localStorage (a click on EN/RU, "Open" or × on the banner);
  *   2. the browser's main language, if it is not the site's main locale (ru-RU → ru);

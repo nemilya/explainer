@@ -6,7 +6,7 @@
  *       Next: cd explainers/<slug>/video && make preview; make preview in the repo root (the site).
  *
  *   node video-kit/scripts/new.mjs <folder> --plain [--name name] [--art]
- *       only a video <folder>/video from template/ (as in infographics: title, points, finale);
+ *       only a video <folder>/video from template/ (a title, three points, a verdict, a finale);
  *       --art — also art.js for videos made of AI images (AI-ART.md).
  *
  * Paths to video-kit and to the repo root are filled in automatically ({{KIT}}, {{ROOT}}). */

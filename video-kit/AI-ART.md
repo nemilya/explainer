@@ -3,12 +3,11 @@
 **English** · [Русский](AI-ART.ru.md)
 
 The concept and a how-to for videos whose frames are generated illustrations (a story with characters),
-not only code-drawn infographics. The first such project is karkas-house in nemilya/infographics
-("The Three Little Pigs 2.0").
+not only code-drawn scenes.
 
-## What changes compared with an infographic
+## What changes compared with a code-drawn video
 
-| | Infographic | A video made of AI images |
+| | Code-drawn video | A video made of AI images |
 |---|---|---|
 | Frame | HTML/SVG drawn by code | an AI illustration + an HTML layer on top |
 | Motion | every detail is animated | a slow zoom/pan (Ken Burns), a light shake, crossfades; details live in the HTML layer |
@@ -103,7 +102,7 @@ side" for scale, built from each character's sheet.
 
 - **Ken Burns** — `ken(img, t, t0, t1, { from: { s: 1.12, y: 3 }, to: { s: 1.02 } })`: a zoom in or out with a pan
   over the whole scene. The scale is at least 1, the offset (in % of the frame) — no more than the scale margin.
-- **Accents on words** — as in an infographic: `s.sfx(a.at('barbecue'), 'pop')` + a badge, a number or an arrow
+- **Accents on words** — as in a code-drawn video: `s.sfx(a.at('barbecue'), 'pop')` + a badge, a number or an arrow
   appearing over the image at that moment.
 - **Shake / hit** — a short offset of the image on a word ("blows" → `shake`).
 - **Split screen** — two 1:1 images on top and bottom, with different zoom paths.

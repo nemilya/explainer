@@ -23,7 +23,7 @@ async function send(url, headers, json, form = null, timeout = 180) {
     const res = await fetch(url, { method: 'POST', headers, body, signal: AbortSignal.timeout(timeout * 1000) });
     return { status: res.status, type: res.headers.get('content-type') || '', body: Buffer.from(await res.arrayBuffer()) };
   }
-  const tmp = mkdtempSync(join(tmpdir(), 'infographics-or-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'video-kit-or-'));
   const conf = join(tmp, 'curl.conf');
   const out = join(tmp, 'body');
   const q = (v) => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
@@ -45,7 +45,7 @@ async function send(url, headers, json, form = null, timeout = 180) {
 export async function post(path, body, { form = null, endpoint = ENDPOINT, timeout = 180 } = {}) {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) throw new Error('no OPENROUTER_API_KEY in the environment (video-kit/README.md)');
-  const headers = { authorization: `Bearer ${key}`, 'x-title': 'Infographics video' };
+  const headers = { authorization: `Bearer ${key}`, 'x-title': 'Explainer video' };
   if (!form) headers['content-type'] = 'application/json';
   let res;
   for (let attempt = 1; ; attempt++) {

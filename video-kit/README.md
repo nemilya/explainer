@@ -2,7 +2,7 @@
 
 **English** · [Русский](README.ru.md)
 
-A shared video engine (it came from nemilya/infographics): scenes that come alive in sync with the voice,
+A video engine: scenes that come alive in sync with the voice,
 plus an **anatomy figure layer** — the machine runs through the whole video, the camera moves onto its parts,
 pin labels attach to them, and the hosts explain (one voice or a dialogue). The voice-over is
 Gemini TTS through OpenRouter; music and sound effects are synthesized in code (no samples). Output:
@@ -38,13 +38,13 @@ two formats, two languages).
   not compared then.
 
 **Videos made of AI images** with recurring characters (character reference sheets → shots with them,
-Seedream through OpenRouter) — [`AI-ART.md`](AI-ART.md); the first such project is karkas-house in nemilya/infographics.
+Seedream through OpenRouter) — [`AI-ART.md`](AI-ART.md).
 
 ## A new video
 
 ```bash
 node video-kit/scripts/new.mjs explainers/my-topic --title "…"   # a whole explainer topic (template-explainer/)
-node video-kit/scripts/new.mjs my-infographic --plain              # only a video → my-infographic/video (--art — AI images)
+node video-kit/scripts/new.mjs my-video --plain                    # only a video → my-video/video (--art — AI images)
 cd explainers/my-topic/video
 make preview      # the player in the browser (without a voice-over durations are estimated from the text)
 # write the scenes (film.js), the texts (text/en.js, text/ru.js), the styles (scenes.css) — watch in the player

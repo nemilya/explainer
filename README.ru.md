@@ -22,7 +22,7 @@
 
 ```
 anatomy/            скилл и кит изометрических фигур — копия wheresryan22/anatomy @ 240a9bf (MIT), не правим
-video-kit/          движок роликов (из nemilya/infographics) + слой фигуры: lib/figure.js (камера, булавки),
+video-kit/          движок роликов со слоем фигуры: lib/figure.js (камера, булавки),
                     film.layers и film.speakers в stage/stage.js; шаблон темы — template-explainer/
 explainers/
   build.mjs         сборка сайта: шаблон + i18n/<язык>.mjs → статические HTML на каждый язык + файлы → dist/ (make dist)
@@ -47,7 +47,7 @@ Makefile            make help · serve · landing · test · new
 
 ## Языки
 
-Основной язык — английский, остальные — в подпапке со своим адресом (как в nemilya/scantunnel): `/` и `/ru/`,
+Основной язык — английский, остальные — в подпапке со своим адресом: `/` и `/ru/`,
 `/explainers/token-bucket/` и `/explainers/token-bucket/ru/`. Страницы собираются из одного шаблона и словарей
 по языкам (`make dist`): у каждой `<html lang>`, свои title/description, `canonical`, `hreflang` на все
 языки и `x-default` → английский, общий `sitemap.xml`. Ключи словарей обязаны совпадать — иначе сборка падает.

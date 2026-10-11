@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Builds the site into dist/ — the folder you copy to the hosting (as in nemilya/scantunnel and prism-rail).
+/* Builds the site into dist/ — the folder you copy to the hosting.
  *
  *   node explainers/build.mjs              build into dist/ (make dist)
  *   node explainers/build.mjs --out DIR    build into another folder (tests)
