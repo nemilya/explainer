@@ -2,6 +2,8 @@
 
 **English** · [Русский](README.ru.md)
 
+**Demo: [explainer.nemilya.me](https://explainer.nemilya.me/)** — the catalog, the token bucket topic: [English](https://explainer.nemilya.me/explainers/token-bucket/) · [Русский](https://explainer.nemilya.me/explainers/token-bucket/ru/)
+
 "How does it work" explainers, built in three forms from one model:
 
 - **an interactive illustration** — an isometric machine made with [anatomy](https://github.com/wheresryan22/anatomy)
@@ -115,7 +117,8 @@ cd ../../.. && make preview        # rebuild the site and look at it
 
 The site is static and lives entirely in `dist/` after `make dist`: copy the folder's contents to any static
 hosting as is (or `make deploy` with `DEPLOY=user@host:/path/` — rsync; the address can also go into `local.mk`).
-Set the real address in `site.mjs` first: canonical, hreflang and sitemap.xml are built from it.
+The site address is in `site.mjs` (now the demo, https://explainer.nemilya.me/): canonical, hreflang and sitemap.xml
+are built from it, so change it when publishing elsewhere. `repo` there is the source link shown on every page.
 
 `dist/` keeps the repository layout and holds only what the browser needs: the pages (`index.html`, `ru/`,
 `explainers/<topic>/`, `…/ru/`, `sitemap.xml`, `robots.txt`), shared scripts and styles, fonts, the anatomy kit,

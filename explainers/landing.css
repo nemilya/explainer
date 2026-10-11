@@ -27,6 +27,11 @@ a { color: var(--accent-d); }
 .top a { color: inherit; text-decoration: none; }
 .top a:hover { color: var(--ink); }
 .langs { display: flex; gap: 4px; }
+.tools { display: flex; align-items: center; gap: 14px; }
+.gh { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; border-radius: 8px; color: var(--muted); }
+.gh svg { width: 15px; height: 15px; }
+.top a.gh:hover { color: var(--ink); background: var(--paper); }
+.foot.src { margin-top: 10px; font-size: 13.5px; }
 .langs button { border: 0; background: transparent; padding: 6px 10px; border-radius: 8px; font: inherit; color: var(--muted); cursor: pointer; }
 .langs button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 

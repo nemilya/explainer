@@ -2,6 +2,8 @@
 
 [English](README.md) · **Русский**
 
+**Демо: [explainer.nemilya.me](https://explainer.nemilya.me/)** — каталог, тема token bucket: [по-английски](https://explainer.nemilya.me/explainers/token-bucket/) · [по-русски](https://explainer.nemilya.me/explainers/token-bucket/ru/)
+
 Объяснения «как это работает» в трёх видах из одной модели:
 
 - **интерактивная иллюстрация** — изометрическая машина на ките [anatomy](https://github.com/wheresryan22/anatomy) (копия в [`anatomy/`](anatomy/)),
@@ -109,7 +111,8 @@ cd ../../.. && make preview        # пересобрать сайт и посм
 
 Сайт статический и после `make dist` целиком лежит в `dist/`: содержимое папки копируется на любой статический
 хостинг как есть (или `make deploy` с `DEPLOY=user@host:/path/` — rsync; адрес можно записать и в `local.mk`).
-Перед выкладкой — настоящий адрес в `site.mjs`: от него строятся canonical, hreflang и sitemap.xml.
+Адрес сайта — в `site.mjs` (сейчас демо, https://explainer.nemilya.me/): от него строятся canonical, hreflang и
+sitemap.xml, поэтому при выкладке в другое место его нужно поменять. `repo` там же — ссылка на исходники на каждой странице.
 
 `dist/` повторяет структуру репозитория и содержит только то, что нужно браузеру: страницы (`index.html`, `ru/`,
 `explainers/<тема>/`, `…/ru/`, `sitemap.xml`, `robots.txt`), общие скрипты и стили, шрифты, кит anatomy, фигуру,

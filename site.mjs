@@ -8,7 +8,8 @@
  * Locale order is the order in the switch after the current language. A new language: a line here +
  * i18n/<code>.mjs dictionaries for the catalog and topics + countries in explainers/lang.js (TZ) → make dist. */
 export default {
-  url: 'https://explainer.nemilya.me/', // change to the real address before publishing
+  url: 'https://explainer.nemilya.me/', // the demo; canonical, hreflang and sitemap.xml are built from it
+  repo: 'https://github.com/nemilya/explainer', // the source link in the header and footer of every page
   locales: [
     { code: 'en', dir: '' }, // the main one (x-default)
     { code: 'ru', dir: 'ru' },

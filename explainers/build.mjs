@@ -149,6 +149,7 @@ export async function pages() {
         lang: locale.code, canonical: url, alternates, langSwitch, root, up,
         home: linkBetween(url, `${site.url}${locale.dir ? `${locale.dir}/` : ''}`), // the catalog in the same language
         generated: GENERATED,
+        repo: site.repo ?? '',
         js: `<script type="application/json" id="i18n">${JSON.stringify(t.js ?? {}).replace(/</g, '\\u003c')}</script>`,
         flags: { video: false, main: locale === site.locales[0] },
       };
