@@ -1,40 +1,69 @@
 {
-  "_": "Озвучка (make voice). Ключ — только в окружении OPENROUTER_API_KEY или local.mk, не здесь. Диалог: основной голос — Вера (объясняет, реплики 'she' в text/<язык>.js), voices.he — Макс (спрашивает). Сверху — русский (первый в LANGS), в langs.en — поправки английского. Голоса Gemini TTS: мужские — Charon, Orus, Iapetus, Puck, Fenrir; женские — Kore, Aoede, Leda, Zephyr, Sulafat.",
+  "_": "Озвучка (make voice). Ключ — только в окружении OPENROUTER_API_KEY или local.mk, не здесь. Диалог: основной голос — Вера (объясняет, реплики 'she' в text/<язык>.js), voices.he — Макс (спрашивает). Сверху — английский (основной, первый в LANGS), в langs.ru — поправки русского. Голоса Gemini TTS: мужские — Charon, Orus, Iapetus, Puck, Fenrir; женские — Kore, Aoede, Leda, Zephyr, Sulafat.",
   "name": "token-bucket",
   "endpoint": "https://openrouter.ai/api/v1",
   "model": "google/gemini-3.8-flash-lite-tts",
   "voice": "Aoede",
-  "instructions": "Спокойная, тёплая женщина-инженер объясняет другу, как устроен лимит запросов, показывая на машину перед собой. Говорит ясно и неторопливо, с улыбкой в голосе, короткие паузы перед главным. Без пафоса. Читай текст ровно как написан.",
+  "instructions": "A calm, warm woman engineer explaining to a friend how a rate limit works, pointing at the machine in front of her. Clear and unhurried, a smile in her voice, short pauses before the key point. Not theatrical. Read the text exactly as written.",
+  "language": "en",
   "speed": 1.0,
   "loudness": -16,
   "gap": 0.3,
   "voices": {
     "he": {
       "voice": "Puck",
-      "instructions": "Любопытный молодой разработчик, который упёрся в лимит API и хочет разобраться. Спрашивает живо, с искренним интересом, чуть озадаченно. Не тараторь и не переигрывай. Читай текст ровно как написан."
+      "instructions": "A curious young developer who just hit an API rate limit and wants to understand it. Asks in a lively way, with genuine interest, a little puzzled. Don't rush, don't overact. Read the text exactly as written."
     }
   },
-  "music": { "enabled": true, "gain": -2, "duck": true },
-  "sfx": { "enabled": true, "gain": 0 },
+  "music": {
+    "enabled": true,
+    "gain": -2,
+    "duck": true
+  },
+  "sfx": {
+    "enabled": true,
+    "gain": 0
+  },
   "verify": {
     "enabled": true,
     "model": "google/gemini-3.5-transcribe",
     "retries": 3,
     "minScore": 0.85,
-    "skip": ["api", "token", "bucket", "too", "many", "requests", "retry", "after", "бэ", "эр", "t"]
+    "skip": [
+      "api",
+      "b",
+      "r",
+      "t",
+      "retry",
+      "after"
+    ]
   },
   "langs": {
-    "en": {
+    "ru": {
       "voice": "Aoede",
-      "instructions": "A calm, warm woman engineer explaining to a friend how a rate limit works, pointing at the machine in front of her. Clear and unhurried, a smile in her voice, short pauses before the key point. Not theatrical. Read the text exactly as written.",
-      "language": "en",
+      "instructions": "Спокойная, тёплая женщина-инженер объясняет другу, как устроен лимит запросов, показывая на машину перед собой. Говорит ясно и неторопливо, с улыбкой в голосе, короткие паузы перед главным. Без пафоса. Читай текст ровно как написан.",
       "voices": {
         "he": {
           "voice": "Puck",
-          "instructions": "A curious young developer who just hit an API rate limit and wants to understand it. Asks in a lively way, with genuine interest, a little puzzled. Don't rush, don't overact. Read the text exactly as written."
+          "instructions": "Любопытный молодой разработчик, который упёрся в лимит API и хочет разобраться. Спрашивает живо, с искренним интересом, чуть озадаченно. Не тараторь и не переигрывай. Читай текст ровно как написан."
         }
       },
-      "verify": { "skip": ["api", "b", "r", "t", "retry", "after"] }
+      "language": "ru",
+      "verify": {
+        "skip": [
+          "api",
+          "token",
+          "bucket",
+          "too",
+          "many",
+          "requests",
+          "retry",
+          "after",
+          "бэ",
+          "эр",
+          "t"
+        ]
+      }
     }
   }
 }

@@ -1,0 +1,113 @@
+<!doctype html>
+<!-- Собрано explainers/build.mjs из шаблона и i18n/ — не править руками: make landing -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему API отвечает 429? — Token bucket · Explainer</title>
+<meta name="description" content="Token bucket, собранный в железе: живая изометрическая машина, ролик-диалог и объяснение лимита запросов.">
+<link rel="canonical" href="https://explainer.nemilya.me/explainers/token-bucket/ru/">
+<link rel="alternate" hreflang="en" href="https://explainer.nemilya.me/explainers/token-bucket/" data-href="../" data-suggest="This page is available in English" data-go="Open">
+<link rel="alternate" hreflang="ru" href="https://explainer.nemilya.me/explainers/token-bucket/ru/" data-href="./" data-suggest="Эта страница есть на русском" data-go="Открыть">
+<link rel="alternate" hreflang="x-default" href="https://explainer.nemilya.me/explainers/token-bucket/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://explainer.nemilya.me/explainers/token-bucket/ru/">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Почему API отвечает 429? — Token bucket · Explainer">
+<meta property="og:description" content="Token bucket, собранный в железе: живая изометрическая машина, ролик-диалог и объяснение лимита запросов.">
+<meta property="og:image" content="https://explainer.nemilya.me/explainers/token-bucket/video/out/web/poster-ru.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<!-- язык до первой отрисовки: с основной страницы уводит на язык читателя (explainers/lang.js) -->
+<script src="../../../explainers/lang.js"></script>
+<link rel="stylesheet" href="../../../anatomy/kit/iso.css">
+<link rel="stylesheet" href="../../../explainers/landing.css">
+<script type="application/json" id="i18n">{"readout":"жетонов {tokens}/5 · r = 1/{p} с · 200: {ok} · 429: {no}","figLabel":"Машина token bucket: магазин на пять монет, бункер с часами роняет монету каждые 2 секунды, лента везёт запросы. Запрос, получивший монету, уходит в лоток 200; запрос без монеты толкатель сбрасывает в лоток 429."}</script>
+<script type="module" src="../landing.js"></script>
+</head>
+<body class="iso" data-theme="light">
+<main class="page">
+  <header class="top">
+    <a class="mono" href="../../../ru/">← Explainer</a>
+    <nav class="langs mono" aria-label="Язык"><a href="./" hreflang="ru" lang="ru" data-lang="ru" title="Русский" aria-current="page">RU</a><a href="../" hreflang="en" lang="en" data-lang="en" title="English">EN</a></nav>
+  </header>
+
+  <div class="hero">
+    <div class="eyebrow mono">Explainer · rate limiting</div>
+    <h1>Почему API отвечает <em>429</em>?</h1>
+    <p class="lede">Почти любой лимит запросов внутри устроен как <b>ведро с жетонами</b> — token bucket. Мы собрали его в железе: магазин монет, часы пополнения и лента запросов. Трогайте машину, смотрите ролик — и через пять минут правило <b>b + r·T</b> будет очевидным.</p>
+    <ul class="questions"><li>Что значит 429 Too Many Requests?</li><li>Сколько запросов можно отправить разом?</li><li>Почему в среднем пропускают ровно r в секунду?</li><li>Что делать, получив 429?</li></ul>
+  </div>
+
+  <!-- 01: живая машина -->
+  <section id="machine">
+    <div class="sec-head mono"><span class="n">01</span><span>Машина</span></div>
+    <h2>Token bucket в железе</h2>
+    <p class="sub">Магазин на 5 монет — ведро (ёмкость b). Часы бункера роняют монету раз в 2 секунды — пополнение (скорость r). Каждый запрос на ленте забирает одну монету; нет монеты — толкатель сбрасывает его в лоток 429.</p>
+    <figure class="iso-figure">
+      <div class="iso-plate">
+        <div class="iso-plate-corners" aria-hidden="true">
+          <span class="iso-plate-corner" data-corner="fig">Fig 1</span>
+          <span class="iso-plate-corner" data-corner="title">Token bucket</span>
+          <span class="iso-plate-corner" data-corner="hint">Пробел — запрос · B — всплеск</span>
+          <span class="iso-plate-corner" data-corner="readout" data-readout></span>
+        </div>
+        <div class="iso-stage" tabindex="0" role="group"></div>
+      </div>
+      <div class="controls">
+        <button class="btn" type="button" id="send">Отправить запрос<kbd>Space</kbd></button>
+        <button class="btn ghost" type="button" id="burst">Всплеск ×10<kbd>B</kbd></button>
+        <div class="seg" role="group" id="rate"><span>пополнение</span><button type="button" data-p="1">1 / 1 с</button><button type="button" data-p="2">1 / 2 с</button><button type="button" data-p="4">1 / 4 с</button></div>
+      </div>
+      <div class="meter">
+        <div class="m-tok"><b id="m-tok">5 / 5</b><span>жетонов в ведре</span></div>
+        <div class="m-ok"><b id="m-ok">0</b><span>пропущено · 200</span></div>
+        <div class="m-no"><b id="m-no">0</b><span>отказ · 429</span></div>
+      </div>
+      <figcaption class="iso-legend"><span class="iso-caption">Числа на счётчиках — из той же модели, что двигает детали: монета падает раз в период, лишняя уходит в стакан переполнения, запрос без монеты получает 429. Попробуйте всплеск при полном ведре, а потом — при пустом.</span></figcaption>
+    </figure>
+  </section>
+
+  <!-- 02: ролик -->
+  <section id="video">
+    <div class="sec-head mono"><span class="n">02</span><span>Ролик · 2:24</span></div>
+    <h2>Вера объясняет, Макс спрашивает</h2>
+    <p class="sub">Диалог над той же машиной: ведро, пополнение, запрос, всплеск, среднее и две ручки лимита. Есть вертикальная версия для Reels/Shorts.</p>
+    <div class="vtabs">
+      <div class="seg" role="group" aria-label="формат"><span>формат</span><button type="button" data-f="h" aria-pressed="true">16:9</button><button type="button" data-f="v" aria-pressed="false">9:16</button></div>
+      <a class="btn ghost" href="../video/index.html#ru" target="_blank" rel="noopener" data-live-h="../video/index.html#ru" data-live-v="../video/index.html#ru-v">Живой плеер ↗</a>
+    </div>
+    <div class="video" data-f="h"><video controls preload="none" playsinline poster="../video/out/web/poster-ru.jpg"><source src="../video/out/web/token-bucket-ru.mp4" type="video/mp4"><track kind="subtitles" srclang="ru" label="RU" src="../video/voice/ru.vtt"></video></div>
+    <div class="video v" data-f="v" data-has hidden><video controls preload="none" playsinline poster="../video/out/web/poster-ru-vertical-captions.jpg"><source src="../video/out/web/token-bucket-ru-vertical-captions.mp4" type="video/mp4"></video></div>
+    <ul class="chapters"><li><button type="button" data-t="0.05"><span class="mono">· · 0:00</span>Вопрос</button></li><li><button type="button" data-t="16.02"><span class="mono">01 · 0:16</span>Ведро</button></li><li><button type="button" data-t="27.32"><span class="mono">02 · 0:27</span>Пополнение</button></li><li><button type="button" data-t="51.12"><span class="mono">03 · 0:51</span>Запрос</button></li><li><button type="button" data-t="67.48"><span class="mono">04 · 1:07</span>Всплеск</button></li><li><button type="button" data-t="85.92"><span class="mono">05 · 1:26</span>В среднем</button></li><li><button type="button" data-t="108.75"><span class="mono">06 · 1:49</span>Две ручки</button></li><li><button type="button" data-t="135.82"><span class="mono">· · 2:16</span>Финал</button></li></ul>
+  </section>
+
+  <!-- 03: суть -->
+  <section id="facts">
+    <div class="sec-head mono"><span class="n">03</span><span>Суть</span></div>
+    <h2>Четыре факта о token bucket</h2>
+    <div class="facts"><div class="fact"><span class="mono">b · ёмкость</span><h3>Всплеск — не больше b</h3><p>Полное ведро пропускает b запросов подряд, сколько бы их ни пришло разом.</p></div><div class="fact"><span class="mono">r · скорость</span><h3>В среднем — не больше r</h3><p>Когда запас кончился, проходит ровно столько, сколько капает: r запросов в секунду.</p></div><div class="fact"><span class="mono">переполнение</span><h3>Копить нельзя</h3><p>Ведро не растёт: лишние жетоны сгорают. Долгое молчание не даёт права на огромный всплеск.</p></div><div class="fact"><span class="mono">429</span><h3>Отказ — это подсказка</h3><p>Получили 429 — подождите Retry-After секунд: к этому времени капнет новый жетон.</p></div></div>
+    <div class="formula">за любые T секунд пройдёт не больше <b>b</b> + <b>r</b>·T запросов<small>В нашей машине b = 5, r = 0,5/с: за 10 секунд — не больше 5 + 0,5·10 = 10 запросов.</small></div>
+  </section>
+
+  <!-- 04: в коде -->
+  <section id="code">
+    <div class="sec-head mono"><span class="n">04</span><span>Код</span></div>
+    <h2>Тот же алгоритм — двенадцать строк</h2>
+    <p class="sub">В настоящих серверах жетоны не падают по одному: их число пересчитывают при каждом запросе по прошедшему времени. Результат тот же, что у машины.</p>
+    <pre><span class="k">class</span> TokenBucket {
+  constructor(b, r) { <span class="k">this</span>.b = b; <span class="k">this</span>.r = r; <span class="k">this</span>.tokens = b; <span class="k">this</span>.last = Date.now() / 1000; }
+  take() {
+    <span class="k">const</span> now = Date.now() / 1000;
+    <span class="c">// пополнение: r жетонов в секунду, но не больше ёмкости b</span>
+    <span class="k">this</span>.tokens = Math.min(<span class="k">this</span>.b, <span class="k">this</span>.tokens + (now - <span class="k">this</span>.last) * <span class="k">this</span>.r);
+    <span class="k">this</span>.last = now;
+    <span class="k">if</span> (<span class="k">this</span>.tokens >= 1) { <span class="k">this</span>.tokens -= 1; <span class="k">return</span> { ok: <span class="k">true</span> }; }             <span class="c">// 200</span>
+    <span class="k">return</span> { ok: <span class="k">false</span>, retryAfter: Math.ceil((1 - <span class="k">this</span>.tokens) / <span class="k">this</span>.r) };  <span class="c">// 429</span>
+  }
+}</pre>
+  </section>
+
+  <p class="foot">Сделано на <a href="https://github.com/wheresryan22/anatomy">anatomy</a> (изометрическая фигура) и video-kit (ролик с озвучкой). Машина — <code>figure.js</code>, модель — <code>model.js</code>, сценарий — <code>video/SCENARIO.md</code>.</p>
+</main>
+</body>
+</html>

@@ -3,6 +3,9 @@
 #     include $(KIT)/video.mk
 # Нужны: Node 22, ffmpeg, Chromium через Playwright (make install). Ключ OpenRouter — в окружении
 # (OPENROUTER_API_KEY) или в local.mk проекта; нужен только для make voice.
+# Не перегревать ноутбук при рендере: на Mac по умолчанию аппаратный кодек (ENC=sw — x264),
+# THREADS=2 — x264 в 2 потока, PAUSE=40 — пауза между кадрами (мс), NICE=10 — приоритет ниже (по умолчанию).
+export ENC THREADS PAUSE NICE HEIGHT
 -include local.mk
 export OPENROUTER_API_KEY OPENROUTER_PROXY
 # качество H.264 при рендере (scripts/render.mjs): CRF ?= 19 — можно задать в Makefile проекта
@@ -12,7 +15,7 @@ LNG ?=
 L := $(if $(LNG),--lang $(LNG))
 NODE := node $(KIT)/scripts
 
-.PHONY: help install voice mix video video-v video-cc cover stills stills-v poster ask preview all clean
+.PHONY: help install voice mix video video-v video-cc web cover stills stills-v poster ask preview all clean
 
 help:  ## список целей
 	@grep -hE '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*## /\t/'
@@ -34,6 +37,9 @@ video-v:  ## вертикальный MP4 1080×1920 → out/<имя>[-en]-verti
 
 video-cc:  ## вертикальный MP4 с субтитрами в кадре (Reels, Shorts) → out/<имя>[-en]-vertical-captions.mp4
 	$(NODE)/render.mjs --vertical --captions $(L)
+
+web:  ## лёгкие версии для сайта (720p, CRF 28) → out/web/ (LNG=en — один язык; CRF=31 HEIGHT=540 — легче)
+	$(NODE)/web.mjs $(L)
 
 cover:  ## обложка для Reels 1080×1920 (cover.html проекта) → out/cover[-en].jpg
 	$(NODE)/render.mjs --cover $(L)

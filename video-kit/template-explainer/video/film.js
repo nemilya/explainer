@@ -9,7 +9,7 @@ import { state } from '../model.js';
 import en from './text/en.js';
 import ru from './text/ru.js';
 
-export const TEXTS = { ru, en }; // первый язык — основной
+export const TEXTS = { en, ru }; // первый язык — основной (английский)
 export const LANGS = Object.keys(TEXTS);
 
 const FIG = buildFigure();

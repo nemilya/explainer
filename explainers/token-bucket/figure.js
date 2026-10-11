@@ -44,7 +44,7 @@ const TRAY = { x: 99, y: 4, w: 32, d: 28 };
 const WALL = 1.5;
 const BOX_H = 10;
 
-export function buildFigure() {
+export function buildFigure({ label } = {}) {
   const P = k.fitProjection(
     [...k.boxCorners(PLATE, -PLATE_H - FOOT_H, 0), [DIAL[0], DIAL[1], DIAL_TOP + 2], [LAMP[0], LAMP[1], KICK_TOP + 8]],
     W, H, { pad: 26, azimuth: AZ },
@@ -267,7 +267,7 @@ export function buildFigure() {
 
   const svg = k.figureSvg({
     width: W, height: H,
-    label: 'Машина token bucket: магазин на пять монет, бункер с часами роняет монету каждые 2 секунды, лента везёт запросы. Запрос, получивший монету, уходит в лоток 200; запрос без монеты толкатель сбрасывает в лоток 429.',
+    label: label ?? 'Машина token bucket: магазин на пять монет, бункер с часами роняет монету каждые 2 секунды, лента везёт запросы. Запрос, получивший монету, уходит в лоток 200; запрос без монеты толкатель сбрасывает в лоток 429.',
     body: [
       plate(),
       feeder(),

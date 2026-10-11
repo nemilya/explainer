@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://explainer.nemilya.me/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://explainer.nemilya.me/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://explainer.nemilya.me/ru/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://explainer.nemilya.me/"/>
+  </url>
+  <url>
+    <loc>https://explainer.nemilya.me/ru/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://explainer.nemilya.me/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://explainer.nemilya.me/ru/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://explainer.nemilya.me/"/>
+  </url>
+  <url>
+    <loc>https://explainer.nemilya.me/explainers/token-bucket/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://explainer.nemilya.me/explainers/token-bucket/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://explainer.nemilya.me/explainers/token-bucket/ru/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://explainer.nemilya.me/explainers/token-bucket/"/>
+  </url>
+  <url>
+    <loc>https://explainer.nemilya.me/explainers/token-bucket/ru/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://explainer.nemilya.me/explainers/token-bucket/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://explainer.nemilya.me/explainers/token-bucket/ru/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://explainer.nemilya.me/explainers/token-bucket/"/>
+  </url>
+</urlset>

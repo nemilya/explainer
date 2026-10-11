@@ -1,0 +1,99 @@
+<!doctype html>
+{{generated}}
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{meta.title}}</title>
+<meta name="description" content="{{meta.description}}">
+<link rel="canonical" href="{{canonical}}">
+{{alternates}}
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{canonical}}">
+<meta property="og:locale" content="{{ogLocale}}">
+<meta property="og:title" content="{{meta.title}}">
+<meta property="og:description" content="{{meta.description}}">
+<!--if og-->
+<meta property="og:image" content="{{ogImage}}">
+<meta name="twitter:card" content="summary_large_image">
+<!--end-->
+<!-- язык до первой отрисовки: с основной страницы уводит на язык читателя (explainers/lang.js) -->
+<script src="{{root}}explainers/lang.js"></script>
+<link rel="stylesheet" href="{{root}}anatomy/kit/iso.css">
+<link rel="stylesheet" href="{{root}}explainers/landing.css">
+{{js}}
+<script type="module" src="{{up}}landing.js"></script>
+</head>
+<body class="iso" data-theme="light">
+<main class="page">
+  <header class="top">
+    <a class="mono" href="{{home}}">← Explainer</a>
+    <nav class="langs mono" aria-label="{{nav.language}}">{{langSwitch}}</nav>
+  </header>
+
+  <div class="hero">
+    <div class="eyebrow mono">{{hero.eyebrow}}</div>
+    <h1>{{hero.h1}}</h1>
+    <p class="lede">{{hero.lede}}</p>
+    <ul class="questions"><!--each questions--><li>{{.}}</li><!--/each--></ul>
+  </div>
+
+  <!-- 01: живая машина -->
+  <section id="machine">
+    <div class="sec-head mono"><span class="n">01</span><span>{{machine.kicker}}</span></div>
+    <h2>{{machine.h}}</h2>
+    <p class="sub">{{machine.sub}}</p>
+    <figure class="iso-figure">
+      <div class="iso-plate">
+        <div class="iso-plate-corners" aria-hidden="true">
+          <span class="iso-plate-corner" data-corner="fig">Fig 1</span>
+          <span class="iso-plate-corner" data-corner="title">{{machine.figTitle}}</span>
+          <span class="iso-plate-corner" data-corner="hint">{{machine.figHint}}</span>
+          <span class="iso-plate-corner" data-corner="readout" data-readout></span>
+        </div>
+        <div class="iso-stage" tabindex="0" role="group"></div>
+      </div>
+      <div class="controls">
+        <button class="btn" type="button" id="send">{{machine.send}}<kbd>Space</kbd></button>
+        <button class="btn ghost" type="button" id="burst">{{machine.burst}}<kbd>B</kbd></button>
+        <div class="seg" role="group" id="rate"><span>{{machine.rate}}</span><button type="button" data-p="1">{{machine.rate1}}</button><button type="button" data-p="2">{{machine.rate2}}</button><button type="button" data-p="4">{{machine.rate4}}</button></div>
+      </div>
+      <div class="meter">
+        <div class="m-tok"><b id="m-tok">5 / 5</b><span>{{machine.mTok}}</span></div>
+        <div class="m-ok"><b id="m-ok">0</b><span>{{machine.mOk}}</span></div>
+        <div class="m-no"><b id="m-no">0</b><span>{{machine.mNo}}</span></div>
+      </div>
+      <figcaption class="iso-legend"><span class="iso-caption">{{machine.caption}}</span></figcaption>
+    </figure>
+  </section>
+
+<!--if video-->
+  <!-- 02: ролик -->
+  <section id="video">
+    <div class="sec-head mono"><span class="n">02</span><span>{{video.kicker}} · {{videoDuration}}</span></div>
+    <h2>{{video.h}}</h2>
+    <p class="sub">{{video.sub}}</p>
+    {{videoBlock}}
+  </section>
+<!--end-->
+
+  <!-- 03: суть -->
+  <section id="facts">
+    <div class="sec-head mono"><span class="n">03</span><span>{{facts.kicker}}</span></div>
+    <h2>{{facts.h}}</h2>
+    <div class="facts"><!--each facts.list--><div class="fact"><span class="mono">{{.0}}</span><h3>{{.1}}</h3><p>{{.2}}</p></div><!--/each--></div>
+    <div class="formula">{{facts.formula}}</div>
+  </section>
+
+  <!-- 04: в коде -->
+  <section id="code">
+    <div class="sec-head mono"><span class="n">04</span><span>{{code.kicker}}</span></div>
+    <h2>{{code.h}}</h2>
+    <p class="sub">{{code.sub}}</p>
+    <pre>{{code.pre}}</pre>
+  </section>
+
+  <p class="foot">{{foot}}</p>
+</main>
+</body>
+</html>

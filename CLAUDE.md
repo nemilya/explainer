@@ -12,4 +12,9 @@
 - Проверка — глазами: `make stills T=…` / `make stills-v T=… CC=1` в папке ролика, читать каждый PNG.
 - Озвучка платная: `make voice` синтезирует только новые/изменённые реплики (кеш `voice/clips/`, не в git);
   всегда указывайте язык (`LNG=en`), чтобы не пересинтезировать всё.
-- В git: исходники, `voice/<язык>.{m4a,json,vtt}`, `out/*.mp4`, `out/poster*.jpg`, `out/cover*.jpg`.
+- Языки: основной — английский (первый в `site.mjs` и в `TEXTS` ролика), остальные — подпапки `ru/`. Страницы
+  (`index.html`, `ru/index.html` у каталога и тем, `sitemap.xml`) собираются `make landing` из `landing/index.html` +
+  `landing/i18n/<язык>.mjs` — руками их не править; после правки текстов — `make landing test`.
+- После нового рендера ролика — `make web` в папке ролика (лёгкие версии в `out/web/`), потом `make landing`.
+- В git: исходники, собранные страницы, `voice/<язык>.{m4a,json,vtt}`, `out/*.mp4`, `out/web/*`, `out/poster*.jpg`,
+  `out/cover*.jpg`.

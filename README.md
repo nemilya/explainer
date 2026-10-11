@@ -26,14 +26,19 @@ anatomy/            isometric figure skill and kit — a copy of wheresryan22/an
 video-kit/          video engine (from nemilya/infographics) + the figure layer: lib/figure.js (camera, pins),
                     film.layers and film.speakers in stage/stage.js; topic template — template-explainer/
 explainers/
-  landing.css       shared landing style
+  build.mjs         page builder: template + i18n/<lang>.mjs → static HTML per language (make landing)
+  lang.js           language auto-pick before first paint; suggest.js, video.js, landing.css — shared
+  catalog/          catalog template and i18n
   <topic>/
     QUESTIONS.md    brief: questions, the truth (numbers), the object, parts, scenes
     model.js        the model — the single source of every number, pure functions of time
     figure.js       anatomy figure: buildFigure() → SVG and anchors, mountFigure() → apply(state)
-    index.html      landing page (+ landing.js)
-    video/          film.js, text/<lang>.js, scenes.css, voice.config.json, SCENARIO.md, voice/, out/
-index.html          topic catalog
+    landing/        page template index.html + i18n/en.mjs, ru.mjs; landing.js — the live figure
+    index.html      built page (en), ru/index.html — built page (ru)
+    video/          film.js, text/<lang>.js, scenes.css, voice.config.json, SCENARIO.md, voice/, out/, out/web/
+index.html, ru/     built catalog (en, ru); sitemap.xml, robots.txt
+site.mjs            site address and languages (first one is the main language)
+Makefile            make help · serve · landing · test · new
 .claude/skills/     explain — how to build a topic; anatomy — link to the figure skill
 ```
 
@@ -42,23 +47,71 @@ state, the video draws each frame as a function of time (frame-by-frame renderin
 landing page runs the same model live. The machine's schedule in the video is built from the lines: an event
 happens exactly on the word that names it, and after a new voice-over everything lands in place again.
 
+## Languages
+
+English is the main language; every other language lives in a subfolder with its own URL (as in
+nemilya/scantunnel): `/` and `/ru/`, `/explainers/token-bucket/` and `/explainers/token-bucket/ru/`. Pages are
+built from one template and per-language dictionaries (`make landing`): each has `<html lang>`, its own
+title/description, `canonical`, `hreflang` for every language plus `x-default` → English, and a shared
+`sitemap.xml`. Dictionaries must have identical keys — the build fails otherwise.
+
+**Which language a visitor sees** (`explainers/lang.js`, a blocking script in `<head>`, before first paint):
+
+1. an explicit choice — `explainer-lang` in `localStorage` (a click on EN/RU, "Open" or × on the banner);
+2. the browser's main language, if it is not the main site language (`ru-RU` → ru);
+3. the country by time zone: Russia, Belarus, Kazakhstan → ru (no GeoIP, the site stays static);
+4. otherwise English.
+
+Only the main page redirects (`location.replace`), and only a person arriving from outside: bots and links
+inside the site stay, so English is indexed. A direct link to `/ru/` never redirects; if the visitor's pick
+differs, the page shows a banner "This page is available in English → Open". The auto-pick is not saved —
+only an explicit choice is.
+
+Videos follow the same order: English is the main language (`TEXTS = { en, ru }` in `film.js`), files are
+`out/<name>.mp4` (en) and `out/<name>-ru.mp4`. The landing plays light versions from `out/web/` (`make web`);
+on a phone in portrait, if a vertical cut exists, it opens 9:16 first.
+
+A new language: a line in `site.mjs`, `i18n/<code>.mjs` for the catalog and each topic, `text/<code>.js` and
+`langs.<code>` in `voice.config.json` for the video, countries in `TZ` in `explainers/lang.js`, then
+`make landing test`.
+
+## Commands
+
+```bash
+make help        # all commands
+make serve       # the site locally: http://127.0.0.1:8790/ (/ru/ — Russian)
+make landing     # build pages from templates and i18n/
+make test        # language auto-pick, dictionaries, built pages are up to date
+make new SLUG=my-topic TITLE="How … works"
+```
+
+In a video folder (`explainers/<topic>/video`, `make help` there too): `make preview`, `make voice [LNG=ru]`,
+`make video video-cc [LNG=ru]`, `make web` (720p versions for the site, ~3× smaller), `make cover`.
+
+**Rendering without overheating a laptop:** on macOS the encoder defaults to hardware VideoToolbox (the CPU
+stays almost free; `ENC=sw` for x264), `ENC=hw` uses NVENC on Linux/Windows, `THREADS=2` limits x264 to two
+threads, `PAUSE=40` adds a pause between frames (ms), and ffmpeg and Chromium run at lower priority (`NICE=10`
+by default). `make web` compresses with x264 at lower priority (`THREADS=2` and `ENC=hw` work there too).
+
 ## A new topic
 
 In Claude Code: `/explain how … works` (the [`.claude/skills/explain`](.claude/skills/explain/SKILL.md) skill).
 By hand:
 
 ```bash
-node video-kit/scripts/new.mjs explainers/my-topic --title "How … works"   # stubs for every part
+make new SLUG=my-topic TITLE="How … works"   # stubs for every part
 cd explainers/my-topic/video
 make preview                       # video player: http://127.0.0.1:8790/explainers/my-topic/video/
-make voice && make voice LNG=en    # voice-over (OPENROUTER_API_KEY)
+make voice && make voice LNG=ru    # voice-over (OPENROUTER_API_KEY)
 make video video-cc                # MP4 16:9 and 9:16 with captions → out/
-make video video-cc LNG=en
-make cover && make cover LNG=en    # Reels covers
+make video video-cc LNG=ru
+make web                           # light versions for the site → out/web/
+make cover && make cover LNG=ru    # Reels covers
+cd ../../.. && make landing test   # rebuild the pages
 ```
 
-The landing pages and the catalog are static: serve the repository root with any local server (for example
-`node video-kit/scripts/serve.mjs` from the root → http://127.0.0.1:8790/) or publish it on GitHub Pages.
+The site is static: `make serve` locally, or publish the repository root (GitHub Pages or any static host);
+set the real address in `site.mjs` first.
 
 ## anatomy: keeping the copy up to date
 

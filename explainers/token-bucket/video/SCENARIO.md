@@ -1,7 +1,7 @@
 # «Почему API отвечает 429?» — сценарий ролика
 
 Человекочитаемая версия `film.js` и `text/ru.js` (держать в согласии). Диалог: **Вера** (she — объясняет,
-основной голос Aoede) и **Макс** (he — спрашивает, голос Puck). Длительность — около 2,5 мин (ru 2:24, en 2:27).
+основной голос Aoede) и **Макс** (he — спрашивает, голос Puck). Длительность — около 2,5 мин (en 2:27 — основной язык, ru 2:24).
 
 Машина (`../figure.js`) работает весь ролик без остановок — это постоянный слой под сценами. Расписание
 (когда приходят запросы) строится в `film.js → plan()` от реплик: запросы приезжают к словам, о которых
@@ -23,8 +23,9 @@
 ```bash
 cd explainers/token-bucket/video
 make preview                    # живой плеер (http://127.0.0.1:8790/…)
-make voice                      # озвучка ru (OPENROUTER_API_KEY); make voice LNG=en — английская
+make voice                      # озвучка en — основной язык (OPENROUTER_API_KEY); make voice LNG=ru — русская
 make video video-cc             # MP4 16:9 и вертикальный с субтитрами в кадре → out/
-make video video-cc LNG=en
-make cover; make cover LNG=en   # обложки для Reels
+make video video-cc LNG=ru
+make cover; make cover LNG=ru   # обложки для Reels
+make web                        # лёгкие 720p-версии для лендинга → out/web/; потом make landing в корне
 ```

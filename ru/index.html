@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- Собрано explainers/build.mjs из шаблона и i18n/ — не править руками: make landing -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explainer — как это работает</title>
+<meta name="description" content="Объяснения «как это работает»: живая изометрическая машина, ролик-диалог и лендинг из одной модели.">
+<link rel="canonical" href="https://explainer.nemilya.me/ru/">
+<link rel="alternate" hreflang="en" href="https://explainer.nemilya.me/" data-href="../" data-suggest="This page is available in English" data-go="Open">
+<link rel="alternate" hreflang="ru" href="https://explainer.nemilya.me/ru/" data-href="./" data-suggest="Эта страница есть на русском" data-go="Открыть">
+<link rel="alternate" hreflang="x-default" href="https://explainer.nemilya.me/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://explainer.nemilya.me/ru/">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Explainer — как это работает">
+<meta property="og:description" content="Объяснения «как это работает»: живая изометрическая машина, ролик-диалог и лендинг из одной модели.">
+<!-- язык до первой отрисовки: с основной страницы уводит на язык читателя (explainers/lang.js) -->
+<script src="../explainers/lang.js"></script>
+<link rel="stylesheet" href="../explainers/landing.css">
+<script type="application/json" id="i18n">{}</script>
+<script type="module" src="../explainers/catalog/catalog.js"></script>
+</head>
+<body class="catalog">
+<main class="page">
+  <header class="top">
+    <span class="mono">Explainer</span>
+    <nav class="langs mono" aria-label="Язык"><a href="./" hreflang="ru" lang="ru" data-lang="ru" title="Русский" aria-current="page">RU</a><a href="../" hreflang="en" lang="en" data-lang="en" title="English">EN</a></nav>
+  </header>
+  <div class="hero">
+    <div class="eyebrow mono">Explainer</div>
+    <h1>Как это <em>работает</em></h1>
+    <p class="lede">Каждая тема — машина, чьё устройство и есть идея: её можно трогать на странице, а в ролике двое объясняют её, пока она работает. Числа в кадре, на счётчиках и в подписях — из одной модели.</p>
+  </div>
+
+  <section>
+    <div class="sec-head mono"><span class="n">01</span><span>Темы</span></div>
+    <div class="cards">
+      <a class="card" href="../explainers/token-bucket/ru/"><img src="../explainers/token-bucket/video/out/web/poster-ru.jpg" alt="Машина token bucket: магазин монет, бункер с часами, лента запросов и лотки 200 и 429" loading="lazy"><div><span class="mono">rate limiting · 2:24</span><h3>Почему API отвечает 429?</h3><p>Token bucket в железе: ёмкость b, пополнение r и правило b + r·T.</p></div></a>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head mono"><span class="n">02</span><span>Из чего сделано</span></div>
+    <div class="facts"><div class="fact"><span class="mono">anatomy</span><h3>Фигура</h3><p>Изометрическая машина из десятков деталей — <a href="https://github.com/wheresryan22/anatomy">wheresryan22/anatomy</a>.</p></div><div class="fact"><span class="mono">video-kit</span><h3>Ролик</h3><p>Озвучка Gemini TTS, диалог двух голосов, наезды камеры, 16:9 и 9:16, языки.</p></div><div class="fact"><span class="mono">model.js</span><h3>Одна модель</h3><p>Чистые функции времени: рендер покадровый, страница живая, числа честные.</p></div></div>
+  </section>
+  <p class="foot">Новая тема: <code>make new SLUG=my-topic TITLE="Как работает …"</code> или <code>/explain</code> в Claude Code.</p>
+</main>
+</body>
+</html>

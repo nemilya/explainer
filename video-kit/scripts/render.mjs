@@ -15,9 +15,18 @@
  *   CRF=23 node scripts/render.mjs             # качество H.264 (по умолчанию 19; больше — меньше файл:
  *                                              # ИИ-картинкам с наездом хватает 22–24)
  *
+ * Чтобы не перегревать ноутбук (x264 занимает все ядра, Chromium — ещё одно):
+ *   на Mac по умолчанию — аппаратный кодек VideoToolbox, процессор почти свободен (ENC=sw — x264)
+ *   ENC=hw      — аппаратный кодек и на Linux/Windows (NVIDIA NVENC)
+ *   THREADS=2   — x264 не больше 2 потоков (preset medium)
+ *   PAUSE=40    — пауза между кадрами, мс (меньше нагрев, дольше рендер)
+ *   NICE=10     — пониженный приоритет ffmpeg и Chromium (по умолчанию 10; 0 — как есть)
+ * Лёгкая версия для сайта (720p) — scripts/web.mjs (make web).
+ *
  * Кадры детерминированы: index.html?render, на каждый кадр window.__video.seek(t) и скриншот.
  * Сеть не нужна: шрифты локальные, внешние запросы обрываются. */
 import { spawn } from 'node:child_process';
+import { setPriority } from 'node:os';
 import { createReadStream, existsSync, mkdirSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join } from 'node:path';
@@ -32,6 +41,23 @@ const ROOT = P.dir; // проект: index.html, cover.html, voice/, out/
 const OUT = join(ROOT, 'out');
 const FPS = Number(process.env.FPS || 30);
 const CRF = String(process.env.CRF || 19);
+const PAUSE = Number(process.env.PAUSE || 0);
+const NICE = Number(process.env.NICE ?? 10);
+/** аппаратный кодек: на macOS по умолчанию (VideoToolbox есть всегда), ENC=hw — и на Linux/Windows (NVENC), ENC=sw — x264 */
+const HW = process.env.ENC ? process.env.ENC === 'hw' : process.platform === 'darwin';
+/** кодек: аппаратный — битрейт по размеру кадра (≈9 Мбит/с на 1920×1080), иначе x264 с CRF */
+function videoCodec(pixels) {
+  const threads = process.env.THREADS ? ['-threads', process.env.THREADS] : [];
+  if (HW) {
+    const rate = `${Math.round((pixels / 2073600) * 9)}M`;
+    return process.platform === 'darwin'
+      ? ['-c:v', 'h264_videotoolbox', '-b:v', rate, '-allow_sw', '1', '-realtime', '0']
+      : ['-c:v', 'h264_nvenc', '-preset', 'p5', '-b:v', rate];
+  }
+  return ['-c:v', 'libx264', '-preset', process.env.THREADS ? 'medium' : 'slow', '-crf', CRF, ...threads];
+}
+/** пониженный приоритет процесса (не мешать остальной работе на ноутбуке) */
+const lower = (pid) => { if (NICE && pid) { try { setPriority(pid, NICE); } catch { /* нет прав — как есть */ } } };
 const LANG = args.includes('--lang') ? args[args.indexOf('--lang') + 1] : P.langs[0];
 // ролик только в вертикальном формате (film.formats = ['v']) — вертикальный кадр и без флага
 const VERT = args.includes('--vertical') || P.makeFilm(LANG).formats?.join() === 'v';
@@ -58,6 +84,7 @@ await new Promise((ok) => server.listen(0, '127.0.0.1', ok));
 const base = `http://127.0.0.1:${server.address().port}/${P.url}/`;
 
 const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+lower(browser.process?.()?.pid);
 const page = await browser.newPage({ viewport: VERT ? { width: 1080, height: 1920 } : { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
 await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, (r) => r.abort());
 page.on('pageerror', (e) => { console.error(e); process.exitCode = 1; });
@@ -117,14 +144,17 @@ if (stills) {
     ...(withSubs ? ['-map', '2:s', '-c:s', 'mov_text', '-metadata:s:s:0', `language=${ISO[LANG] ?? LANG}`] : []),
   ];
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-c:v', 'mjpeg', '-framerate', String(FPS), '-i', '-',
-    ...inputs, ...outputs, '-t', (to - from).toFixed(3), '-c:v', 'libx264', '-preset', 'slow', '-crf', CRF, '-pix_fmt', 'yuv420p', '-movflags', '+faststart', file],
+    ...inputs, ...outputs, '-t', (to - from).toFixed(3), ...videoCodec(VERT ? 1080 * 1920 : 1920 * 1080), '-pix_fmt', 'yuv420p', '-movflags', '+faststart', file],
   { stdio: ['pipe', 'inherit', 'inherit'] });
+  lower(ff.pid);
+  console.log(`кодек: ${HW ? (process.platform === 'darwin' ? 'VideoToolbox (аппаратный)' : 'NVENC (аппаратный)') : `x264${process.env.THREADS ? `, потоков ${process.env.THREADS}` : ''}`}${NICE ? `, приоритет +${NICE}` : ''}${PAUSE ? `, пауза ${PAUSE} мс` : ''}`);
   const n = Math.ceil((to - from) * FPS);
   const t0 = Date.now();
   for (let i = 0; i <= n; i++) {
     await seek(from + i / FPS);
     const buf = await grab();
     if (!ff.stdin.write(buf)) await new Promise((ok) => ff.stdin.once('drain', ok));
+    if (PAUSE) await new Promise((ok) => setTimeout(ok, PAUSE));
     if (i % (FPS * 5) === 0) process.stdout.write(`\r${Math.round((i / n) * 100)}%  (${Math.round((Date.now() - t0) / 1000)} с)`);
   }
   ff.stdin.end();

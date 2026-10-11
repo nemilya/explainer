@@ -1,0 +1,48 @@
+<!doctype html>
+{{generated}}
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{meta.title}}</title>
+<meta name="description" content="{{meta.description}}">
+<link rel="canonical" href="{{canonical}}">
+{{alternates}}
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{canonical}}">
+<meta property="og:locale" content="{{ogLocale}}">
+<meta property="og:title" content="{{meta.title}}">
+<meta property="og:description" content="{{meta.description}}">
+<!-- язык до первой отрисовки: с основной страницы уводит на язык читателя (explainers/lang.js) -->
+<script src="{{root}}explainers/lang.js"></script>
+<link rel="stylesheet" href="{{root}}explainers/landing.css">
+{{js}}
+<script type="module" src="{{root}}explainers/catalog/catalog.js"></script>
+</head>
+<body class="catalog">
+<main class="page">
+  <header class="top">
+    <span class="mono">Explainer</span>
+    <nav class="langs mono" aria-label="{{nav.language}}">{{langSwitch}}</nav>
+  </header>
+  <div class="hero">
+    <div class="eyebrow mono">Explainer</div>
+    <h1>{{hero.h1}}</h1>
+    <p class="lede">{{hero.lede}}</p>
+  </div>
+
+  <section>
+    <div class="sec-head mono"><span class="n">01</span><span>{{topics}}</span></div>
+    <div class="cards">
+      {{cards}}
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head mono"><span class="n">02</span><span>{{how.kicker}}</span></div>
+    <div class="facts"><!--each how.list--><div class="fact"><span class="mono">{{.0}}</span><h3>{{.1}}</h3><p>{{.2}}</p></div><!--/each--></div>
+  </section>
+  <p class="foot">{{foot}}</p>
+</main>
+</body>
+</html>

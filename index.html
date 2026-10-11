@@ -1,50 +1,50 @@
 <!doctype html>
-<html lang="ru">
+<!-- Собрано explainers/build.mjs из шаблона и i18n/ — не править руками: make landing -->
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Explainer — как это работает</title>
-<meta name="description" content="Объяснения «как это работает»: живая изометрическая машина, ролик-диалог и лендинг из одной модели.">
-<link rel="stylesheet" href="explainers/landing.css">
-<style>
-  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-top: 26px; }
-  .card { display: block; border-radius: 20px; overflow: hidden; background: var(--paper); box-shadow: 0 0 0 1px var(--line); color: inherit; text-decoration: none; transition: transform .2s; }
-  .card:hover { transform: translateY(-3px); }
-  .card img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--bg); }
-  .card div { padding: 18px 20px 20px; }
-  .card .mono { color: var(--accent); }
-  .card h3 { margin: 8px 0 6px; font: 400 26px/1.15 Serif; }
-  .card p { margin: 0; color: var(--muted); font-size: 15px; }
-  .how { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 18px; }
-</style>
+<title>Explainer — how things work</title>
+<meta name="description" content="How-things-work explainers: a live isometric machine, a narrated dialogue video and a landing page, all from one model.">
+<link rel="canonical" href="https://explainer.nemilya.me/">
+<link rel="alternate" hreflang="en" href="https://explainer.nemilya.me/" data-href="./" data-suggest="This page is available in English" data-go="Open">
+<link rel="alternate" hreflang="ru" href="https://explainer.nemilya.me/ru/" data-href="ru/" data-suggest="Эта страница есть на русском" data-go="Открыть">
+<link rel="alternate" hreflang="x-default" href="https://explainer.nemilya.me/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://explainer.nemilya.me/">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Explainer — how things work">
+<meta property="og:description" content="How-things-work explainers: a live isometric machine, a narrated dialogue video and a landing page, all from one model.">
+<!-- язык до первой отрисовки: с основной страницы уводит на язык читателя (explainers/lang.js) -->
+<script src="./explainers/lang.js"></script>
+<link rel="stylesheet" href="./explainers/landing.css">
+<script type="application/json" id="i18n">{}</script>
+<script type="module" src="./explainers/catalog/catalog.js"></script>
 </head>
-<body>
+<body class="catalog">
 <main class="page">
+  <header class="top">
+    <span class="mono">Explainer</span>
+    <nav class="langs mono" aria-label="Language"><a href="./" hreflang="en" lang="en" data-lang="en" title="English" aria-current="page">EN</a><a href="ru/" hreflang="ru" lang="ru" data-lang="ru" title="Русский">RU</a></nav>
+  </header>
   <div class="hero">
     <div class="eyebrow mono">Explainer</div>
-    <h1>Как это <em style="color:var(--accent)">работает</em></h1>
-    <p class="lede">Каждая тема — машина, чьё устройство и есть идея: её можно трогать на странице, а в ролике двое объясняют её, пока она работает. Числа в кадре, на счётчиках и в подписях — из одной модели.</p>
+    <h1>How things <em>work</em></h1>
+    <p class="lede">Every topic is a machine whose working is the idea: you can play with it on the page, and in the video two people explain it while it runs. Every number on screen, on the counters and in the captions comes from one model.</p>
   </div>
 
   <section>
-    <div class="sec-head mono"><span class="n">01</span><span>Темы</span></div>
+    <div class="sec-head mono"><span class="n">01</span><span>Topics</span></div>
     <div class="cards">
-      <a class="card" href="explainers/token-bucket/">
-        <img src="explainers/token-bucket/video/out/poster.jpg" alt="Машина token bucket: магазин монет, бункер с часами, лента запросов и лотки 200 и 429" loading="lazy">
-        <div><span class="mono">rate limiting · ru / en · 2:24</span><h3>Почему API отвечает 429?</h3><p>Token bucket в железе: ёмкость b, пополнение r и правило b + r·T.</p></div>
-      </a>
+      <a class="card" href="explainers/token-bucket/"><img src="./explainers/token-bucket/video/out/web/poster.jpg" alt="The token bucket machine: a coin magazine, a hopper with a clock, a request belt and trays for 200 and 429" loading="lazy"><div><span class="mono">rate limiting · 2:27</span><h3>Why does an API answer 429?</h3><p>A token bucket as a machine: capacity b, refill r and the rule b + r·T.</p></div></a>
     </div>
   </section>
 
   <section>
-    <div class="sec-head mono"><span class="n">02</span><span>Из чего сделано</span></div>
-    <div class="how">
-      <div class="fact"><span class="mono">anatomy</span><h3>Фигура</h3><p>Изометрическая машина из десятков деталей, кит и правила — в <code>anatomy/</code>.</p></div>
-      <div class="fact"><span class="mono">video-kit</span><h3>Ролик</h3><p>Озвучка Gemini TTS, диалог двух голосов, наезды камеры, 16:9 и 9:16, языки.</p></div>
-      <div class="fact"><span class="mono">model.js</span><h3>Одна модель</h3><p>Чистые функции времени: рендер покадровый, страница живая, числа честные.</p></div>
-    </div>
+    <div class="sec-head mono"><span class="n">02</span><span>What it is made of</span></div>
+    <div class="facts"><div class="fact"><span class="mono">anatomy</span><h3>The figure</h3><p>An isometric machine of dozens of parts — <a href="https://github.com/wheresryan22/anatomy">wheresryan22/anatomy</a>.</p></div><div class="fact"><span class="mono">video-kit</span><h3>The video</h3><p>Gemini TTS voice-over, a two-voice dialogue, camera moves, 16:9 and 9:16, several languages.</p></div><div class="fact"><span class="mono">model.js</span><h3>One model</h3><p>Pure functions of time: frame-by-frame rendering, a live page, honest numbers.</p></div></div>
   </section>
-  <p class="foot">Новая тема: <code>node video-kit/scripts/new.mjs explainers/&lt;slug&gt; --title "…"</code> или <code>/explain</code> в Claude Code.</p>
+  <p class="foot">A new topic: <code>make new SLUG=my-topic TITLE="How … works"</code> or <code>/explain</code> in Claude Code.</p>
 </main>
 </body>
 </html>
