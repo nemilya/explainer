@@ -149,4 +149,4 @@ key is needed only for the voice-over: `export OPENROUTER_API_KEY=…` or `OPENR
 
 ## Licenses
 
-`anatomy/` — MIT (© wheresryan22, see [`anatomy/LICENSE`](anatomy/LICENSE)). Fonts in `video-kit/fonts/` — OFL.
+This repository — MIT, see [`LICENSE`](LICENSE). `anatomy/` — MIT (© wheresryan22, see [`anatomy/LICENSE`](anatomy/LICENSE)). Fonts in `video-kit/fonts/` — OFL.
