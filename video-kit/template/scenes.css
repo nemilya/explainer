@@ -1,0 +1,38 @@
+/* {{NAME}}: palette and scene layout. Loaded after {{KIT}}/stage/base.css.
+ * Frame 1920×1080; vertical — #stage.v (1080×1920), captions in the frame — #stage.cc
+ * (the line is ≈330px from the bottom: keep everything important in the vertical frame above ~1500px). */
+:root {
+  /* project palette — change it to fit the topic */
+  --bg: #EDEFF3; --paper: #F8F9FB; --mist: #DCE2EC; --line: #D8DEE8; --haze: #D3E1F0;
+  --ink: #0F1A2E; --ink2: #2C3A55; --muted: #56627A; --cloud: #9AA4B6;
+  --accent: #3346E8; --accent-d: #2433B8; --accent-soft: #DDE1FF; --accent-on-dark: #8E9AFF;
+}
+
+/* ================================================================ title */
+.s-title .t-eyebrow { position: absolute; left: 156px; top: 260px; color: var(--accent-d); }
+.s-title .t-h1 { position: absolute; left: 146px; top: 310px; margin: 0; font: 400 150px/1.02 Serif; letter-spacing: -.03em; }
+.s-title .t-by { position: absolute; left: 156px; top: 700px; width: 1100px; margin: 0; font: 400 38px/1.4 Sans; color: var(--muted); }
+.s-title .t-by b { color: var(--ink); font-weight: 600; }
+
+/* ================================================================ points */
+.pt-card { position: absolute; top: 400px; width: 520px; height: 380px; border-radius: 30px; background: var(--paper); border: 1.5px solid var(--line); padding: 42px; display: flex; flex-direction: column; justify-content: space-between; }
+.pt-card.c0 { left: 140px; } .pt-card.c1 { left: 700px; } .pt-card.c2 { left: 1260px; }
+.pt-card .mono { color: var(--accent); }
+.pt-card h4 { margin: 0; font: 400 56px/1.1 Serif; }
+
+/* ================================================================ verdict */
+.vd-text { position: absolute; left: 140px; top: 300px; width: 1400px; margin: 0; font: 400 84px/1.2 Serif; color: #fff; }
+
+/* ================================================================ end */
+.e-h1 { position: absolute; left: 0; right: 0; top: 330px; margin: 0; text-align: center; font: 400 130px/1.05 Serif; letter-spacing: -.03em; }
+.e-foot { position: absolute; left: 0; right: 0; bottom: 140px; text-align: center; color: var(--muted); }
+
+/* ================================================================ vertical frame 1080×1920 */
+#stage.v .s-title .t-eyebrow { left: 86px; top: 520px; }
+#stage.v .s-title .t-h1 { left: 78px; top: 566px; width: 940px; font-size: 130px; }
+#stage.v .s-title .t-by { left: 86px; top: 1150px; width: 900px; }
+#stage.v .pt-card { left: 80px; width: 920px; height: 260px; }
+#stage.v .pt-card.c0 { top: 480px; } #stage.v .pt-card.c1 { top: 780px; } #stage.v .pt-card.c2 { top: 1080px; }
+#stage.v .vd-text { left: 80px; top: 420px; width: 920px; font-size: 80px; }
+#stage.v .e-h1 { left: 60px; right: 60px; top: 560px; font-size: 120px; text-wrap: balance; }
+#stage.v .e-foot { bottom: 440px; padding: 0 60px; }

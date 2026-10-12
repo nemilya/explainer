@@ -1,0 +1,118 @@
+/* Landing page "Why does an API answer 429?": the live machine (figure.js + model.js), the video and the language.
+ * The page is built by explainers/build.mjs from landing/index.html and landing/i18n/<code>.mjs: the texts are already
+ * in the HTML, strings for the script — in <script type="application/json" id="i18n">. One script for every language.
+ *
+ * The machine is the same model as in the video, but with a live schedule: "request" puts a card on the belt,
+ * "burst" — ten in a row, the switch — the refill period. While nobody touches it, a tour runs:
+ * a steady flow and now and then a burst. */
+import { buildFigure, mountFigure } from './figure.js';
+import { MACHINE, simulate, travel, view } from './model.js';
+import { suggestLanguage } from '../suggest.js';
+import { videoSection } from '../video.js';
+
+const T = JSON.parse(document.getElementById('i18n')?.textContent || '{}');
+const fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]);
+
+// ---------------------------------------------------------------- language: remember the choice, the "available in …" banner
+suggestLanguage();
+
+// ---------------------------------------------------------------- live machine
+const FIG = buildFigure({ label: T.figLabel });
+const stage = document.querySelector('.iso-stage');
+stage.innerHTML = FIG.svg;
+stage.setAttribute('aria-label', T.figLabel ?? 'Token bucket');
+const fig = mountFigure(stage.querySelector('svg'), FIG);
+const readout = document.querySelector('[data-readout]');
+const still = matchMedia('(prefers-reduced-motion: reduce)');
+
+let clock = 0;
+let period = MACHINE.period;
+let base = { t: -10, tokens: MACHINE.capacity };
+let ticks = [];
+let nextTick = period;
+let arrivals = [];
+const totals = { ok: 0, no: 0 };
+const counted = new Set();
+let touring = true;
+let tourClock = 0;
+let idleTimer = 0;
+
+const lastArrival = () => (arrivals.length ? arrivals[arrivals.length - 1] : -Infinity);
+function send(at = clock) {
+  const t = Math.max(at + travel(), lastArrival() + 0.35);
+  arrivals.push(Math.round(t * 1000) / 1000);
+}
+const burst = () => { for (let i = 0; i < 10; i++) send(); };
+function setPeriod(p) {
+  period = p;
+  // coins already released from the hopper (landing < feed away) stay; after that — the new tempo
+  ticks = ticks.filter((t) => t <= clock + MACHINE.feed);
+  nextTick = (ticks.length ? ticks[ticks.length - 1] : clock) + period;
+  document.querySelectorAll('#rate button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.p) === p)));
+}
+setPeriod(MACHINE.period);
+
+function takeOver() {
+  touring = false;
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => { touring = !still.matches; tourClock = 0; }, 12000);
+}
+document.getElementById('send').addEventListener('click', () => { takeOver(); send(); });
+document.getElementById('burst').addEventListener('click', () => { takeOver(); burst(); });
+document.querySelectorAll('#rate button').forEach((b) => b.addEventListener('click', () => { takeOver(); setPeriod(Number(b.dataset.p)); }));
+stage.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); takeOver(); send(); }
+  if (e.code === 'KeyB') { takeOver(); burst(); }
+});
+stage.addEventListener('click', () => { takeOver(); send(); stage.focus(); });
+
+// tour: a steady flow every 2.6 s, a burst at second 18, a 30 s cycle
+function tour(dt) {
+  const before = tourClock;
+  tourClock += dt;
+  const hit = (x) => before < x && tourClock >= x;
+  for (let x = 1; x < 16; x += 2.6) if (hit(x)) send();
+  if (hit(18)) burst();
+  if (tourClock > 30) tourClock = 0;
+}
+
+let frame = 0;
+let last = 0;
+let visible = false;
+function tick(now) {
+  const dt = last ? Math.min((now - last) / 1000, 1 / 20) : 1 / 60;
+  last = now;
+  clock += dt;
+  if (touring) tour(dt);
+  while (nextTick <= clock + 3) { ticks.push(Math.round(nextTick * 1000) / 1000); nextTick += period; }
+  let sim = simulate({ start: base.tokens, ticks: ticks.filter((t) => t > base.t), arrivals: arrivals.filter((t) => t > base.t) });
+  // counters — from decisions that have already happened
+  for (const r of sim.reqs) {
+    const key = `${r.t}`;
+    if (r.t <= clock && !counted.has(key)) { counted.add(key); r.ok ? totals.ok++ : totals.no++; }
+  }
+  // every 10 s forget the old: the bucket state at clock − 6 becomes the start
+  if (clock - base.t > 16) {
+    const t0 = clock - 6;
+    base = { t: t0, tokens: sim.tokensAt(t0) };
+    ticks = ticks.filter((t) => t > t0);
+    arrivals = arrivals.filter((t) => t > t0);
+    for (const k of counted) if (Number(k) <= t0) counted.delete(k);
+    sim = simulate({ start: base.tokens, ticks, arrivals });
+  }
+  fig.apply(view(sim, clock));
+  const s = { tokens: sim.tokensAt(clock), ok: totals.ok, no: totals.no, p: period };
+  if (T.readout) readout.textContent = fill(T.readout, s);
+  document.getElementById('m-tok').textContent = `${s.tokens} / ${MACHINE.capacity}`;
+  document.getElementById('m-ok').textContent = s.ok;
+  document.getElementById('m-no').textContent = s.no;
+  frame = visible ? requestAnimationFrame(tick) : 0;
+}
+new IntersectionObserver((entries) => {
+  visible = entries[entries.length - 1].isIntersecting;
+  if (visible && !frame) { last = 0; frame = requestAnimationFrame(tick); }
+}, { rootMargin: '120px 0px' }).observe(stage);
+if (still.matches) touring = false;
+
+// ---------------------------------------------------------------- video: 16:9 / 9:16 and chapters
+videoSection();

@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+local.mk
+voice/clips/
+out/still-*.png
+out/part-*.mp4
+dist/

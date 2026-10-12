@@ -1,0 +1,7 @@
+local.mk
+out/still-*.png
+out/part-*.mp4
+# cache of voiced lines (make voice re-creates only the changed ones)
+voice/clips/
+# AI image takes (make art-takes, art-redo)
+art/takes/

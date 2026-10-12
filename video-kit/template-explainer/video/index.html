@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{TITLE}} — an explainer video with a live figure.">
+<link rel="stylesheet" href="{{KIT}}/stage/base.css">
+<link rel="stylesheet" href="{{ROOT}}/anatomy/kit/iso.css">
+<link rel="stylesheet" href="scenes.css">
+<script type="module" src="{{KIT}}/stage/stage.js"></script>
+</head>
+<body>
+<div id="player">
+  <div id="frame">
+    <div id="stage">
+      <div id="bg"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
+      <div id="scenes"></div>
+      <div id="chrome">
+        <div id="kicker"><span class="num"></span><span class="txt"></span></div>
+        <div id="brand"></div>
+        <div id="progress"><i></i></div>
+      </div>
+      <div id="cc" hidden><span></span></div>
+    </div>
+    <button id="cover" type="button" aria-label="▶">
+      <span class="go">
+        <span class="btn"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6 3.5v17l14-8.5z"/></svg></span>
+        <span class="lbl"><span id="watch">Watch</span> · <span id="dur">0:00</span></span>
+      </span>
+    </button>
+    <div id="menu" role="menu"></div>
+  </div>
+  <div id="ctrl">
+    <button id="play" type="button" aria-label="Play / pause" title="Play / pause (Space)"></button>
+    <button id="prev" type="button" aria-label="Previous chapter" title="Previous chapter (P)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9.5 12z"/></svg></button>
+    <button id="next" type="button" aria-label="Next chapter" title="Next chapter (N)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l10.5-7z"/></svg></button>
+    <span id="time">0:00 / 0:00</span>
+    <div id="track" role="slider" aria-label="Seek" tabindex="0"><div class="rail"></div><div class="fill"></div><div class="ticks"></div><div class="knob"></div><div class="tip"></div></div>
+    <span id="chap"></span>
+    <button id="lang" type="button" title="English version">EN</button>
+    <button id="fmt" type="button" title="Vertical version">9:16</button>
+    <button id="cc-btn" type="button" aria-pressed="false" title="Subtitles (C)">CC</button>
+    <button id="mute" type="button" aria-pressed="false" title="Sound (M)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <button id="menu-btn" type="button" aria-expanded="false" title="Chapters">Chapters</button>
+    <button id="fs" type="button" title="Full screen (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+</div>
+<audio id="audio" data-src="voice/{lang}.m4a" preload="auto"></audio>
+</body>
+</html>

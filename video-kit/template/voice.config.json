@@ -1,0 +1,46 @@
+{
+  "_": "Voice-over settings (make voice). The key lives only in OPENROUTER_API_KEY in the environment or local.mk, never here. name — the video file name in out/ (default — the name of the topic folder). On top — the main language (English, first in LANGS), langs.<lang> — overrides for the others: voice, instructions, tempo (speech speed-up), gap (pause between lines, s), pace (multiplier for scene pauses), language, verify.skip. Gemini TTS voices: male — Charon, Orus, Iapetus, Puck, Fenrir; female — Kore, Aoede, Leda, Zephyr.",
+  "name": "{{NAME}}",
+  "endpoint": "https://openrouter.ai/api/v1",
+  "model": "google/gemini-3.8-flash-lite-tts",
+  "voice": "Puck",
+  "instructions": "You are the narrator of a fast-paced explainer video for social media about economics and technology. Speak natural, confident American English with energy and momentum: brisk pace, crisp delivery, clear emphasis on key words, short pauses only. Engaging, never theatrical. Read the text exactly as written.",
+  "language": "en",
+  "speed": 1.0,
+  "tempo": 1.1,
+  "gap": 0.18,
+  "pace": 0.6,
+  "loudness": -16,
+  "music": {
+    "enabled": true,
+    "gain": 2,
+    "duck": true
+  },
+  "sfx": {
+    "enabled": true,
+    "gain": 0
+  },
+  "verify": {
+    "enabled": true,
+    "model": "google/gemini-3.5-transcribe",
+    "retries": 3,
+    "minScore": 0.85,
+    "skip": [
+      "ai",
+      "us",
+      "gdp"
+    ]
+  },
+  "langs": {
+    "ru": {
+      "voice": "Charon",
+      "instructions": "Ты — ведущий вдумчивого научно-популярного видеоэссе об экономике и технологиях. Говори по-русски спокойно и уверенно, с интонацией рассказчика: короткие паузы перед ключевыми мыслями, лёгкий акцент на главных словах. Без пафоса и без театральности, тепло и ясно. Читай текст ровно как написан.",
+      "language": "ru",
+      "verify": {
+        "skip": [
+          "ии"
+        ]
+      }
+    }
+  }
+}

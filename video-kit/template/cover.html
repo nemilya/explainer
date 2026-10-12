@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cover</title>
+<!-- Cover for Reels / Shorts: 1080×1920, everything important inside the 4:5 zone (y 285…1635) that Instagram
+     keeps in the profile grid. Texts — cover in text/<lang>.js. Snapshot: make cover [LNG=en] -->
+<link rel="stylesheet" href="{{KIT}}/stage/base.css">
+<link rel="stylesheet" href="scenes.css">
+<style>
+  html, body { margin: 0; background: var(--bg); overflow: hidden; }
+  #cv { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: clip; background: var(--bg); color: var(--ink); font-family: Sans, sans-serif; }
+  #cv .col { position: absolute; left: 90px; top: 380px; width: 900px; display: flex; flex-direction: column; }
+  #cv .eyebrow { color: var(--accent-d); font-size: 30px; }
+  #cv h1 { margin: 34px 0 0 -8px; width: 940px; font: 400 172px/0.98 Serif; letter-spacing: -.035em; }
+  #cv h1 em { font-style: italic; color: var(--accent); }
+  #cv .sub { margin: 56px 0 0; width: 880px; font: 400 52px/1.25 Serif; color: var(--ink2); text-wrap: balance; }
+  #cv .foot { margin-top: 90px; color: var(--muted); font-size: 24px; }
+</style>
+</head>
+<body class="render">
+<div id="cv"></div>
+<script type="module">
+  import { TEXTS, LANGS } from './film.js';
+  const params = new URLSearchParams(location.search);
+  const lang = [params.get('lang'), ...location.hash.slice(1).split('-')].find((x) => LANGS.includes(x)) ?? LANGS[0];
+  const C = TEXTS[lang].cover;
+  document.documentElement.lang = lang;
+  const h1 = C.h1.map((w) => (w === '<br>' ? '<br>' : `<span>${w}</span>`)).join(' ').replace(/ <br> /g, '<br>');
+  document.getElementById('cv').innerHTML = `
+    <div class="col">
+      <div class="eyebrow mono">${C.eyebrow}</div>
+      <h1>${h1}</h1>
+      <p class="sub">${C.sub}</p>
+      <div class="foot mono">${C.foot}</div>
+    </div>`;
+  await document.fonts.ready;
+  await Promise.all(['400 20px Serif', 'italic 400 20px Serif', '400 20px Sans', '20px Mono'].map((f) => document.fonts.load(f, 'Abc Абв')));
+  window.__cover = { ready: true };
+</script>
+</body>
+</html>
