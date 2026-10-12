@@ -27,8 +27,10 @@ let PROXY = process.env.OPENROUTER_PROXY || '';
 const lmPath = localArg ? resolve(localArg) : resolve('local.mk');
 if ((!KEY || !PROXY) && existsSync(lmPath)) {
   const lm = readFileSync(lmPath, 'utf8');
-  KEY ||= lm.match(/OPENROUTER_API_KEY=(.+)/)?.[1]?.trim() ?? '';
-  PROXY ||= lm.match(/OPENROUTER_PROXY=(.+)/)?.[1]?.trim() ?? '';
+  // make syntax: NAME = v, NAME := v, NAME ?= v, export NAME = v; commented-out lines are skipped
+  const mkVar = (name) => lm.match(new RegExp(`^[ \\t]*(?:export[ \\t]+)?${name}[ \\t]*[:?]?=(.*)$`, 'm'))?.[1]?.trim() ?? '';
+  KEY ||= mkVar('OPENROUTER_API_KEY');
+  PROXY ||= mkVar('OPENROUTER_PROXY');
 }
 if (!KEY) { console.error('no key: set OPENROUTER_API_KEY or local.mk'); process.exit(3); }
 
