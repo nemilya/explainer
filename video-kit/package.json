@@ -1,6 +1,7 @@
 {
   "name": "video-kit",
   "private": true,
+  "license": "MIT",
   "description": "Engine for narrated videos (README.md). npm is needed only to render frames (Playwright + Chromium).",
   "type": "module",
   "devDependencies": {

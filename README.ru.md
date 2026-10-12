@@ -142,4 +142,4 @@ Node 22, `ffmpeg`; для рендера — Playwright (`make install` в па�
 
 ## Лицензии
 
-`anatomy/` — MIT (© wheresryan22, см. `anatomy/LICENSE`). Шрифты в `video-kit/fonts/` — OFL.
+Этот репозиторий — MIT, см. [`LICENSE`](LICENSE). `anatomy/` — MIT (© wheresryan22, см. `anatomy/LICENSE`). Шрифты в `video-kit/fonts/` — OFL.
