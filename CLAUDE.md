@@ -15,7 +15,8 @@
 - The voice-over is paid: `make voice` synthesizes only new/changed lines (cache `voice/clips/`, not in git);
   always pass the language (`LNG=ru`) so nothing is synthesized again needlessly.
 - Languages: English is the main one (first in `site.mjs` and in the video's `TEXTS`), the others live in `ru/`
-  subfolders.
+  subfolders. Content lines are written first in the language of the request, then adapted into the others —
+  «Languages» in the `explain` skill.
 - The site is built into `dist/` (`make dist`; not in git): pages from `landing/index.html` +
   `landing/i18n/<lang>.mjs`, plus only the files the browser needs (`assets()` in `explainers/build.mjs` — add new
   topic files there). Look — `make preview`, publish — copy `dist/` or `make deploy`. After changes — `make dist test`.
